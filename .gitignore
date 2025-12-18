@@ -1,0 +1,12 @@
+# Node
+frontend/node_modules/
+
+# Python
+backend/__pycache__
+backend/venv
+
+# Databases
+databases/*.cb
+
+# IDE
+.idea/
