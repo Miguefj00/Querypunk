@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api import gameplay
+from backend.app.api import gameplay
 
 app = FastAPI(title="Querypunk API")
 

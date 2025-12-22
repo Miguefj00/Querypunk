@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.database.session import get_db
-from app.schemas.attempt import AttemptCreate
+from backend.app.database.session import get_db
+from backend.app.schemas.attempt import AttemptCreate
 
 router = APIRouter(prefix="/gameplay", tags=["Gameplay"])
 
