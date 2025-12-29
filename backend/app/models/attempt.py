@@ -1,14 +1,16 @@
-from sqlalchemy import Column, Integer, Text, Boolean, Float, ForeignKey
+from sqlalchemy import Boolean, Integer, Float, Text, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 from app.database.connection import Base
 
 class Attempt(Base):
     __tablename__ = "Attempt"
 
-    Id = Column(Integer, primary_key=True)
-    User_id = Column(Integer, ForeignKey("User.Id"))
-    Challenge_id = Column(Integer, ForeignKey("Challenge.Id"))
-    Submitted_query = Column(Text, nullable=False)
-    Is_correct = Column(Boolean, nullable=False)
-    Score_awarded = Column(Float, nullable=False)
-    Attempt_number = Column(Integer, nullable=False)
-    Execution_time = Column(Float, nullable=False)
+    Id: Mapped[int] = mapped_column(primary_key=True)
+    User_id: Mapped[int] = mapped_column(ForeignKey("User.Id"))
+    Challenge_id: Mapped[int] = mapped_column(ForeignKey("Challenge.Id"))
+
+    Submitted_query: Mapped[str] = mapped_column(Text)
+    Is_correct: Mapped[bool] = mapped_column(Boolean)
+    Score_awarded: Mapped[float] = mapped_column(Float)
+    Attempt_number: Mapped[int] = mapped_column(Integer)
+    Execution_time: Mapped[float] = mapped_column(Float)
