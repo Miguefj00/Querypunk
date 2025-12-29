@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Text, Boolean, Float, ForeignKey
-from backend.app.database.connection import Base
+from app.database.connection import Base
 
 class Attempt(Base):
     __tablename__ = "Attempt"

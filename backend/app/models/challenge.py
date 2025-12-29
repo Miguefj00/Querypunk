@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey
-from backend.app.database.connection import Base
+from app.database.connection import Base
 
 class Challenge(Base):
     __tablename__ = "Challenge"
