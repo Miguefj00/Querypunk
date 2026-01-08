@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.api.auth import get_current_user
-from app.database.session import get_db
+from app.database.current_session import get_db
 from app.schemas.attempt import AttemptCreate, AttemptResponse
 from app.models.user import User
 from app.services import gameplay_service

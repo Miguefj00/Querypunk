@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.database.session import get_db
+from app.database.current_session import get_db
 from app.models.user import User
 
 
