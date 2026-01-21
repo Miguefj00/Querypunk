@@ -1,6 +1,9 @@
 from fastapi import FastAPI
-from app.api import gameplay
+import app.models
+from app.api import gameplay, auth, users
 from fastapi.responses import RedirectResponse
+
+from app.database.connection import Base, engine
 
 app = FastAPI(
     title="Querypunk API",
@@ -12,5 +15,9 @@ app = FastAPI(
 def root():
     return RedirectResponse(url="/docs")
 
+Base.metadata.create_all(bind=engine)
+
+app.include_router(auth.router)
+app.include_router(users.router)
 app.include_router(gameplay.router)
 

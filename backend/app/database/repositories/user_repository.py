@@ -11,6 +11,11 @@ class UserRepository:
         return db.execute(stmt).scalar_one_or_none()
 
     @staticmethod
+    def get_by_username(db: Session, username: str) -> User | None:
+        stmt = select(User).where(User.Username == username)
+        return db.execute(stmt).scalar_one_or_none()
+
+    @staticmethod
     def get_by_email(db: Session, email: str) -> User | None:
         stmt = select(User).where(User.Email == email)
         return db.execute(stmt).scalar_one_or_none()
