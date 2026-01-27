@@ -5,6 +5,7 @@ from app.database.repositories.challenge_repository import ChallengeRepository
 from app.database.repositories.attempt_repository import AttemptRepository
 from app.database.repositories.hint_repository import HintRepository
 
+
 class GameplayService:
 
     @staticmethod

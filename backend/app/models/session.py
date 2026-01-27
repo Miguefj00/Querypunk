@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.connection import Base
 
+
 class Session(Base):
     __tablename__ = "Session"
 

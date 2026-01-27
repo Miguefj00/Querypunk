@@ -2,6 +2,7 @@ from sqlalchemy import String, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.connection import Base
 
+
 class User(Base):
     __tablename__ = "User"
 

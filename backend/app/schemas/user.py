@@ -6,16 +6,19 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
+
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str
     role_id: Literal["student", "teacher"]
 
+
 class UserRegister(BaseModel):
     username: str
     email: EmailStr
     password: str
+
 
 class UserResponse(BaseModel):
     id: int = Field(alias="Id")

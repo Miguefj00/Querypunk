@@ -7,7 +7,7 @@ from app.database.current_session import get_db
 from app.schemas.user import UserCreate, UserResponse, UserRegister
 from app.services.user_service import UserService
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix="/user", tags=["User"])
 
 @router.post("/", response_model=UserResponse)
 def create_user(

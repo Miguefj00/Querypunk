@@ -2,6 +2,7 @@ from sqlalchemy import Integer, String, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.connection import Base
 
+
 class Challenge(Base):
     __tablename__ = "Challenge"
 

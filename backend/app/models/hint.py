@@ -2,6 +2,7 @@ from sqlalchemy import Integer, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.connection import Base
 
+
 class Hint(Base):
     __tablename__ = "Hint"
 
