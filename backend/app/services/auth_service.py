@@ -4,14 +4,23 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from app.database.repositories.user_repository import UserRepository
 from app.database.repositories.session_repository import SessionRepository
+from app.schemas.user import LoginRequest
+from app.security.passwords import verify_password
+
 
 class AuthService:
 
     @staticmethod
-    def login(db, username, password, request):
-        user = UserRepository.get_by_username(db, username)
+    def login(db: Session, data: LoginRequest, request):
+        user = UserRepository.get_by_username(db, data.username)
 
-        if not user or user.Password_hash != password:
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid credentials"
+            )
+
+        if not verify_password(data.password, user.Password_hash):
             raise HTTPException(
                 status_code=401,
                 detail="Invalid credentials"

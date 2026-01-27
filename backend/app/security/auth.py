@@ -13,7 +13,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def verify_password(plain, hashed):
     return pwd_context.verify(plain, hashed)
 
-def hash_password(password):
+def get_hash_password(password):
     return pwd_context.hash(password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta]=None):

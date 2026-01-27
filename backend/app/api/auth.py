@@ -19,8 +19,7 @@ def login(
 ):
     user, session = AuthService.login(
         db,
-        data.username,
-        data.password,
+        data,
         request
     )
 
