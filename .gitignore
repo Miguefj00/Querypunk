@@ -2,11 +2,20 @@
 frontend/node_modules/
 
 # Python
-backend/__pycache__
-backend/venv
+backend/__pycache__/
+backend/venv/
+*.pyc
+
+# Environment variables
+backend/.env
 
 # Databases
-databases/*.cb
+backend/*.db
 
 # IDE
 .idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
