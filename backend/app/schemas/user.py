@@ -11,7 +11,7 @@ class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str
-    role_id: Literal["student", "teacher"]
+    role: Literal["student", "teacher"]
 
 
 class UserRegister(BaseModel):

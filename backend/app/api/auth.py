@@ -2,9 +2,13 @@ from fastapi import Depends, Header, HTTPException, status, APIRouter
 from fastapi import Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+
+from app.api.dependencies import require_role, get_current_user_from_token
+from app.core.roles import ROLE_ADMIN, ROLE_TEACHER, ROLE_STUDENT
 from app.database.current_session import get_db
 from app.database.repositories.session_repository import SessionRepository
 from app.database.repositories.user_repository import UserRepository
+from app.models import User
 from app.schemas.user import LoginRequest, UserRegister, UserResponse
 from app.security.auth import verify_password, create_access_token
 from app.services.auth_service import AuthService
@@ -58,25 +62,40 @@ def login_token(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+    if user.Role_id == ROLE_STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins and teachers can access this token"
+        )
+
     access_token = create_access_token(
         data={"sub": user.Username, "role_id": user.Role_id}
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
 
 
 @router.post("/logout")
 def logout(
         db: Session = Depends(get_db),
-        session_id: int = Header(...)
+        session_id: int = Header(...),
+        user: User = Depends(get_current_user_from_token)
 ):
     session = SessionRepository.get_by_id(db, session_id)
 
-    if session is None or session.Logout_time is not None:
+    if (
+            session is None
+            or session.Logout_time is not None
+            or session.User_id != user.Id
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired session"
         )
 
     SessionRepository.close(db, session)
-
     return {"message": "Logout successful"}
+

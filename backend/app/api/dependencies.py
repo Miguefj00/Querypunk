@@ -10,6 +10,7 @@ from app.security.auth import decode_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login-token")
 
+
 def get_current_user(
         db: Session = Depends(get_db),
         session_id: int = Header(...)
@@ -33,6 +34,7 @@ def get_current_user(
 
     return user
 
+
 def get_current_user_from_token(
         token: str = Depends(oauth2_scheme),
         db: Session = Depends(get_db)
@@ -48,8 +50,11 @@ def get_current_user_from_token(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     return user
 
+
 def require_role(*allowed_roles: int):
-    def dependency(user: User = Depends(get_current_user)) -> User:
+    def dependency(
+            user: User = Depends(get_current_user_from_token)
+    ) -> User:
         if user.Role_id not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
