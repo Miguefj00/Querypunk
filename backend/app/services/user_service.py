@@ -7,35 +7,24 @@ from app.core.roles import ROLE_TEACHER, ROLE_STUDENT
 from app.database.repositories.user_repository import UserRepository
 from app.models.user import User
 from app.schemas.user import UserCreate
-from app.security.passwords import hash_password
+from app.security.password import hash_password
 
 
 class UserService:
 
     @staticmethod
-    def create(db: Session, data: UserCreate):
-
-        if UserRepository.get_by_username(db, data.username):
-            raise HTTPException(
-                status_code=409,
-                detail="Username already exists"
-            )
-
-        if UserRepository.get_by_email(db, data.email):
-            raise HTTPException(
-                status_code=409,
-                detail="Email already exists"
-            )
-
-        if data.role == "teacher":
-            role_id = ROLE_TEACHER
-        else:
-            role_id = ROLE_STUDENT
-
+    def _create_user(
+            db: Session,
+            *,
+            username: str,
+            email: str,
+            password: str,
+            role_id: int
+    ) -> User:
         user = User(
-            Username=data.username,
-            Email=data.email,
-            Password_hash=hash_password(data.password),
+            Username=username,
+            Email=email,
+            Password_hash=hash_password(password),
             Role_id=role_id,
             Created_at=datetime.utcnow().isoformat(),
             Last_login=None
@@ -48,18 +37,39 @@ class UserService:
         return user
 
     @staticmethod
-    def register(db, data):
-        user = User(
-            Username=data.username,
-            Email=data.email,
-            Password_hash=hash_password(data.password),
-            Role_id=ROLE_STUDENT,
-            Created_at=datetime.utcnow().isoformat(),
-            Last_login=None
+    def create(db: Session, data: UserCreate):
+
+        if UserRepository.get_by_username(db, data.username):
+            raise HTTPException(status_code=409, detail="Username already exists")
+
+        if UserRepository.get_by_email(db, data.email):
+            raise HTTPException(status_code=409, detail="Email already exists")
+
+        if data.role == "teacher":
+            role_id = ROLE_TEACHER
+        else:
+            role_id = ROLE_STUDENT
+
+        return UserService._create_user(
+            db,
+            username=data.username,
+            email=data.email,
+            password=data.password,
+            role_id=role_id
         )
 
-        db.add(user)
-        db.commit()
-        db.refresh(user)
+    @staticmethod
+    def register(db, data):
+        if UserRepository.get_by_username(db, data.username):
+            raise HTTPException(status_code=409, detail="Username already exists")
 
-        return user
+        if UserRepository.get_by_email(db, data.email):
+            raise HTTPException(status_code=409, detail="Email already exists")
+
+        return UserService._create_user(
+            db,
+            username=data.username,
+            email=data.email,
+            password=data.password,
+            role_id=ROLE_STUDENT
+        )

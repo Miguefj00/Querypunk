@@ -2,6 +2,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from app.models.attempt import Attempt
 
+
 class AttemptRepository:
 
     @staticmethod

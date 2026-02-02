@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.database.repositories.user_repository import UserRepository
 from app.database.repositories.session_repository import SessionRepository
 from app.schemas.user import LoginRequest
-from app.security.passwords import verify_password
+from app.security.password import verify_password
 
 
 class AuthService:

@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.roles import ROLE_STUDENT, ROLE_TEACHER, ROLE_ADMIN
 from app.database.current_session import get_db
-from app.api.dependencies import get_current_user, get_current_user_from_token, require_role
+from app.api.dependencies import get_current_user
 from app.schemas.attempt import AttemptCreate, AttemptResponse
 from app.models.user import User
 from app.services.gameplay_service import GameplayService

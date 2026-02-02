@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.models.role import Role
 
+
 class RoleRepository:
 
     @staticmethod

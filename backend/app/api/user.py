@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from starlette import status
 
 from app.api.dependencies import require_role
 from app.core.roles import ROLE_ADMIN, ROLE_TEACHER
 from app.database.current_session import get_db
 from app.models import User
-from app.schemas.user import UserCreate, UserResponse, UserRegister
+from app.schemas.user import UserCreate, UserResponse
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="/user", tags=["User"])

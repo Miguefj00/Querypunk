@@ -2,6 +2,7 @@ from sqlalchemy import select, literal
 from sqlalchemy.orm import Session
 from app.models.challenge import Challenge
 
+
 class ChallengeRepository:
 
     @staticmethod

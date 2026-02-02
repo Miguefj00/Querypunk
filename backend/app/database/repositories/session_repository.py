@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.models.session import Session as UserSession
 
+
 class SessionRepository:
 
     @staticmethod
