@@ -56,6 +56,22 @@ class SessionRepository:
         db.commit()
 
     @staticmethod
+    def close_active_sessions_by_user(db: Session, user_id: int) -> None:
+        sessions = (
+            db.query(UserSession)
+            .filter(
+                UserSession.User_id == user_id,
+                UserSession.Logout_time.is_(None)
+            )
+            .all()
+        )
+
+        for session in sessions:
+            session.Logout_time = datetime.utcnow()
+
+        db.commit()
+
+    @staticmethod
     def get_by_id(db: Session, session_id: int) -> UserSession | None:
         return db.get(UserSession, session_id)
 

@@ -14,6 +14,7 @@ pwd_context = CryptContext(
     deprecated="auto"
 )
 
+
 def verify_password(plain, hashed):
     return pwd_context.verify(plain, hashed)
 

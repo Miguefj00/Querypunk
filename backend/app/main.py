@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-import app.models
 from app.api import gameplay, auth, user
 from fastapi.responses import RedirectResponse
 
@@ -11,9 +10,11 @@ app = FastAPI(
     version="0.1.0"
 )
 
+
 @app.get("/", include_in_schema=False)
 def root():
     return RedirectResponse(url="/docs")
+
 
 Base.metadata.create_all(bind=engine)
 

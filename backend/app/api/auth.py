@@ -1,15 +1,16 @@
-from fastapi import Depends, Header, HTTPException, status, APIRouter
-from fastapi import Request
+from datetime import datetime
+
+from fastapi import Depends, HTTPException, status, APIRouter, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from app.core.roles import ROLE_STUDENT, ROLE_TEACHER
+from app.api.dependencies import get_current_user_from_token
 from app.database.current_session import get_db
 from app.database.repositories.session_repository import SessionRepository
 from app.database.repositories.user_repository import UserRepository
-from app.schemas.user import LoginRequest, UserRegister, UserResponse
+from app.models import User
+from app.schemas.user import UserRegister, UserResponse
 from app.security.auth import verify_password, create_access_token
-from app.services.auth_service import AuthService
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -29,45 +30,33 @@ def register(
 
 @router.post("/login")
 def login(
-        data: LoginRequest,
         request: Request,
-        db: Session = Depends(get_db)
-):
-    user, session = AuthService.login(
-        db,
-        data,
-        request
-    )
-
-    return {
-        "session_id": session.Id,
-        "user_id": user.Id,
-        "role_id": user.Role_id
-    }
-
-
-@router.post("/login-token")
-def login_token(
         form_data: OAuth2PasswordRequestForm = Depends(),
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
 ):
     user = UserRepository.get_by_username(db, form_data.username)
 
     if not user or not verify_password(form_data.password, user.Password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect credentials",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    if user.Role_id == ROLE_STUDENT or user.Role_id == ROLE_TEACHER:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only admins can access this token"
-        )
+    SessionRepository.close_active_sessions_by_user(db, user.Id)
+
+    session = SessionRepository.create(
+        db=db,
+        user_id=user.Id,
+        ip=request.client.host
+    )
+
+    user.Last_login = datetime.utcnow()
+    db.commit()
 
     access_token = create_access_token(
-        data={"sub": user.Username, "role_id": user.Role_id}
+        data={
+            "sub": user.Username,
+            "user_id": user.Id,
+            "role_id": user.Role_id,
+            "session_id": session.Id
+        }
     )
 
     return {
@@ -79,19 +68,8 @@ def login_token(
 @router.post("/logout")
 def logout(
         db: Session = Depends(get_db),
-        session_id: int = Header(...),
+        user: User = Depends(get_current_user_from_token),
 ):
-    session = SessionRepository.get_by_id(db, session_id)
+    SessionRepository.close_active_sessions_by_user(db, user.Id)
 
-    if (
-            session is None
-            or session.Logout_time is not None
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired session"
-        )
-
-    SessionRepository.close(db, session)
     return {"message": "Logout successful"}
-
