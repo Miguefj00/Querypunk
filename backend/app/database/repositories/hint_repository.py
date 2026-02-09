@@ -15,10 +15,10 @@ class HintRepository:
         stmt = (
             select(Hint)
             .where(
-                Hint.Challenge_id == challenge_id,
-                Hint.Unlock_attempt <= attempt_number
+                Hint.challenge_id == challenge_id,
+                Hint.unlock_attempt <= attempt_number
             )
-            .order_by(Hint.Hint_number.desc())
+            .order_by(Hint.hint_number.desc())
         )
 
         return db.execute(stmt).scalar_one_or_none()

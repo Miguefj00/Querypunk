@@ -8,8 +8,8 @@ class LeaderboardRepository:
     @staticmethod
     def get_entry(db: Session, user_id: int, challenge_id: int) -> Leaderboard | None:
         stmt = select(Leaderboard).where(
-            Leaderboard.User_id == user_id,
-            Leaderboard.Challenge_id == challenge_id
+            Leaderboard.user_id == user_id,
+            Leaderboard.challenge_id == challenge_id
         )
         return db.execute(stmt).scalar_one_or_none()
 

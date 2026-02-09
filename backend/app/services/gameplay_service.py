@@ -23,35 +23,35 @@ class GameplayService:
         # Count previous attempts
         attempt_number = (
                 AttemptRepository.count_by_user_and_challenge(
-                    db, user_id, challenge.Id
+                    db, user_id, challenge.id
                 ) + 1
         )
 
         # Check solution
         is_correct = (
                 data.submitted_query.strip().lower()
-                == challenge.Expected_query.strip().lower()
+                == challenge.expected_query.strip().lower()
         )
 
         # Calculate score
-        score = challenge.Max_score if is_correct else 0
+        score = challenge.max_score if is_correct else 0
 
         # Create attempt
         attempt = Attempt(
-            User_id=user_id,
-            Challenge_id=challenge.Id,
-            Submitted_query=data.submitted_query,
-            Is_correct=is_correct,
-            Score_awarded=score,
-            Attempt_number=attempt_number,
-            Execution_time=0.0
+            user_id=user_id,
+            challenge_id=challenge.Id,
+            submitted_query=data.submitted_query,
+            is_correct=is_correct,
+            score_awarded=score,
+            attempt_number=attempt_number,
+            execution_time=0.0
         )
 
         AttemptRepository.create(db, attempt)
 
         # Get hint if its necessary
         hint = HintRepository.get_unlocked_hint(
-            db, challenge.Id, attempt_number
+            db, challenge.id, attempt_number
         )
 
         # Answer

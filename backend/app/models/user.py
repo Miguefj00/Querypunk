@@ -6,12 +6,13 @@ from app.database.connection import Base
 class User(Base):
     __tablename__ = "User"
 
-    Id: Mapped[int] = mapped_column(primary_key=True)
-    Role_id: Mapped[int] = mapped_column(ForeignKey("Role.Id"))
-    Username: Mapped[str] = mapped_column(String, nullable=False)
-    Email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    Password_hash: Mapped[str] = mapped_column(String, nullable=False)
-    Created_at: Mapped[str] = mapped_column(Text, nullable=False)
-    Last_login: Mapped[str] = mapped_column(Text, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    role_id: Mapped[int] = mapped_column(ForeignKey("Role.id"))
+    username: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[str] = mapped_column(Text, nullable=False)
+    last_login: Mapped[str | None] = mapped_column(Text, nullable=True)
+
 
 

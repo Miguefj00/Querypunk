@@ -11,10 +11,10 @@ class SessionRepository:
     @staticmethod
     def create(db: Session, user_id: int, ip: str) -> UserSession:
         session = UserSession(
-            User_id=user_id,
-            Login_time=datetime.utcnow().isoformat(),
-            Logout_time=None,
-            Ip_address=ip
+            user_id=user_id,
+            login_time=datetime.utcnow().isoformat(),
+            logout_time=None,
+            ip_address=ip
         )
         db.add(session)
         db.commit()
@@ -26,8 +26,8 @@ class SessionRepository:
         return (
             db.query(UserSession)
             .filter(
-                UserSession.Id == session_id,
-                UserSession.Logout_time.is_(None)
+                UserSession.id == session_id,
+                UserSession.logout_time.is_(None)
             )
             .first()
         )
@@ -35,8 +35,8 @@ class SessionRepository:
     @staticmethod
     def get_active_by_user(db: Session, user_id: int) -> UserSession | None:
         stmt = select(UserSession).where(
-            UserSession.User_id == user_id,
-            UserSession.Logout_time.is_(None)
+            UserSession.user_id == user_id,
+            UserSession.logout_time.is_(None)
         )
         return db.execute(stmt).scalar_one_or_none()
 
@@ -47,12 +47,12 @@ class SessionRepository:
         if session is None:
             raise HTTPException(status_code=404, detail="Session not found")
 
-        session.Logout_time = datetime.utcnow().isoformat()
+        session.logout_time = datetime.utcnow().isoformat()
         db.commit()
 
     @staticmethod
     def close(db: Session, session: UserSession) -> None:
-        session.Logout_time = datetime.utcnow().isoformat()
+        session.logout_time = datetime.utcnow().isoformat()
         db.commit()
 
     @staticmethod
@@ -60,14 +60,14 @@ class SessionRepository:
         sessions = (
             db.query(UserSession)
             .filter(
-                UserSession.User_id == user_id,
-                UserSession.Logout_time.is_(None)
+                UserSession.user_id == user_id,
+                UserSession.logout_time.is_(None)
             )
             .all()
         )
 
         for session in sessions:
-            session.Logout_time = datetime.utcnow()
+            session.logout_time = datetime.utcnow()
 
         db.commit()
 

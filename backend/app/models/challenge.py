@@ -6,10 +6,10 @@ from app.database.connection import Base
 class Challenge(Base):
     __tablename__ = "Challenge"
 
-    Id: Mapped[int] = mapped_column(primary_key=True)
-    Chapter_id: Mapped[int] = mapped_column(ForeignKey("Chapter.Id"))
-    Title: Mapped[str] = mapped_column(String, nullable=False)
-    Description: Mapped[str] = mapped_column(Text, nullable=False)
-    Difficulty: Mapped[int] = mapped_column(Integer, nullable=False)
-    Expected_query: Mapped[str] = mapped_column(Text, nullable=False)
-    Max_score: Mapped[int] = mapped_column(Integer)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    chapter_id: Mapped[int] = mapped_column(ForeignKey("Chapter.id"))
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    difficulty: Mapped[int] = mapped_column(Integer, nullable=False)
+    expected_query: Mapped[str] = mapped_column(Text, nullable=False)
+    max_score: Mapped[int] = mapped_column(Integer)

@@ -6,5 +6,5 @@ from app.database.connection import Base
 class Role(Base):
     __tablename__ = "Role"
 
-    Id: Mapped[int] = mapped_column(primary_key=True)
-    Name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String, unique=True, nullable=False)

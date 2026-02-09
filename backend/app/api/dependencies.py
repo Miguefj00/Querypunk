@@ -54,13 +54,13 @@ def get_current_user_from_token(
 
     session = SessionRepository.get_by_id(db, session_id)
 
-    if not session or session.Logout_time is not None:
+    if not session or session.logout_time is not None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Session expired"
         )
 
-    if session.User_id != user.Id:
+    if session.user_id != user.id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Session does not belong to user"
@@ -73,7 +73,7 @@ def require_role(*allowed_roles: int):
     def dependency(
             user: User = Depends(get_current_user_from_token)
     ) -> User:
-        if user.Role_id not in allowed_roles:
+        if user.role_id not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not enough permissions"

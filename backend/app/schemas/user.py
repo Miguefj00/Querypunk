@@ -1,5 +1,6 @@
-from typing import Literal
-from pydantic import BaseModel, EmailStr, Field
+from datetime import datetime
+from typing import Literal, Optional
+from pydantic import BaseModel, EmailStr
 
 
 class LoginRequest(BaseModel):
@@ -21,11 +22,26 @@ class UserRegister(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: int = Field(alias="Id")
-    username: str = Field(alias="Username")
-    email: str = Field(alias="Email")
-    role_id: int = Field(alias="Role_id")
+    id: int
+    username: str
+    email: str
+    role_id: int
 
     class Config:
         from_attributes = True
+
+
+class UserBase(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    role_id: int
+
+    class Config:
+        from_attributes = True
+
+
+class UserRead(UserBase):
+    created_at: Optional[datetime]
+    last_login: Optional[datetime]
 

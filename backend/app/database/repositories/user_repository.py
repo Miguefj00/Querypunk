@@ -7,17 +7,17 @@ class UserRepository:
 
     @staticmethod
     def get_by_id(db: Session, user_id: int) -> User | None:
-        stmt = select(User).where(User.Id == user_id)
+        stmt = select(User).where(User.id == user_id)
         return db.execute(stmt).scalar_one_or_none()
 
     @staticmethod
     def get_by_username(db: Session, username: str) -> User | None:
-        stmt = select(User).where(User.Username == username)
+        stmt = select(User).where(User.username == username)
         return db.execute(stmt).scalar_one_or_none()
 
     @staticmethod
     def get_by_email(db: Session, email: str) -> User | None:
-        stmt = select(User).where(User.Email == email)
+        stmt = select(User).where(User.email == email)
         return db.execute(stmt).scalar_one_or_none()
 
     @staticmethod
@@ -27,4 +27,12 @@ class UserRepository:
 
     @staticmethod
     def get_by_role(db: Session, role_id: int):
-        return db.query(User).filter(User.Role_id == role_id).first()
+        return db.query(User).filter(User.role_id == role_id).first()
+
+    @staticmethod
+    def get_all(db: Session) -> list[User]:
+        return (
+            db.query(User)
+            .order_by(User.username.asc())
+            .all()
+        )

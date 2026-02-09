@@ -20,14 +20,14 @@ class AuthService:
                 detail="Invalid credentials"
             )
 
-        if not verify_password(data.password, user.Password_hash):
+        if not verify_password(data.password, user.password_hash):
             raise HTTPException(
                 status_code=401,
                 detail="Invalid credentials"
             )
 
         # Check active session
-        active_session = SessionRepository.get_active_by_user(db, user.Id)
+        active_session = SessionRepository.get_active_by_user(db, user.id)
         if active_session:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -35,12 +35,12 @@ class AuthService:
             )
 
         # Update last login
-        user.Last_login = datetime.now(timezone.utc).isoformat()
+        user.last_login = datetime.now(timezone.utc).isoformat()
         db.add(user)
 
         # Create session
         ip = request.client.host
-        session = SessionRepository.create(db, user.Id, ip)
+        session = SessionRepository.create(db, user.id, ip)
 
         db.commit()
         db.refresh(user)

@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,10 +34,12 @@ def create_admin():
             return
 
         admin = User(
-            Username=username,
-            Email=email,
-            Password_hash=hash_password(password),
-            Role_id=ROLE_ADMIN,
+            username=username,
+            email=email,
+            password_hash=hash_password(password),
+            role_id=ROLE_ADMIN,
+            created_at=datetime.utcnow().isoformat(),
+            last_login=None,
         )
 
         db.add(admin)

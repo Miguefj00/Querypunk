@@ -8,8 +8,8 @@ class AttemptRepository:
     @staticmethod
     def count_attempts(db: Session, user_id: int, challenge_id: int) -> int:
         stmt = select(func.count()).where(
-            Attempt.User_id == user_id,
-            Attempt.Challenge_id == challenge_id
+            Attempt.user_id == user_id,
+            Attempt.challenge_id == challenge_id
         )
         return db.execute(stmt).scalar_one()
 
@@ -20,8 +20,8 @@ class AttemptRepository:
         stmt = (
             select(func.count())
             .where(
-                Attempt.User_id == user_id,
-                Attempt.Challenge_id == challenge_id
+                Attempt.user_id == user_id,
+                Attempt.challenge_id == challenge_id
             )
         )
         return db.execute(stmt).scalar_one()
@@ -38,10 +38,10 @@ class AttemptRepository:
         stmt = (
             select(Attempt)
             .where(
-                Attempt.User_id == user_id,
-                Attempt.Challenge_id == challenge_id
+                Attempt.user_id == user_id,
+                Attempt.challenge_id == challenge_id
             )
-            .order_by(Attempt.Attempt_number.desc())
+            .order_by(Attempt.attempt_number.desc())
         )
         return db.execute(stmt).scalar_one_or_none()
 

@@ -36,26 +36,26 @@ def login(
 ):
     user = UserRepository.get_by_username(db, form_data.username)
 
-    if not user or not verify_password(form_data.password, user.Password_hash):
+    if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    SessionRepository.close_active_sessions_by_user(db, user.Id)
+    SessionRepository.close_active_sessions_by_user(db, user.id)
 
     session = SessionRepository.create(
         db=db,
-        user_id=user.Id,
+        user_id=user.id,
         ip=request.client.host
     )
 
-    user.Last_login = datetime.utcnow()
+    user.last_login = datetime.utcnow()
     db.commit()
 
     access_token = create_access_token(
         data={
-            "sub": user.Username,
-            "user_id": user.Id,
-            "role_id": user.Role_id,
-            "session_id": session.Id
+            "sub": user.username,
+            "user_id": user.id,
+            "role_id": user.role_id,
+            "session_id": session.id
         }
     )
 
@@ -70,6 +70,6 @@ def logout(
         db: Session = Depends(get_db),
         user: User = Depends(get_current_user_from_token),
 ):
-    SessionRepository.close_active_sessions_by_user(db, user.Id)
+    SessionRepository.close_active_sessions_by_user(db, user.id)
 
     return {"message": "Logout successful"}

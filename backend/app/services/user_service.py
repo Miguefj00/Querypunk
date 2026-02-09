@@ -22,12 +22,12 @@ class UserService:
             role_id: int
     ) -> User:
         user = User(
-            Username=username,
-            Email=email,
-            Password_hash=hash_password(password),
-            Role_id=role_id,
-            Created_at=datetime.utcnow().isoformat(),
-            Last_login=None
+            username=username,
+            email=email,
+            password_hash=hash_password(password),
+            role_id=role_id,
+            created_at=datetime.utcnow().isoformat(),
+            last_login=None
         )
 
         db.add(user)
