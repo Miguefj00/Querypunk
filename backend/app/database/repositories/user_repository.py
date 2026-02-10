@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.models.user import User
+from app.schemas.user import UserUpdate
 
 
 class UserRepository:
@@ -36,3 +37,19 @@ class UserRepository:
             .order_by(User.username.asc())
             .all()
         )
+
+    @staticmethod
+    def update(db: Session, user: User, user_update: UserUpdate) -> User:
+        update_data = user_update.model_dump(exclude_unset=True)
+
+        for field, value in update_data.items():
+            setattr(user, field, value)
+
+        db.commit()
+        db.refresh(user)
+        return user
+
+    @staticmethod
+    def delete(db: Session, user: User) -> None:
+        db.delete(user)
+        db.commit()

@@ -11,29 +11,16 @@ from app.security.auth import decode_token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
-def get_current_user(
-        token: str = Depends(oauth2_scheme),
-        db: Session = Depends(get_db)
-):
-    payload = decode_token(token)
-
-    user = UserRepository.get_by_username(db, payload["sub"])
-    if not user:
-        raise HTTPException(status_code=401)
-
-    return user
-
-
 def get_current_user_from_token(
         token: str = Depends(oauth2_scheme),
         db: Session = Depends(get_db)
 ):
     try:
         payload = decode_token(token)
-        username = payload.get("sub")
+        user_id = payload.get("user_id")
         session_id = payload.get("session_id")
 
-        if not username or not session_id:
+        if not user_id or not session_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token"
@@ -45,7 +32,7 @@ def get_current_user_from_token(
             detail="Invalid token"
         )
 
-    user = UserRepository.get_by_username(db, username)
+    user = UserRepository.get_by_id(db, user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

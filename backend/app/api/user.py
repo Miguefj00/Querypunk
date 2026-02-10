@@ -9,7 +9,7 @@ from app.core.roles import ROLE_ADMIN, ROLE_TEACHER
 from app.database.current_session import get_db
 from app.database.repositories.user_repository import UserRepository
 from app.models import User
-from app.schemas.user import UserCreate, UserResponse, UserRead, UserBase
+from app.schemas.user import UserCreate, UserResponse, UserRead, UserBase, UserUpdate
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -68,4 +68,51 @@ def get_user_by_id(
 
     return user
 
+
+@router.put("{user_id}", response_model=UserResponse)
+def update_user(
+        user_id: int,
+        user_update: UserUpdate,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user_from_token),
+):
+    user = UserRepository.get_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    is_admin = current_user.role_id == ROLE_ADMIN
+
+    if not is_admin and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only update your own user"
+        )
+
+    updated_user = UserRepository.update(db, user, user_update)
+    return updated_user
+
+
+@router.delete("{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(
+        user_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user_from_token),
+):
+    if current_user.role_id != ROLE_ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can delete users"
+        )
+
+    if current_user.id == user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Admin cannot delete itself"
+        )
+
+    user = UserRepository.get_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    UserRepository.delete(db, user)
 
