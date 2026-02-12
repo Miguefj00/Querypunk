@@ -1,5 +1,4 @@
 from app.models.user import User
-from app.models.role import Role
 from app.models.session import Session
 from app.models.chapter import Chapter
 from app.models.challenge import Challenge

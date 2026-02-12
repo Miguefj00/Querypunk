@@ -8,6 +8,5 @@ class Hint(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     challenge_id: Mapped[int] = mapped_column(ForeignKey("Challenge.id"))
-    hint_number: Mapped[int] = mapped_column(Integer, nullable=False)
-    unlock_attempt: Mapped[int] = mapped_column(Integer, nullable=False)
+    order_index: Mapped[int] = mapped_column(Integer, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
