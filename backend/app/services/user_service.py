@@ -38,7 +38,6 @@ class UserService:
 
     @staticmethod
     def create(db: Session, data: UserCreate):
-
         if UserRepository.get_by_username(db, data.username):
             raise HTTPException(status_code=409, detail="Username already exists")
 

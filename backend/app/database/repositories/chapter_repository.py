@@ -1,4 +1,3 @@
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.models.chapter import Chapter
 
@@ -6,11 +5,21 @@ from app.models.chapter import Chapter
 class ChapterRepository:
 
     @staticmethod
-    def get_all(db: Session) -> list[Chapter]:
-        stmt = select(Chapter).order_by(Chapter.id)
-        return list(db.execute(stmt).scalars().all())
+    def get_all(db: Session):
+        return db.query(Chapter).all()
 
     @staticmethod
-    def get_by_id(db: Session, chapter_id: int) -> Chapter | None:
-        stmt = select(Chapter).where(Chapter.id == chapter_id)
-        return db.execute(stmt).scalar_one_or_none()
+    def get_by_id(db: Session, chapter_id: int):
+        return db.query(Chapter).filter(Chapter.id == chapter_id).first()
+
+    @staticmethod
+    def create(db: Session, chapter: Chapter):
+        db.add(chapter)
+        db.commit()
+        db.refresh(chapter)
+        return chapter
+
+    @staticmethod
+    def delete(db: Session, chapter: Chapter):
+        db.delete(chapter)
+        db.commit()

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api import gameplay, auth, user
+from app.api import gameplay_router, auth_router, user_router, chapter_router
 from fastapi.responses import RedirectResponse
 
 from app.database.connection import Base, engine
@@ -18,7 +18,8 @@ def root():
 
 Base.metadata.create_all(bind=engine)
 
-app.include_router(auth.router)
-app.include_router(user.router)
-app.include_router(gameplay.router)
+app.include_router(auth_router.router)
+app.include_router(user_router.router)
+app.include_router(chapter_router.router)
+app.include_router(gameplay_router.router)
 

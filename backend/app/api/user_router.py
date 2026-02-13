@@ -62,14 +62,14 @@ def get_user_by_id(
     if user.role_id == ROLE_ADMIN:
         if current_user.role_id != ROLE_ADMIN:
             raise HTTPException(
-                status_code=403,
-                detail="Not enough permissions"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
             )
 
     return user
 
 
-@router.put("{user_id}", response_model=UserResponse)
+@router.put("/{user_id}", response_model=UserResponse)
 def update_user(
         user_id: int,
         user_update: UserUpdate,
@@ -92,7 +92,7 @@ def update_user(
     return updated_user
 
 
-@router.delete("{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{user_id}")
 def delete_user(
         user_id: int,
         db: Session = Depends(get_db),
@@ -115,4 +115,6 @@ def delete_user(
         raise HTTPException(status_code=404, detail="User not found")
 
     UserRepository.delete(db, user)
+
+    return {"detail": "User deleted successfully"}
 

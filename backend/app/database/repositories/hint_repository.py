@@ -11,7 +11,6 @@ class HintRepository:
             challenge_id: int,
             attempt_number: int
     ) -> Hint | None:
-
         stmt = (
             select(Hint)
             .where(

@@ -18,7 +18,7 @@ class ChapterUpdate(BaseModel):
 
 class ChapterResponse(ChapterBase):
     id: int
-    owner_id: int
+    user_id: int
 
     class Config:
         from_attributes = True

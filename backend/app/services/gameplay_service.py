@@ -14,7 +14,6 @@ class GameplayService:
             user_id: int,
             data: AttemptCreate
     ) -> AttemptResponse:
-
         # Find challenge
         challenge = ChallengeRepository.get_by_id(db, data.challenge_id)
         if not challenge:
