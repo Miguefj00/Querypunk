@@ -1,15 +1,14 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from starlette import status
 
 from app.api.dependencies import require_role, get_current_user_from_token
 from app.core.roles import ROLE_ADMIN, ROLE_TEACHER
 from app.database.current_session import get_db
-from app.database.repositories.user_repository import UserRepository
 from app.models import User
-from app.schemas.user import UserCreate, UserResponse, UserRead, UserBase, UserUpdate
+from app.schemas.user import UserCreate, UserResponse, UserRead, UserBase, UserUpdate, ChangePasswordRequest
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -26,47 +25,30 @@ def create_user(
     return UserService.create(db, data)
 
 
-@router.get(
-    "",
-    response_model=List[UserBase]
-)
+@router.get("", response_model=List[UserBase])
 def get_users(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token)
 ):
-    users = UserRepository.get_all(db)
-
-    if current_user.role_id != ROLE_ADMIN:
-        users = [u for u in users if u.role_id != ROLE_ADMIN]
-
-    return users
+    return UserService.get_all(db, current_user)
 
 
-@router.get(
-    "/{user_id}",
-    response_model=UserRead
-)
+@router.put("/change-password", status_code=status.HTTP_200_OK)
+def change_password(
+        data: ChangePasswordRequest,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user_from_token),
+):
+    return UserService.change_password(db, current_user, data)
+
+
+@router.get("/{user_id}", response_model=UserRead)
 def get_user_by_id(
         user_id: int,
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token)
 ):
-    user = UserRepository.get_by_id(db, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-
-    if user.role_id == ROLE_ADMIN:
-        if current_user.role_id != ROLE_ADMIN:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
-            )
-
-    return user
+    return UserService.get_by_id(db, user_id, current_user)
 
 
 @router.put("/{user_id}", response_model=UserResponse)
@@ -76,20 +58,7 @@ def update_user(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token),
 ):
-    user = UserRepository.get_by_id(db, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    is_admin = current_user.role_id == ROLE_ADMIN
-
-    if not is_admin and current_user.id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only update your own user"
-        )
-
-    updated_user = UserRepository.update(db, user, user_update)
-    return updated_user
+    return UserService.update(db, user_id, user_update, current_user)
 
 
 @router.delete("/{user_id}")
@@ -98,23 +67,5 @@ def delete_user(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token),
 ):
-    if current_user.role_id != ROLE_ADMIN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only admins can delete users"
-        )
-
-    if current_user.id == user_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Admin cannot delete itself"
-        )
-
-    user = UserRepository.get_by_id(db, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    UserRepository.delete(db, user)
-
-    return {"detail": "User deleted successfully"}
+    return UserService.delete(db, user_id, current_user)
 
