@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.core.roles import ROLE_ADMIN
+from app.utils.role_utils import ROLE_ADMIN
 from app.models import User
 from app.models.chapter import Chapter
 from app.database.repositories.chapter_repository import ChapterRepository

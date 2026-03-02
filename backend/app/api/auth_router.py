@@ -1,31 +1,17 @@
 from datetime import datetime
 
-from fastapi import Depends, HTTPException, status, APIRouter, Request
+from fastapi import Depends, HTTPException, APIRouter, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user_from_token
+from app.utils.user_utils import get_current_user_from_token
 from app.database.current_session import get_db
 from app.database.repositories.session_repository import SessionRepository
 from app.database.repositories.user_repository import UserRepository
 from app.models import User
-from app.schemas.user import UserRegister, UserResponse
 from app.security.auth import verify_password, create_access_token
-from app.services.user_service import UserService
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
-
-
-@router.post(
-    "/register",
-    response_model=UserResponse,
-    status_code=status.HTTP_201_CREATED
-)
-def register(
-        data: UserRegister,
-        db: Session = Depends(get_db)
-):
-    return UserService.register(db, data)
 
 
 @router.post("/login")

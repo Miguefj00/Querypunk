@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user_from_token
+from app.utils.user_utils import get_current_user_from_token
 from app.database.current_session import get_db
 from app.models import User
 from app.schemas.challenge import ChallengeUpdate, ChallengeCreate

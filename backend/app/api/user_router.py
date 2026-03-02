@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from starlette import status
 
-from app.api.dependencies import require_role, get_current_user_from_token
-from app.core.roles import ROLE_ADMIN, ROLE_TEACHER
+from app.utils.user_utils import get_current_user_from_token
+from app.utils.role_utils import require_role, ROLE_ADMIN, ROLE_TEACHER
 from app.database.current_session import get_db
 from app.models import User
 from app.schemas.user import UserCreate, UserResponse, UserRead, UserBase, UserUpdate, ChangePasswordRequest
@@ -18,9 +18,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 def create_user(
         data: UserCreate,
         db: Session = Depends(get_db),
-        user: User = Depends(require_role(
-            ROLE_ADMIN, ROLE_TEACHER
-        ))
+        user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
     return UserService.create(db, data)
 

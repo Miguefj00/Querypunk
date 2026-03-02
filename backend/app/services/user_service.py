@@ -4,12 +4,13 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 
-from app.core.roles import ROLE_TEACHER, ROLE_STUDENT, ROLE_ADMIN
+from app.utils.role_utils import ROLE_TEACHER, ROLE_STUDENT, ROLE_ADMIN
 from app.database.repositories.user_repository import UserRepository
 from app.models.user import User
 from app.schemas.user import UserCreate, ChangePasswordRequest, UserUpdate
 from app.security.auth import verify_password
 from app.security.password import hash_password
+from app.utils.user_utils import generate_username_from_name
 
 
 class UserService:
@@ -60,18 +61,24 @@ class UserService:
         )
 
     @staticmethod
-    def register(db, data):
-        if UserRepository.get_by_username(db, data.username):
-            raise HTTPException(status_code=409, detail="Username already exists")
+    def create_student_auto(
+            db: Session,
+            nombre: str,
+            apellido: str,
+            email: str,
+            password: str
+    ) -> User:
 
-        if UserRepository.get_by_email(db, data.email):
+        username = generate_username_from_name(nombre, apellido)
+
+        if UserRepository.get_by_email(db, email):
             raise HTTPException(status_code=409, detail="Email already exists")
 
         return UserService._create_user(
-            db,
-            username=data.username,
-            email=data.email,
-            password=data.password,
+            db=db,
+            username=username,
+            email=email,
+            password=password,
             role_id=ROLE_STUDENT
         )
 

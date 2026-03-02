@@ -1,11 +1,12 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from app.database.current_session import get_db
 from app.database.repositories.session_repository import SessionRepository
 from app.database.repositories.user_repository import UserRepository
-from app.models.user import User
+from app.models.user_group import UserGroup
 from app.security.auth import decode_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -56,16 +57,37 @@ def get_current_user_from_token(
     return user
 
 
-def require_role(*allowed_roles: int):
-    def dependency(
-            user: User = Depends(get_current_user_from_token)
-    ) -> User:
-        if user.role_id not in allowed_roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not enough permissions"
+def generate_password_from_identifier(identifier: str) -> str:
+    digits = ''.join(filter(str.isdigit, identifier))
+    if len(digits) < 4:
+        raise HTTPException(status_code=400, detail="Invalid identifier format")
+    return digits[-4:]
+
+
+def generate_username_from_name(nombre: str, apellido: str) -> str:
+    username = f"{nombre}_{apellido}".lower().replace(" ", "")
+    return username
+
+
+def assign_user_to_group(db: Session, user_id: int, group_id: int):
+    existing = (
+        db.query(UserGroup)
+        .filter(
+            and_(
+                UserGroup.user_id == user_id,
+                UserGroup.group_id == group_id
             )
-        return user
+        )
+        .first()
+    )
 
-    return dependency
+    if existing:
+        return
 
+    relation = UserGroup(
+        user_id=user_id,
+        group_id=group_id
+    )
+
+    db.add(relation)
+    db.commit()

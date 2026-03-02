@@ -1,5 +1,5 @@
 from sqlalchemy import String, Text, Integer
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.connection import Base
 
 
@@ -14,5 +14,5 @@ class User(Base):
     created_at: Mapped[str] = mapped_column(Text, nullable=False)
     last_login: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-
+    groups = relationship("Group", secondary="UserGroup", back_populates="users")
 

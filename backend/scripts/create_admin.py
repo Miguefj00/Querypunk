@@ -12,7 +12,7 @@ from app.database.connection import SessionLocal
 from app.models.user import User
 from app.database.repositories.user_repository import UserRepository
 from app.security.password import hash_password
-from app.core.roles import ROLE_ADMIN
+from app.utils.role_utils import ROLE_ADMIN
 
 load_dotenv()
 

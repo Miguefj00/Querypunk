@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from app.core.roles import ROLE_TEACHER, ROLE_ADMIN
+from app.utils.role_utils import ROLE_TEACHER, ROLE_ADMIN
 from app.database.repositories.challenge_repository import ChallengeRepository
 from app.database.repositories.chapter_repository import ChapterRepository
 from app.models import Challenge, User, Session
