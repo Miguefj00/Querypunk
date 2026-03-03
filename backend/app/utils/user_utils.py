@@ -1,6 +1,5 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from app.database.current_session import get_db
@@ -72,17 +71,12 @@ def generate_username_from_name(nombre: str, apellido: str) -> str:
 def assign_user_to_group(db: Session, user_id: int, group_id: int):
     existing = (
         db.query(UserGroup)
-        .filter(
-            and_(
-                UserGroup.user_id == user_id,
-                UserGroup.group_id == group_id
-            )
-        )
+        .filter_by(user_id=user_id, group_id=group_id)
         .first()
     )
 
     if existing:
-        return
+        return False
 
     relation = UserGroup(
         user_id=user_id,
@@ -91,3 +85,5 @@ def assign_user_to_group(db: Session, user_id: int, group_id: int):
 
     db.add(relation)
     db.commit()
+
+    return True
