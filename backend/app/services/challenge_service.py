@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from app.utils.role_utils import ROLE_TEACHER, ROLE_ADMIN
+from app.utils.role_utils import ROLE_TEACHER
 from app.database.repositories.challenge_repository import ChallengeRepository
 from app.database.repositories.chapter_repository import ChapterRepository
 from app.models import Challenge, User, Session
@@ -40,9 +40,6 @@ class ChallengeService:
 
     @staticmethod
     def create(db: Session, chapter_id: int, data: ChallengeCreate, current_user: User):
-        if current_user.role_id not in [ROLE_ADMIN, ROLE_TEACHER]:
-            raise HTTPException(status_code=403, detail="Not allowed")
-
         ChapterService.get_owned_chapter(db, chapter_id, current_user)
 
         return ChallengeRepository.create(
@@ -59,9 +56,6 @@ class ChallengeService:
     def update(db: Session, chapter_id: int, challenge_id: int, data: ChallengeUpdate, current_user: User):
         challenge = ChallengeService._get_challenge_in_chapter(db, chapter_id, challenge_id)
 
-        if current_user.role_id not in [ROLE_ADMIN, ROLE_TEACHER]:
-            raise HTTPException(status_code=403, detail="Not allowed")
-
         ChallengeService._check_teacher_owns_challenge(db, challenge, current_user)
 
         return ChallengeRepository.update(db, challenge, data)
@@ -69,9 +63,6 @@ class ChallengeService:
     @staticmethod
     def delete(db: Session, chapter_id: int, challenge_id: int, current_user: User):
         challenge = ChallengeService._get_challenge_in_chapter(db, chapter_id, challenge_id)
-
-        if current_user.role_id not in [ROLE_ADMIN, ROLE_TEACHER]:
-            raise HTTPException(status_code=403, detail="Not allowed")
 
         ChallengeService._check_teacher_owns_challenge(db, challenge, current_user)
 

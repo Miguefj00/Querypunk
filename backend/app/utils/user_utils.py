@@ -84,6 +84,5 @@ def assign_user_to_group(db: Session, user_id: int, group_id: int):
     )
 
     db.add(relation)
-    db.commit()
 
     return True

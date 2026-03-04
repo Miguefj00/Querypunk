@@ -13,7 +13,7 @@ class GroupResponse(BaseModel):
 class GroupImportResult(BaseModel):
     group_id: int
     created_users: int
-    existing_users_assigned: int
+    users_assigned: int
 
 
 class GroupListResponse(BaseModel):

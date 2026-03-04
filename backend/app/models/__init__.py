@@ -5,3 +5,5 @@ from app.models.challenge import Challenge
 from app.models.attempt import Attempt
 from app.models.hint import Hint
 from app.models.leaderboard import Leaderboard
+from app.models.group import Group
+from app.models.user_group import UserGroup

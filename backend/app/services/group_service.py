@@ -9,7 +9,7 @@ from app.models.group import Group
 from app.models.user_group import UserGroup
 from app.services.user_service import UserService
 from app.database.repositories.user_repository import UserRepository
-from app.utils.role_utils import ROLE_ADMIN, ROLE_TEACHER
+from app.utils.role_utils import ROLE_TEACHER
 from app.utils.user_utils import assign_user_to_group, generate_password_from_identifier
 
 
@@ -50,53 +50,63 @@ class GroupService:
         csv_reader = csv.DictReader(StringIO(decoded))
 
         created_users = 0
-        existing_users_assigned = 0
+        users_assigned = 0
 
-        for row in csv_reader:
+        try:
+            for row in csv_reader:
 
-            if not all(col in row for col in ["Nombre", "Apellido", "Email", "Identificador"]):
-                raise HTTPException(
-                    status_code=400,
-                    detail="CSV must contain Nombre, Apellido, Email and Identificador columns"
-                )
+                if not all(col in row for col in ["Nombre", "Apellido", "Email", "Identificador"]):
+                    raise HTTPException(
+                        status_code=400,
+                        detail="CSV must contain Nombre, Apellido, Email and Identificador columns"
+                    )
 
-            nombre = row.get("Nombre", "").strip()
-            apellido = row.get("Apellido", "").strip()
-            email = row.get("Email", "").strip()
-            identificador = row.get("Identificador", "").strip()
+                nombre = row.get("Nombre", "").strip()
+                apellido = row.get("Apellido", "").strip()
+                email = row.get("Email", "").strip()
+                identificador = row.get("Identificador", "").strip()
 
-            if not email or not identificador:
-                continue
+                if not email or not identificador:
+                    continue
 
-            existing_user = UserRepository.get_by_email(db, email)
+                existing_user = UserRepository.get_by_email(db, email)
 
-            # User exists
-            if existing_user:
-                was_assigned = assign_user_to_group(db, existing_user.id, group.id)
+                # User exists
+                if existing_user:
+                    was_assigned = assign_user_to_group(db, existing_user.id, group.id)
 
-                if was_assigned:
-                    existing_users_assigned += 1
+                    if was_assigned:
+                        users_assigned += 1
 
-            # New user
-            else:
-                password = generate_password_from_identifier(identificador)
+                # New user
+                else:
+                    password = generate_password_from_identifier(identificador)
 
-                new_user = UserService.create_student_auto(
-                    db=db,
-                    nombre=nombre,
-                    apellido=apellido,
-                    email=email,
-                    password=password
-                )
+                    new_user = UserService.create_student_auto(
+                        db=db,
+                        nombre=nombre,
+                        apellido=apellido,
+                        email=email,
+                        password=password
+                    )
 
-                assign_user_to_group(db, new_user.id, group.id)
+                    was_assigned = assign_user_to_group(db, new_user.id, group.id)
 
-                created_users += 1
+                    created_users += 1
+
+                    if was_assigned:
+                        users_assigned += 1
+
+            db.commit()
+
+        except Exception:
+            db.rollback()
+            raise
 
         return {
             "group_id": group.id,
             "created_users": created_users,
-            "existing_users_assigned": existing_users_assigned
+            "users_assigned": users_assigned
         }
 
     @staticmethod
@@ -153,9 +163,8 @@ class GroupService:
         if not group:
             raise HTTPException(status_code=404, detail="Group not found")
 
-        if current_user.role_id != ROLE_ADMIN:
-            if current_user.role_id == ROLE_TEACHER and group.created_by != current_user.id:
-                raise HTTPException(status_code=403, detail="Not authorized to modify this group")
+        if current_user.role_id == ROLE_TEACHER and group.created_by != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to modify this group")
 
         group.name = name
         group.description = description
@@ -176,9 +185,8 @@ class GroupService:
         if not group:
             raise HTTPException(status_code=404, detail="Group not found")
 
-        if current_user.role_id != ROLE_ADMIN:
-            if current_user.role_id == ROLE_TEACHER and group.created_by != current_user.id:
-                raise HTTPException(status_code=403, detail="Not authorized to delete this group")
+        if current_user.role_id == ROLE_TEACHER and group.created_by != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to delete this group")
 
         db.query(UserGroup).filter(UserGroup.group_id == group_id).delete()
 

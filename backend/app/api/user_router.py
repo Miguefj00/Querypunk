@@ -63,7 +63,7 @@ def update_user(
 def delete_user(
         user_id: int,
         db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user_from_token),
+        current_user: User = Depends(require_role([ROLE_ADMIN])),
 ):
     return UserService.delete(db, user_id, current_user)
 

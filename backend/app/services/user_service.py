@@ -142,12 +142,6 @@ class UserService:
 
     @staticmethod
     def delete(db: Session, user_id: int, current_user: User):
-        if current_user.role_id != ROLE_ADMIN:
-            raise HTTPException(
-                status_code=403,
-                detail="Only admins can delete users"
-            )
-
         if current_user.id == user_id:
             raise HTTPException(
                 status_code=400,

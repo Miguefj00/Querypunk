@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.utils.user_utils import get_current_user_from_token
+from app.utils.role_utils import require_role, ROLE_ADMIN, ROLE_TEACHER
 from app.database.current_session import get_db
 from app.models import User
 from app.schemas.challenge import ChallengeUpdate, ChallengeCreate
@@ -15,7 +15,7 @@ def create_challenge(
         chapter_id: int,
         data: ChallengeCreate,
         db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user_from_token),
+        current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
     return ChallengeService.create(db, chapter_id, data, current_user)
 
@@ -40,7 +40,7 @@ def update_challenge(
         challenge_id: int,
         data: ChallengeUpdate,
         db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user_from_token),
+        current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
     return ChallengeService.update(db, chapter_id, challenge_id, data, current_user)
 
@@ -50,6 +50,6 @@ def delete_challenge(
         chapter_id: int,
         challenge_id: int,
         db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user_from_token),
+        current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
     return ChallengeService.delete(db, chapter_id, challenge_id, current_user)
