@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from app.database.current_session import get_db
@@ -34,6 +34,7 @@ def create_group(
 @router.post("/{group_id}/upload", response_model=GroupImportResult)
 async def upload_students_to_group(
         group_id: int,
+        background_tasks: BackgroundTasks,
         file: UploadFile = File(...),
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
@@ -42,7 +43,8 @@ async def upload_students_to_group(
     return await GroupService.upload_students_to_group(
         db=db,
         group_id=group_id,
-        file=file
+        file=file,
+        background_tasks=background_tasks
     )
 
 

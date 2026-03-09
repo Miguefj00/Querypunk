@@ -1,3 +1,4 @@
+import unicodedata
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -57,7 +58,14 @@ def get_current_user_from_token(
 
 
 def generate_password_from_identifier(identifier: str) -> str:
+    if not identifier:
+        raise HTTPException(
+            status_code=400,
+            detail="Identifier missing in CSV"
+        )
+
     digits = ''.join(filter(str.isdigit, identifier))
+
     if len(digits) < 4:
         raise HTTPException(status_code=400, detail="Invalid identifier format")
     return digits[-4:]
@@ -65,6 +73,7 @@ def generate_password_from_identifier(identifier: str) -> str:
 
 def generate_username_from_name(nombre: str, apellido: str) -> str:
     username = f"{nombre}_{apellido}".lower().replace(" ", "")
+    username = unicodedata.normalize("NFKD", username).encode("ascii", "ignore").decode("ascii")
     return username
 
 
