@@ -12,6 +12,12 @@ class UserRepository:
         return db.execute(stmt).scalar_one_or_none()
 
     @staticmethod
+    def get_by_ids(db: Session, user_ids: list[int]) -> list[User]:
+        stmt = select(User).where(User.id.in_(user_ids))
+        result = db.execute(stmt).scalars().all()
+        return list(result)
+
+    @staticmethod
     def get_by_username(db: Session, username: str) -> User | None:
         stmt = select(User).where(User.username == username)
         return db.execute(stmt).scalar_one_or_none()
@@ -53,3 +59,13 @@ class UserRepository:
     def delete(db: Session, user: User) -> None:
         db.delete(user)
         db.commit()
+
+    @staticmethod
+    def delete_many(db: Session, user_ids: list[int]) -> int:
+        deleted = db.query(User).filter(User.id.in_(user_ids)).delete(
+            synchronize_session=False
+        )
+
+        db.commit()
+
+        return deleted

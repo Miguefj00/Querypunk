@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal, Optional, List
 from pydantic import BaseModel, EmailStr
 
 
@@ -65,4 +65,8 @@ class UserInGroupResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserBulkDelete(BaseModel):
+    user_ids: List[int]
 

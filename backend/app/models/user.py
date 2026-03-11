@@ -1,4 +1,5 @@
-from sqlalchemy import String, Text, Integer
+from datetime import datetime
+from sqlalchemy import String, Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.connection import Base
 
@@ -11,8 +12,8 @@ class User(Base):
     username: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
-    created_at: Mapped[str] = mapped_column(Text, nullable=False)
-    last_login: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    last_login: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     groups = relationship("Group", secondary="UserGroup", back_populates="users")
 

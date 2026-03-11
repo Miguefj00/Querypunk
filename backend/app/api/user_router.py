@@ -8,7 +8,8 @@ from app.utils.user_utils import get_current_user_from_token
 from app.utils.role_utils import require_role, ROLE_ADMIN, ROLE_TEACHER
 from app.database.current_session import get_db
 from app.models import User
-from app.schemas.user import UserCreate, UserResponse, UserRead, UserBase, UserUpdate, ChangePasswordRequest
+from app.schemas.user import UserCreate, UserResponse, UserRead, UserBase, UserUpdate, ChangePasswordRequest, \
+    UserBulkDelete
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -63,7 +64,16 @@ def update_user(
 def delete_user(
         user_id: int,
         db: Session = Depends(get_db),
-        current_user: User = Depends(require_role([ROLE_ADMIN])),
+        current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER])),
 ):
     return UserService.delete(db, user_id, current_user)
+
+
+@router.delete("/")
+def delete_users(
+        data: UserBulkDelete,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER])),
+):
+    return UserService.delete_bulk(db, data.user_ids, current_user)
 

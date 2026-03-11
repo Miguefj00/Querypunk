@@ -29,7 +29,7 @@ class UserService:
             email=email,
             password_hash=hash_password(password),
             role_id=role_id,
-            created_at=datetime.utcnow().isoformat(),
+            created_at=datetime.utcnow(),
             last_login=None
         )
 
@@ -156,3 +156,24 @@ class UserService:
         UserRepository.delete(db, user)
 
         return {"detail": "User deleted successfully"}
+
+    @staticmethod
+    def delete_bulk(db: Session, user_ids: list[int], current_user: User):
+
+        if current_user.id in user_ids:
+            raise HTTPException(
+                status_code=400,
+                detail="You can't delete your own User"
+            )
+
+        users = UserRepository.get_by_ids(db, user_ids)
+
+        if not users:
+            raise HTTPException(
+                status_code=404,
+                detail="Users not found"
+            )
+
+        deleted = UserRepository.delete_many(db, user_ids)
+
+        return {"detail": f"{deleted} users deleted successfully"}
