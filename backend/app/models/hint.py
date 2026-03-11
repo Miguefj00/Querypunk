@@ -10,3 +10,4 @@ class Hint(Base):
     challenge_id: Mapped[int] = mapped_column(ForeignKey("Challenge.id"))
     order_index: Mapped[int] = mapped_column(Integer, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    unlock_after_attempts: Mapped[int | None] = mapped_column(Integer, nullable=True)

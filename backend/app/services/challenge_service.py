@@ -11,7 +11,7 @@ from app.services.chapter_service import ChapterService
 class ChallengeService:
 
     @staticmethod
-    def _check_teacher_owns_challenge(db: Session, challenge: Challenge, user: User):
+    def check_teacher_owns_challenge(db: Session, challenge: Challenge, user: User):
         chapter = ChapterRepository.get_by_id(db, challenge.chapter_id)
 
         if user.role_id == ROLE_TEACHER and chapter.user_id != user.id:
@@ -56,7 +56,7 @@ class ChallengeService:
     def update(db: Session, chapter_id: int, challenge_id: int, data: ChallengeUpdate, current_user: User):
         challenge = ChallengeService._get_challenge_in_chapter(db, chapter_id, challenge_id)
 
-        ChallengeService._check_teacher_owns_challenge(db, challenge, current_user)
+        ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)
 
         return ChallengeRepository.update(db, challenge, data)
 
@@ -64,7 +64,7 @@ class ChallengeService:
     def delete(db: Session, chapter_id: int, challenge_id: int, current_user: User):
         challenge = ChallengeService._get_challenge_in_chapter(db, chapter_id, challenge_id)
 
-        ChallengeService._check_teacher_owns_challenge(db, challenge, current_user)
+        ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)
 
         ChallengeRepository.delete(db, challenge)
 
