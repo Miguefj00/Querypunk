@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 from app.models.session import Session as UserSession
 
@@ -53,12 +53,12 @@ class SessionRepository:
         db.commit()
 
     @staticmethod
-    def delete_old_sessions(db: Session, days: int = 10):
+    def delete_old_sessions(db: Session, days: int = 3):
 
         limit_date = datetime.utcnow() - timedelta(days=days)
 
         deleted = db.query(UserSession).filter(
-            UserSession.login_time < limit_date
+            UserSession.login_time < text("datetime('now', '-1 day')")
         ).delete(synchronize_session=False)
 
         db.commit()

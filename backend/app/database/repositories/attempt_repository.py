@@ -6,12 +6,15 @@ from app.models.attempt import Attempt
 class AttemptRepository:
 
     @staticmethod
-    def count_attempts(db: Session, user_id: int, challenge_id: int) -> int:
-        stmt = select(func.count()).where(
-            Attempt.user_id == user_id,
-            Attempt.challenge_id == challenge_id
+    def count_attempts(db, user_id: int, challenge_id: int):
+        return (
+            db.query(func.count(Attempt.id))
+            .filter(
+                Attempt.user_id == user_id,
+                Attempt.challenge_id == challenge_id
+            )
+            .scalar()
         )
-        return db.execute(stmt).scalar_one()
 
     @staticmethod
     def count_by_user_and_challenge(

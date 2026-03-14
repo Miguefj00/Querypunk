@@ -1,4 +1,6 @@
-from sqlalchemy import Boolean, Float, Text, ForeignKey
+from datetime import datetime
+
+from sqlalchemy import Boolean, Float, Text, ForeignKey, Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.connection import Base
 
@@ -11,4 +13,6 @@ class Attempt(Base):
     challenge_id: Mapped[int] = mapped_column(ForeignKey("Challenge.id"))
     submitted_query: Mapped[str] = mapped_column(Text)
     is_correct: Mapped[bool] = mapped_column(Boolean)
-    attempt_time: Mapped[float] = mapped_column(Float)
+    execution_time: Mapped[float] = mapped_column(Float)
+    rows_returned: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
