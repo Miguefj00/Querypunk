@@ -1,19 +1,28 @@
 from fastapi import HTTPException
 
-FORBIDDEN_KEYWORDS = [
+FORBIDDEN_KEYWORDS = {
     "INSERT",
     "UPDATE",
     "DELETE",
     "DROP",
     "ALTER",
     "PRAGMA",
-    "ATTACH"
-]
+    "ATTACH",
+    "DETACH",
+    "REPLACE",
+    "CREATE"
+}
 
 
 def validate_query(query: str):
 
-    q = query.upper()
+    q = query.upper().strip()
+
+    if not q.startswith(("SELECT", "WITH")):
+        raise HTTPException(
+            status_code=400,
+            detail="Query must start with SELECT or WITH"
+        )
 
     for word in FORBIDDEN_KEYWORDS:
         if word in q:
@@ -22,10 +31,10 @@ def validate_query(query: str):
                 detail="Only SELECT queries are allowed"
             )
 
-    if not q.strip().startswith(("SELECT", "WITH")):
+    if ";" in q[:-1]:
         raise HTTPException(
             status_code=400,
-            detail="Query must start with SELECT or WITH"
+            detail="Multiple SQL statements are not allowed"
         )
 
 

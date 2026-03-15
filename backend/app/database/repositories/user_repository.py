@@ -28,11 +28,6 @@ class UserRepository:
         return db.execute(stmt).scalar_one_or_none()
 
     @staticmethod
-    def get_first(db: Session) -> User | None:
-        stmt = select(User)
-        return db.execute(stmt).scalar_one_or_none()
-
-    @staticmethod
     def get_by_role(db: Session, role_id: int):
         return db.query(User).filter(User.role_id == role_id).first()
 

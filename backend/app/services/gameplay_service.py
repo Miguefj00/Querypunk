@@ -1,4 +1,8 @@
 import time
+
+from fastapi import HTTPException
+from sqlalchemy.exc import SQLAlchemyError, DBAPIError
+
 from app.models.attempt import Attempt
 from app.database.repositories.challenge_repository import ChallengeRepository
 from app.database.game_connection import run_query
@@ -14,15 +18,36 @@ class GameplayService:
         challenge = ChallengeRepository.get_by_id(db, challenge_id)
 
         if not challenge:
-            raise ValueError("Challenge not found")
+            raise HTTPException(
+                status_code=404,
+                detail="Challenge not found"
+            )
 
         start = time.time()
 
-        student_columns, student_rows = run_query(query)
+        try:
+            student_columns, student_rows = run_query(query)
+
+        except DBAPIError as e:
+
+            message = str(getattr(e, "orig", e))
+
+            raise HTTPException(
+                status_code=400,
+                detail=f"SQL error: {message}"
+            )
 
         execution_time = time.time() - start
 
-        solution_columns, solution_rows = run_query(challenge.solution)
+        try:
+            solution_columns, solution_rows = run_query(challenge.solution)
+
+        # In case Challenge solution produces error
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=500,
+                detail="Challenge solution is invalid. Contact the instructor."
+            )
 
         is_correct = compare_results(student_rows, solution_rows)
 

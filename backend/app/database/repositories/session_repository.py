@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from sqlalchemy import select, text
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.models.session import Session as UserSession
 
@@ -22,19 +22,6 @@ class SessionRepository:
     @staticmethod
     def get_by_id(db: Session, session_id: int) -> UserSession | None:
         return db.get(UserSession, session_id)
-
-    @staticmethod
-    def get_active_by_user(db: Session, user_id: int) -> UserSession | None:
-        stmt = select(UserSession).where(
-            UserSession.user_id == user_id,
-            UserSession.logout_time.is_(None)
-        )
-        return db.execute(stmt).scalar_one_or_none()
-
-    @staticmethod
-    def close(db: Session, session: UserSession) -> None:
-        session.logout_time = datetime.utcnow().isoformat()
-        db.commit()
 
     @staticmethod
     def close_active_sessions_by_user(db: Session, user_id: int) -> None:
