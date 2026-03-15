@@ -7,7 +7,7 @@ def run():
     db = SessionLocal()
 
     try:
-        SessionRepository.delete_old_sessions(db, days=3)
+        SessionRepository.delete_old_sessions(db, days=5)
         print("Old sessions cleaned")
     finally:
         db.close()

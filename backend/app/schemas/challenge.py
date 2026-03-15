@@ -1,10 +1,17 @@
 from pydantic import BaseModel
 
 
-class ChallengeBase(BaseModel):
+class ChallengePublic(BaseModel):
+    id: int
     chapter_id: int
     title: str
     description: str
+
+    class Config:
+        from_attributes = True
+
+
+class ChallengeWithSolution(ChallengePublic):
     solution: str
 
 
@@ -20,8 +27,3 @@ class ChallengeUpdate(BaseModel):
     solution: str | None = None
 
 
-class ChallengeResponse(ChallengeBase):
-    id: int
-
-    class Config:
-        from_attributes = True
