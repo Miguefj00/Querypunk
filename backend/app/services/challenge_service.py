@@ -18,7 +18,7 @@ class ChallengeService:
             raise HTTPException(status_code=403, detail="Not allowed")
 
     @staticmethod
-    def _get_challenge_in_chapter(db: Session, chapter_id: int, challenge_id: int):
+    def get_challenge_in_chapter(db: Session, chapter_id: int, challenge_id: int):
         challenge = ChallengeRepository.get_by_id(db, challenge_id)
 
         if not challenge:
@@ -47,7 +47,7 @@ class ChallengeService:
     @staticmethod
     def get_by_id(db: Session, chapter_id: int, challenge_id: int, current_user: User):
 
-        challenge = ChallengeService._get_challenge_in_chapter(db, chapter_id, challenge_id)
+        challenge = ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
 
         if current_user.role_id == ROLE_STUDENT:
             return ChallengePublic.model_validate(challenge)
@@ -66,7 +66,7 @@ class ChallengeService:
 
     @staticmethod
     def update(db: Session, chapter_id: int, challenge_id: int, data: ChallengeUpdate, current_user: User):
-        challenge = ChallengeService._get_challenge_in_chapter(db, chapter_id, challenge_id)
+        challenge = ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
 
         ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)
 
@@ -74,7 +74,7 @@ class ChallengeService:
 
     @staticmethod
     def delete(db: Session, chapter_id: int, challenge_id: int, current_user: User):
-        challenge = ChallengeService._get_challenge_in_chapter(db, chapter_id, challenge_id)
+        challenge = ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
 
         ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)
 
