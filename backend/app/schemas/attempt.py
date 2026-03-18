@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Optional
 
 from pydantic import BaseModel
 
@@ -13,3 +13,4 @@ class AttemptResponse(BaseModel):
     rows_returned: int
     columns: List[str]
     rows: List[List[Any]]
+    hints: Optional[List[str]] = None

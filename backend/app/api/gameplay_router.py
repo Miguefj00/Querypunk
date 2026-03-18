@@ -9,7 +9,9 @@ from app.services.gameplay_service import GameplayService
 router = APIRouter(prefix="/gameplay", tags=["Gameplay"])
 
 
-@router.post("/submit-query", response_model=AttemptResponse)
+@router.post("/submit-query",
+             response_model=AttemptResponse,
+             response_model_exclude_unset=True)
 def submit_query(
         attempt: AttemptCreate,
         db: Session = Depends(get_db),

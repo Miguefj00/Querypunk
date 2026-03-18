@@ -1,11 +1,12 @@
 import time
-
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError, DBAPIError
 
+from app.database.repositories.attempt_repository import AttemptRepository
 from app.models.attempt import Attempt
 from app.database.repositories.challenge_repository import ChallengeRepository
 from app.database.game_connection import run_query
+from app.services.hint_service import HintService
 from app.utils.sql_validator import compare_results, validate_query
 
 
@@ -63,9 +64,29 @@ class GameplayService:
         db.add(attempt)
         db.commit()
 
-        return {
+        hints = []
+
+        if not is_correct:
+            failed_attempts = AttemptRepository.count_failed_attempts(
+                db,
+                user_id,
+                challenge_id
+            )
+
+            hints = HintService.get_unlocked_hints(
+                db,
+                challenge_id,
+                failed_attempts
+            )
+
+        response = {
             "correct": is_correct,
             "rows_returned": len(student_rows),
             "columns": list(student_columns),
             "rows": [list(row) for row in student_rows]
         }
+
+        if hints:
+            response["hints"] = [h.content for h in hints]
+
+        return response

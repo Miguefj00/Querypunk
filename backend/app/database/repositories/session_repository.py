@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.models.session import Session as UserSession
 
@@ -45,7 +44,7 @@ class SessionRepository:
         limit_date = datetime.utcnow() - timedelta(days=days)
 
         deleted = db.query(UserSession).filter(
-            UserSession.login_time < text("datetime('now', '-1 day')")
+            UserSession.login_time < limit_date
         ).delete(synchronize_session=False)
 
         db.commit()

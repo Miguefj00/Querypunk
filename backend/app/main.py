@@ -24,7 +24,7 @@ def cleanup_sessions():
     db = SessionLocal()
 
     try:
-        SessionRepository.delete_old_sessions(db, 40)
+        SessionRepository.delete_old_sessions(db, 5)
         print("Old sessions cleaned")
     finally:
         db.close()

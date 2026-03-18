@@ -43,19 +43,17 @@ class HintService:
         return HintRepository.get_by_challenge(db, challenge_id)
 
     @staticmethod
-    def get_unlocked_hints(db: Session, challenge_id: int, attempts: int):
+    def get_unlocked_hints(db, challenge_id, attempts):
 
         hints = HintRepository.get_by_challenge(db, challenge_id)
 
-        unlocked = []
+        hints = sorted(hints, key=lambda h: h.order_index)
 
-        for hint in hints:
-
-            if hint.unlock_after_attempts is None:
-                unlocked.append(hint)
-
-            elif attempts >= hint.unlock_after_attempts:
-                unlocked.append(hint)
+        unlocked = [
+            h for h in hints
+            if h.unlock_after_attempts is not None
+               and attempts >= h.unlock_after_attempts
+        ]
 
         return unlocked
 
