@@ -14,8 +14,6 @@ class GameplayService:
 
     @staticmethod
     def submit_query(db, user_id, challenge_id, query):
-        validate_query(query)
-
         challenge = ChallengeRepository.get_by_id(db, challenge_id)
 
         if not challenge:
@@ -23,6 +21,8 @@ class GameplayService:
                 status_code=404,
                 detail="Challenge not found"
             )
+
+        validate_query(query, challenge)
 
         start = time.time()
 
