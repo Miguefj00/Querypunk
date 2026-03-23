@@ -61,8 +61,30 @@ class GameplayService:
             rows_returned=len(student_rows)
         )
 
+        score = None
+
         db.add(attempt)
         db.commit()
+
+        if is_correct:
+            failed_attempts = AttemptRepository.count_failed_attempts(
+                db,
+                user_id,
+                challenge_id
+            )
+
+            score = max(100 - (failed_attempts * 10), 10)
+
+            from app.database.repositories.leaderboard_repository import LeaderboardRepository
+
+            entry = LeaderboardRepository.upsert_score(
+                db,
+                user_id=user_id,
+                challenge_id=challenge_id,
+                score=score
+            )
+
+            score = entry.score
 
         hints = []
 
@@ -83,8 +105,11 @@ class GameplayService:
             "correct": is_correct,
             "rows_returned": len(student_rows),
             "columns": list(student_columns),
-            "rows": [list(row) for row in student_rows]
+            "rows": [list(row) for row in student_rows],
         }
+
+        if score is not None:
+            response["score"] = score
 
         if hints:
             response["hints"] = [h.content for h in hints]
