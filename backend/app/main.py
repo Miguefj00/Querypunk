@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.api import gameplay_router, auth_router, user_router, chapter_router, challenge_router, group_router, \
-    hint_router
+    hint_router, leaderboard_router
 from fastapi.responses import RedirectResponse
 
 from app.database.connection import Base, engine, SessionLocal
@@ -39,4 +39,5 @@ app.include_router(chapter_router.router)
 app.include_router(challenge_router.router)
 app.include_router(hint_router.router)
 app.include_router(gameplay_router.router)
+app.include_router(leaderboard_router.router)
 
