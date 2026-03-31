@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from sqlalchemy import String, Text, ForeignKey, JSON
+from sqlalchemy import String, Text, ForeignKey, JSON, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.connection import Base
 
@@ -13,3 +13,4 @@ class Challenge(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     solution: Mapped[str] = mapped_column(Text, nullable=False)
     validation_rules: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
+    generated_by_ai: Mapped[bool] = mapped_column(Boolean, default=False)
