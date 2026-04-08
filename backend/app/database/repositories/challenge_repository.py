@@ -17,6 +17,26 @@ class ChallengeRepository:
         return list(db.execute(stmt).scalars().all())
 
     @staticmethod
+    def get_difficulties_by_chapter(db, chapter_id: int):
+        rows = (
+            db.query(Challenge.difficulty)
+            .filter(Challenge.chapter_id == chapter_id)
+            .all()
+        )
+        return [r[0] for r in rows]
+
+    @staticmethod
+    def get_difficulties_by_chapter_sqlite(conn, chapter_id: int):
+        cursor = conn.cursor()
+
+        cursor.execute("""
+                SELECT difficulty FROM challenge WHERE chapter_id = ?
+            """, (chapter_id,))
+
+        rows = cursor.fetchall()
+        return [r[0] for r in rows]
+
+    @staticmethod
     def create(db: Session, chapter_id: int, data: ChallengeCreate):
         payload = data.model_dump()
         payload["chapter_id"] = chapter_id

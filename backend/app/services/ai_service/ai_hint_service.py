@@ -14,6 +14,14 @@ def generate_hints(sql_query: str, description: str):
     prompt = f"""
         Genera EXACTAMENTE 3 pistas progresivas para resolver este reto SQL.
         
+        RESPONDE EN ESPAÑOL.
+        
+        REGLAS IMPORTANTES:
+        - NO numeres las pistas
+        - NO escribas "Pista 1", "Pista 2", etc.
+        - Cada pista debe ser solo una frase corta
+        - Las pistas deben ir de general a específica
+        
         RETO:
         {description}
         
@@ -22,14 +30,14 @@ def generate_hints(sql_query: str, description: str):
         
         Responde SOLO en JSON válido:
         {{
-          "hints": ["pista 1","pista 2","pista 3"]
+          "hints": ["pista","pista","pista"]
         }}
         """
 
     response = ollama.chat(
         model=MODEL,
         options={
-            "temperature": 0,
+            "temperature": 0.6,
         },
         messages=[
             {

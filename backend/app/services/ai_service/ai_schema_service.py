@@ -1,32 +1,58 @@
-import os
-import sqlite3
-from dotenv import load_dotenv
-
-load_dotenv()
-
-GAME_SQLITE_PATH = os.getenv("GAME_SQLITE_PATH")
+from sqlalchemy import inspect
+from app.database.game_connection import game_engine
 
 
-def get_database_schema():
-    conn = sqlite3.connect(GAME_SQLITE_PATH)
+def get_database_schema() -> str:
+    inspector = inspect(game_engine)
+    conn = game_engine.raw_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT name FROM sqlite_master 
-        WHERE type='table' AND name NOT LIKE 'sqlite_%';
-    """)
+    blocks = []
 
-    tables = cursor.fetchall()
+    for table in inspector.get_table_names():
 
-    schema_text = ""
+        columns = inspector.get_columns(table)
 
-    for (table_name,) in tables:
-        cursor.execute(f"PRAGMA table_info({table_name});")
-        columns = cursor.fetchall()
-
-        schema_text += f"\nTable {table_name}:\n"
+        col_lines = []
         for col in columns:
-            schema_text += f" - {col[1]} ({col[2]})\n"
+            col_lines.append(f"- {col['name']} ({col['type']})")
+
+        columns_text = "\n".join(col_lines)
+
+        fks = inspector.get_foreign_keys(table)
+
+        if fks:
+            fk_lines = []
+            for fk in fks:
+                local_cols = ", ".join(fk["constrained_columns"])
+                remote_cols = ", ".join(fk["referred_columns"])
+                fk_lines.append(
+                    f"- {local_cols} → {fk['referred_table']}.{remote_cols}"
+                )
+            fk_text = "\n".join(fk_lines)
+        else:
+            fk_text = "Sin claves foráneas"
+
+        try:
+            cursor.execute(f"SELECT * FROM {table} LIMIT 3")
+            rows = cursor.fetchall()
+            rows_text = "\n".join([str(r) for r in rows]) if rows else "Tabla vacía"
+        except:
+            rows_text = "No disponible"
+
+        block = f"""
+            TABLA: {table}
+            
+            COLUMNAS:
+            {columns_text}
+            
+            FOREIGN KEYS:
+            {fk_text}
+            
+            EJEMPLOS DE FILAS:
+            {rows_text}
+        """
+        blocks.append(block)
 
     conn.close()
-    return schema_text
+    return "\n\n".join(blocks)

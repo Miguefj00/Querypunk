@@ -1,6 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.database.repositories.challenge_repository import ChallengeRepository
+from app.utils.difficulty_utils import DIFFICULTY_TO_VALUE, VALUE_TO_DIFFICULTY
 from app.utils.role_utils import ROLE_ADMIN
 from app.models import User
 from app.models.chapter import Chapter
@@ -20,6 +22,37 @@ class ChapterService:
             raise HTTPException(status_code=403, detail="Not allowed")
 
         return chapter
+
+    # ORM VERSION(API)
+    @staticmethod
+    def recalculate_chapter_difficulty(db: Session, chapter_id: int):
+        difficulties = ChallengeRepository.get_difficulties_by_chapter(db, chapter_id)
+
+        if not difficulties:
+            return
+
+        numeric_values = [DIFFICULTY_TO_VALUE[d] for d in difficulties]
+        avg_value = sum(numeric_values) / len(numeric_values)
+        new_difficulty = VALUE_TO_DIFFICULTY[round(avg_value)]
+
+        chapter = ChapterRepository.get_by_id(db, chapter_id)
+        chapter.difficulty = new_difficulty
+        db.commit()
+
+    # SQLITE VERSION(Generator)
+    @staticmethod
+    def recalculate_chapter_difficulty_sqlite(conn, chapter_id: int):
+
+        difficulties = ChallengeRepository.get_difficulties_by_chapter_sqlite(conn, chapter_id)
+
+        if not difficulties:
+            return
+
+        numeric_values = [DIFFICULTY_TO_VALUE[d] for d in difficulties]
+        avg_value = sum(numeric_values) / len(numeric_values)
+        new_difficulty = VALUE_TO_DIFFICULTY[round(avg_value)]
+
+        ChapterRepository.update_difficulty(conn, chapter_id, new_difficulty)
 
     @staticmethod
     def create(db: Session, data, current_user):

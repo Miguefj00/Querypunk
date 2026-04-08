@@ -13,6 +13,14 @@ class ChapterRepository:
         return db.query(Chapter).filter(Chapter.id == chapter_id).first()
 
     @staticmethod
+    def update_difficulty(conn, chapter_id: int, difficulty: str):
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE chapter SET difficulty = ? WHERE id = ?
+        """, (difficulty, chapter_id))
+
+    @staticmethod
     def create(db: Session, chapter: Chapter):
         db.add(chapter)
         db.commit()

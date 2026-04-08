@@ -1,6 +1,7 @@
-from sqlalchemy import String, Text, ForeignKey
+from sqlalchemy import String, Text, ForeignKey, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.connection import Base
+from app.database.enums import DifficultyEnum
 
 
 class Chapter(Base):
@@ -13,3 +14,8 @@ class Chapter(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("User.id"), nullable=False)
 
     owner = relationship("User")
+
+    difficulty: Mapped[DifficultyEnum] = mapped_column(
+        Enum(DifficultyEnum),
+        nullable=True
+    )
