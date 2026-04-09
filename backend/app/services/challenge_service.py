@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 
+from app.services.difficulty_service import DifficultyService
 from app.utils.role_utils import ROLE_TEACHER, ROLE_STUDENT
 from app.database.repositories.challenge_repository import ChallengeRepository
 from app.database.repositories.chapter_repository import ChapterRepository
@@ -58,11 +59,16 @@ class ChallengeService:
     def create(db: Session, chapter_id: int, data: ChallengeCreate, current_user: User):
         ChapterService.get_owned_chapter(db, chapter_id, current_user)
 
-        return ChallengeRepository.create(
+        challenge = ChallengeRepository.create(
             db,
             chapter_id=chapter_id,
             data=data
         )
+
+        DifficultyService.recalc_challenge_difficulty(db, challenge)
+        DifficultyService.recalc_chapter_difficulty(db, chapter_id)
+
+        return challenge
 
     @staticmethod
     def update(db: Session, chapter_id: int, challenge_id: int, data: ChallengeUpdate, current_user: User):
@@ -70,7 +76,12 @@ class ChallengeService:
 
         ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)
 
-        return ChallengeRepository.update(db, challenge, data)
+        challenge = ChallengeRepository.update(db, challenge, data)
+
+        DifficultyService.recalc_challenge_difficulty(db, challenge)
+        DifficultyService.recalc_chapter_difficulty(db, chapter_id)
+
+        return challenge
 
     @staticmethod
     def delete(db: Session, chapter_id: int, challenge_id: int, current_user: User):
@@ -79,6 +90,8 @@ class ChallengeService:
         ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)
 
         ChallengeRepository.delete(db, challenge)
+
+        DifficultyService.recalc_chapter_difficulty(db, chapter_id)
 
         return {"detail": "Challenge deleted successfully"}
 

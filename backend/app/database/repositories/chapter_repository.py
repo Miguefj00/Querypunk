@@ -1,3 +1,4 @@
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.models.chapter import Chapter
 
@@ -19,6 +20,14 @@ class ChapterRepository:
         cursor.execute("""
             UPDATE chapter SET difficulty = ? WHERE id = ?
         """, (difficulty, chapter_id))
+
+    @staticmethod
+    def update_difficulty_sqlite(conn, chapter_id: int, difficulty: str):
+        conn.execute(
+            text("UPDATE chapter SET difficulty = :difficulty WHERE id = :id"),
+            {"difficulty": difficulty, "id": chapter_id},
+        )
+        conn.commit()
 
     @staticmethod
     def create(db: Session, chapter: Chapter):

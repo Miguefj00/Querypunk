@@ -17,13 +17,15 @@ class ChallengeRepository:
         return list(db.execute(stmt).scalars().all())
 
     @staticmethod
-    def get_difficulties_by_chapter(db, chapter_id: int):
+    def get_difficulties_by_chapter(db: Session, chapter_id: int):
         rows = (
             db.query(Challenge.difficulty)
             .filter(Challenge.chapter_id == chapter_id)
+            .filter(Challenge.difficulty.isnot(None))
             .all()
         )
-        return [r[0] for r in rows]
+
+        return [row[0] for row in rows]
 
     @staticmethod
     def get_difficulties_by_chapter_sqlite(conn, chapter_id: int):

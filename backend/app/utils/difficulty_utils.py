@@ -1,3 +1,7 @@
+import re
+
+from app.schemas.challenge import ValidationRules
+
 DIFFICULTY_TO_VALUE = {
     "VERY_EASY": 1,
     "EASY": 2,
@@ -7,4 +11,80 @@ DIFFICULTY_TO_VALUE = {
 }
 
 VALUE_TO_DIFFICULTY = {v: k for k, v in DIFFICULTY_TO_VALUE.items()}
+
+
+def evaluate_sql_difficulty(sql: str, rules: ValidationRules) -> str:
+    sql = sql.lower()
+
+    score = 1
+
+    # -----------------------
+    # SQl Complexity
+    # -----------------------
+
+    if "where" in sql:
+        score += 1
+
+    if re.search(r"\b(and|or)\b", sql):
+        score += 1
+
+    if re.search(r"[<>]=?|=", sql):
+        score += 1
+
+    if "join" in sql:
+        score += 2
+
+    if "group by" in sql:
+        score += 2
+
+    if "having" in sql:
+        score += 2
+
+    if any(func in sql for func in ["avg(", "count(", "sum(", "min(", "max("]):
+        score += 1
+
+    if "order by" in sql:
+        score += 1
+
+    if "limit" in sql:
+        score += 1
+
+    if "select distinct" in sql:
+        score += 1
+
+    if "case" in sql:
+        score += 2
+
+    # Subquery
+    if re.search(r"select .*select", sql):
+        score += 3
+
+    # -----------------------
+    # VALIDATION RULES
+    # -----------------------
+
+    if rules.must_use_join:
+        score += 2
+
+    if rules.must_use_group_by:
+        score += 2
+
+    if rules.must_use_avg:
+        score += 1
+
+    if rules.must_use_subquery:
+        score += 3
+
+    if rules.forbid_literals:
+        score += 1
+
+    if rules.no_group_by:
+        score -= 1
+
+    # -----------------------
+    # NORMALIZE
+    # -----------------------
+
+    score = max(1, min(score, 5))
+    return VALUE_TO_DIFFICULTY[score]
 
