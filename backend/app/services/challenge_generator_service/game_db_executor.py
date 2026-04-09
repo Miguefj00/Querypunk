@@ -32,9 +32,9 @@ def save_challenge_to_db(chapter:int, challenge, expected_rows, hints, difficult
     cursor.execute("""
         INSERT INTO challenge (
             chapter_id, title, description, solution,
-            expected_result, validation_rules, generated_by_ai, difficulty
+            expected_result, validation_rules, difficulty, generated_by_system
         )
-        VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 1)
     """, (
         chapter,
         challenge["title"],

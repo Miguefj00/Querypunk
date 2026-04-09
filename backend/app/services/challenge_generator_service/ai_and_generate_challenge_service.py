@@ -3,14 +3,17 @@ import json
 
 import random
 
-from app.services.ai_service.ai_hint_service import generate_hints
-from app.services.ai_service.sql_randomizer import pick_table, pick_column, pick_join
-from app.services.ai_service.validate_challenge_quality import is_duplicate_query, validate_language, \
+from app.services.challenge_generator_service.ai_hint_service import generate_hints
+from app.services.challenge_generator_service.generation_helpers import random_where_clause
+from app.services.challenge_generator_service.sql_randomizer import pick_table, pick_column, pick_join
+from app.services.challenge_generator_service.validate_challenge_quality import is_duplicate_query, validate_language, \
     uses_forbidden_columns
 from app.utils.ai_utils import clean_llm_json
 from dotenv import load_dotenv
 
-from app.services.ai_service.game_db_executor import execute_query_and_get_expected, save_challenge_to_db
+from app.services.challenge_generator_service.game_db_executor import (execute_query_and_get_expected,
+                                                                       save_challenge_to_db)
+from app.utils.difficulty_utils import DIFFICULTY_TO_VALUE
 
 load_dotenv()
 
@@ -19,9 +22,18 @@ MODEL = "llama3"
 
 def generate_very_easy_sql():
     table = pick_table()
-    column = pick_column(table, allow_ids=False)
 
-    return f"SELECT {column} FROM {table}"
+    if random.random() < 0.5:
+        col = pick_column(table, allow_ids=False)
+        return f"SELECT {col} FROM {table}"
+
+    col1 = pick_column(table, allow_ids=False)
+    col2 = pick_column(table, allow_ids=False)
+
+    return f"""
+    SELECT {col1}, {col2}
+    FROM {table}
+    """
 
 
 def generate_easy_sql():
@@ -29,77 +41,98 @@ def generate_easy_sql():
 
     mode = random.choice(["numeric", "text"])
 
-    # =========================
-    # NUMERIC FILTER
-    # =========================
+    # ───────── NUMERIC ─────────
     if mode == "numeric":
-        column = pick_column(table, numeric_only=True, allow_ids=False)
+        col1 = pick_column(table, numeric_only=True, allow_ids=False)
 
-        op = random.choice([">", "<"])
-        number = random.randint(1, 10)
+        if random.random() < 0.6:
+            number = random.randint(1, 10)
+            op = random.choice([">", "<"])
+            return f"""
+            SELECT {col1}
+            FROM {table}
+            WHERE {col1} {op} {number}
+            """
 
-        return f"""
-        SELECT {column}
-        FROM {table}
-        WHERE {column} {op} {number}
-        """
-
-    # =========================
-    # TEXT FILTER
-    # =========================
-    else:
-        column = pick_column(table, text_only=True, allow_ids=False)
-
-        letter = random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+        col2 = pick_column(table, numeric_only=True, allow_ids=False)
+        n1, n2 = random.randint(1, 10), random.randint(1, 10)
+        logic = random.choice(["AND", "OR"])
 
         return f"""
-        SELECT {column}
+        SELECT {col1}
         FROM {table}
-        WHERE {column} LIKE '{letter}%'
+        WHERE {col1} > {n1} {logic} {col2} < {n2}
         """
+
+    # ───────── TEXT ─────────
+    col = pick_column(table, text_only=True, allow_ids=False)
+    letter = random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+    return f"""
+    SELECT {col}
+    FROM {table}
+    WHERE {col} LIKE '{letter}%'
+    """
 
 
 def generate_medium_sql():
     join = pick_join()
     if not join:
-        return generate_very_easy_sql()
+        return generate_easy_sql()
 
     t1, t2, col1, col2 = join
 
     c1 = pick_column(t1, allow_ids=False)
     c2 = pick_column(t2, allow_ids=False)
 
-    return f"""
+    base_query = f"""
     SELECT {t1}.{c1}, {t2}.{c2}
     FROM {t1}
     JOIN {t2} ON {t1}.{col1} = {t2}.{col2}
     """
 
+    # 🔥 70% probabilidad de WHERE
+    if random.random() < 0.7:
+        if random.random() < 0.5:
+            condition = random_where_clause(t1, t1)
+        else:
+            condition = random_where_clause(t2, t2)
+
+        base_query += f"\nWHERE {condition}"
+
+    return base_query
+
 
 def generate_hard_sql():
-    import random
-
     agg = random.choice(["COUNT", "AVG", "SUM", "MAX", "MIN"])
-
     join = pick_join()
 
-    if join and random.random() < 0.5:
+    if join and random.random() < 0.8:
         t1, t2, col1, col2 = join
-
         group_col = pick_column(t1, allow_ids=False)
 
         if agg == "COUNT":
             agg_expr = "COUNT(*)"
         else:
-            numeric_col = pick_column(t1, numeric_only=True, allow_ids=False)
-            agg_expr = f"{agg}({t1}.{numeric_col})"
+            num_col = pick_column(t1, numeric_only=True, allow_ids=False)
+            agg_expr = f"{agg}({t1}.{num_col})"
 
-        return f"""
+        query = f"""
         SELECT {t1}.{group_col}, {agg_expr}
         FROM {t1}
         JOIN {t2} ON {t1}.{col1} = {t2}.{col2}
-        GROUP BY {t1}.{group_col}
         """
+
+        if random.random() < 0.7:
+            condition = random_where_clause(t1, t1)
+            query += f"\nWHERE {condition}"
+
+        query += f"\nGROUP BY {t1}.{group_col}"
+
+        if random.random() < 0.6:
+            query += f"\nHAVING {agg_expr} > 1"
+
+        return query
 
     table = pick_table()
     group_col = pick_column(table, allow_ids=False)
@@ -107,32 +140,62 @@ def generate_hard_sql():
     if agg == "COUNT":
         agg_expr = "COUNT(*)"
     else:
-        numeric_col = pick_column(table, numeric_only=True, allow_ids=False)
-        agg_expr = f"{agg}({numeric_col})"
+        num_col = pick_column(table, numeric_only=True, allow_ids=False)
+        agg_expr = f"{agg}({num_col})"
 
-    return f"""
+    query = f"""
     SELECT {group_col}, {agg_expr}
     FROM {table}
-    GROUP BY {group_col}
     """
+
+    if random.random() < 0.7:
+        query += f"\nWHERE {random_where_clause(table)}"
+
+    query += f"\nGROUP BY {group_col}\nHAVING {agg_expr} > 1"
+
+    return query
 
 
 def generate_expert_sql():
-    import random
+    join = pick_join()
+
+    if join and random.random() < 0.7:
+        t1, t2, col1, col2 = join
+
+        num_col = pick_column(t1, numeric_only=True, allow_ids=False)
+        select_col = pick_column(t1, allow_ids=False)
+
+        query = f"""
+        SELECT {t1}.{select_col}
+        FROM {t1}
+        JOIN {t2} ON {t1}.{col1} = {t2}.{col2}
+        WHERE {t1}.{num_col} > (
+            SELECT AVG({num_col}) FROM {t1}
+        )
+        """
+
+        if random.random() < 0.7:
+            extra = random_where_clause(t1, t1)
+            query += f"\nAND {extra}"
+
+        return query
 
     table = pick_table()
-    numeric_col = pick_column(table, numeric_only=True, allow_ids=False)
+    num_col = pick_column(table, numeric_only=True, allow_ids=False)
     select_col = pick_column(table, allow_ids=False)
 
-    operator = random.choice([">", "<"])
-
-    return f"""
+    query = f"""
     SELECT {select_col}
     FROM {table}
-    WHERE {numeric_col} {operator} (
-        SELECT AVG({numeric_col}) FROM {table}
+    WHERE {num_col} > (
+        SELECT AVG({num_col}) FROM {table}
     )
     """
+
+    if random.random() < 0.7:
+        query += f"\nAND {random_where_clause(table)}"
+
+    return query
 
 
 def generate_ai_backstory_challenge(sql_query: str):
@@ -153,18 +216,17 @@ def generate_ai_backstory_challenge(sql_query: str):
     prompt = f"""
         Eres diseñador de retos SQL.
         
-        Debes describir la query de forma LITERAL y EXACTA.
+        Debes describir la tarea SIN explicar cómo escribir la query.
         
         REGLAS CRÍTICAS:
         - NO inventes columnas ni conceptos.
-        - SOLO puedes mencionar columnas que aparecen en la query.
-        - Si la query usa GROUP BY → debes mencionarlo.
-        - Si la query usa JOIN → debes mencionarlo.
-        - Si la query usa AVG/SUM/MIN/MAX/COUNT → debes mencionarlo.
-        - Describe exactamente qué columnas se seleccionan y de qué tabla vienen.
-        - No añadas narrativa extra.
-        - No expliques el contexto del juego.
-        - No interpretes el significado de las columnas.
+        - NO expliques la estructura de la query.
+        - NO menciones JOIN, GROUP BY, HAVING o subqueries.
+        - NO describas columnas paso a paso.
+        - Describe el objetivo del reto en lenguaje natural.
+        - Debe explicar QUÉ datos se buscan, no CÓMO obtenerlos.
+        - Debe sonar como un ejercicio real para estudiantes.
+        - Máximo 1 frase.
         
         Formato:
         - title en inglés
@@ -176,7 +238,7 @@ def generate_ai_backstory_challenge(sql_query: str):
         Devuelve JSON:
         {{
           "title": "...",
-          "description": "...",
+          "description": "..."
         }}
     """
 
@@ -227,6 +289,10 @@ def generate_sql_by_difficulty(difficulty):
 
 
 def generate_and_store_challenge(chapter:int, difficulty:str):
+    valid_difficulties = DIFFICULTY_TO_VALUE
+
+    if difficulty not in valid_difficulties:
+        raise ValueError(f"Invalid difficulty: {difficulty}")
 
     feedback = ""
 

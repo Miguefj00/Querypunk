@@ -7,3 +7,4 @@ DIFFICULTY_TO_VALUE = {
 }
 
 VALUE_TO_DIFFICULTY = {v: k for k, v in DIFFICULTY_TO_VALUE.items()}
+

@@ -1,6 +1,6 @@
 import sqlite3
 
-from app.services.ai_service.game_db_executor import SYSTEM_SQLITE_PATH
+from app.services.challenge_generator_service.game_db_executor import SYSTEM_SQLITE_PATH
 
 
 def is_duplicate_query(sql: str):

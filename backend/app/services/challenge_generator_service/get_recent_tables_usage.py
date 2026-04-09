@@ -5,7 +5,7 @@ from sqlalchemy import inspect
 from typing_extensions import Counter
 
 from app.database.game_connection import game_engine
-from app.services.ai_service.game_db_executor import SYSTEM_SQLITE_PATH
+from app.services.challenge_generator_service.game_db_executor import SYSTEM_SQLITE_PATH
 
 
 def get_all_table_names():

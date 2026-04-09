@@ -15,6 +15,7 @@ class ChallengePublic(BaseModel):
 
 class ChallengeWithSolution(ChallengePublic):
     solution: str
+    generated_by_system: int
 
 
 class ValidationRules(BaseModel):

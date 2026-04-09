@@ -1,6 +1,6 @@
 import random
-from app.services.ai_service.ai_schema_structured_service import get_structured_schema
-from app.services.ai_service.get_recent_tables_usage import get_recent_tables_usage
+from app.services.challenge_generator_service.schema_structured_service import get_structured_schema
+from app.services.challenge_generator_service.get_recent_tables_usage import get_recent_tables_usage
 
 FORBIDDEN_COLUMNS = {
     "id",
@@ -16,12 +16,21 @@ BOOLEAN_KEYWORDS = [
     "Legality"
 ]
 
+FORBIDDEN_TABLES = {
+    "Corporation_sector",
+    "Personnel_implant",
+}
+
 
 def pick_table():
     schema = get_structured_schema()
     most_used, least_used = get_recent_tables_usage()
 
-    candidates = least_used if least_used else list(schema.keys())
+    all_tables = list(schema.keys())
+
+    allowed_tables = [t for t in all_tables if t not in FORBIDDEN_TABLES]
+
+    candidates = [t for t in least_used if t in allowed_tables] if least_used else allowed_tables
 
     return random.choice(candidates)
 
@@ -64,7 +73,7 @@ def pick_column(table, numeric_only=False, text_only=False, allow_ids=False):
 
 def pick_join():
     schema = get_structured_schema()
-    tables = list(schema.keys())
+    tables = [t for t in schema.keys() if t not in FORBIDDEN_TABLES]
     random.shuffle(tables)
 
     valid_joins = []
@@ -73,7 +82,12 @@ def pick_join():
         fks = schema[table]["foreign_keys"]
 
         for fk in fks:
-            if not fk.get("referred_table"):
+            ref_table = fk.get("referred_table")
+
+            if ref_table in FORBIDDEN_TABLES:
+                continue
+
+            if not ref_table:
                 continue
 
             if not fk.get("constrained_columns"):
@@ -82,15 +96,9 @@ def pick_join():
             if not fk.get("referred_columns"):
                 continue
 
-            if len(fk["constrained_columns"]) == 0:
-                continue
-
-            if len(fk["referred_columns"]) == 0:
-                continue
-
             valid_joins.append((
                 table,
-                fk["referred_table"],
+                ref_table,
                 fk["constrained_columns"][0],
                 fk["referred_columns"][0]
             ))

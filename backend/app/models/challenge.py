@@ -14,7 +14,7 @@ class Challenge(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     solution: Mapped[str] = mapped_column(Text, nullable=False)
     validation_rules: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
-    generated_by_ai: Mapped[bool] = mapped_column(Boolean, default=False)
+    generated_by_system: Mapped[bool] = mapped_column(Boolean, default=False)
 
     difficulty: Mapped[DifficultyEnum] = mapped_column(
         Enum(DifficultyEnum),
