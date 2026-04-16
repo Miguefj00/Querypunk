@@ -46,7 +46,7 @@ class ChallengeRepository:
         challenge = Challenge(**payload)
 
         db.add(challenge)
-        db.commit()
+        db.flush()
         db.refresh(challenge)
 
         return challenge
@@ -56,7 +56,7 @@ class ChallengeRepository:
         for key, value in data.model_dump(exclude_unset=True).items():
             setattr(challenge, key, value)
 
-        db.commit()
+        db.flush()
         db.refresh(challenge)
 
         return challenge
@@ -64,4 +64,4 @@ class ChallengeRepository:
     @staticmethod
     def delete(db: Session, challenge: Challenge):
         db.delete(challenge)
-        db.commit()
+        db.flush()

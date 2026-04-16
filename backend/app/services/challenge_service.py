@@ -1,5 +1,7 @@
 from fastapi import HTTPException
+import json
 
+from app.services.challenge_generator_service.game_db_executor import run_solution_and_get_result
 from app.services.difficulty_service import DifficultyService
 from app.utils.role_utils import ROLE_TEACHER, ROLE_STUDENT
 from app.database.repositories.challenge_repository import ChallengeRepository
@@ -7,6 +9,7 @@ from app.database.repositories.chapter_repository import ChapterRepository
 from app.models import Challenge, User, Session
 from app.schemas.challenge import ChallengeUpdate, ChallengeCreate, ChallengePublic, ChallengeWithSolution
 from app.services.chapter_service import ChapterService
+from app.utils.rule_utils import DEFAULT_RULES
 
 
 class ChallengeService:
@@ -57,18 +60,38 @@ class ChallengeService:
 
     @staticmethod
     def create(db: Session, chapter_id: int, data: ChallengeCreate, current_user: User):
-        ChapterService.get_owned_chapter(db, chapter_id, current_user)
+        try:
+            ChapterService.get_owned_chapter(db, chapter_id, current_user)
 
-        challenge = ChallengeRepository.create(
-            db,
-            chapter_id=chapter_id,
-            data=data
-        )
+            challenge = ChallengeRepository.create(db, chapter_id, data)
 
-        DifficultyService.recalc_challenge_difficulty(db, challenge)
-        DifficultyService.recalc_chapter_difficulty(db, chapter_id)
+            expected = run_solution_and_get_result(db, challenge.solution)
 
-        return challenge
+            if expected is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail="SQL inválido o tablas inexistentes en la BD del juego"
+                )
+
+            challenge.expected_result = json.dumps(expected)
+
+            if not challenge.validation_rules:
+                challenge.validation_rules = DEFAULT_RULES
+
+            DifficultyService.recalc_challenge_difficulty(db, challenge)
+
+            db.add(challenge)
+            db.commit()
+            db.refresh(challenge)
+
+            DifficultyService.recalc_chapter_difficulty(db, chapter_id)
+            db.commit()
+
+            return challenge
+
+        except:
+            db.rollback()
+            raise
 
     @staticmethod
     def update(db: Session, chapter_id: int, challenge_id: int, data: ChallengeUpdate, current_user: User):
@@ -78,20 +101,42 @@ class ChallengeService:
 
         challenge = ChallengeRepository.update(db, challenge, data)
 
+        expected = run_solution_and_get_result(db, challenge.solution)
+
+        if expected is None:
+            raise HTTPException(
+                status_code=400,
+                detail="SQL inválido o tablas inexistentes en la BD del juego"
+            )
+
+        challenge.expected_result = json.dumps(expected)
+
         DifficultyService.recalc_challenge_difficulty(db, challenge)
+
+        db.add(challenge)
+        db.commit()
+        db.refresh(challenge)
+
         DifficultyService.recalc_chapter_difficulty(db, chapter_id)
+        db.commit()
 
         return challenge
 
     @staticmethod
     def delete(db: Session, chapter_id: int, challenge_id: int, current_user: User):
-        challenge = ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
+        try:
+            challenge = ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
+            ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)
 
-        ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)
+            ChallengeRepository.delete(db, challenge)
 
-        ChallengeRepository.delete(db, challenge)
+            DifficultyService.recalc_chapter_difficulty(db, chapter_id)
 
-        DifficultyService.recalc_chapter_difficulty(db, chapter_id)
+            db.commit()
 
-        return {"detail": "Challenge deleted successfully"}
+            return {"detail": "Challenge deleted successfully"}
+
+        except:
+            db.rollback()
+            raise
 

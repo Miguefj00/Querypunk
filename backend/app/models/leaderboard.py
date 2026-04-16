@@ -7,6 +7,6 @@ class Leaderboard(Base):
     __tablename__ = "Leaderboard"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("User.id"))
-    challenge_id: Mapped[int] = mapped_column(ForeignKey("Challenge.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("User.id", ondelete="CASCADE"))
+    challenge_id: Mapped[int] = mapped_column(ForeignKey("Challenge.id", ondelete="CASCADE"))
     score: Mapped[int] = mapped_column(Integer, nullable=False)

@@ -9,10 +9,11 @@ class Challenge(Base):
     __tablename__ = "Challenge"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    chapter_id: Mapped[int] = mapped_column(ForeignKey("Chapter.id"))
+    chapter_id: Mapped[int] = mapped_column(ForeignKey("Chapter.id", ondelete="CASCADE"))
     title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     solution: Mapped[str] = mapped_column(Text, nullable=False)
+    expected_result: Mapped[list] = mapped_column(JSON, nullable=False)
     validation_rules: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
     generated_by_system: Mapped[bool] = mapped_column(Boolean, default=False)
 

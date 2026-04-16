@@ -1,4 +1,3 @@
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.models.chapter import Chapter
 
@@ -14,20 +13,11 @@ class ChapterRepository:
         return db.query(Chapter).filter(Chapter.id == chapter_id).first()
 
     @staticmethod
-    def update_difficulty(conn, chapter_id: int, difficulty: str):
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            UPDATE chapter SET difficulty = ? WHERE id = ?
-        """, (difficulty, chapter_id))
-
-    @staticmethod
-    def update_difficulty_sqlite(conn, chapter_id: int, difficulty: str):
-        conn.execute(
-            text("UPDATE chapter SET difficulty = :difficulty WHERE id = :id"),
-            {"difficulty": difficulty, "id": chapter_id},
-        )
-        conn.commit()
+    def update_difficulty(db: Session, chapter_id: int, difficulty: str):
+        chapter = db.query(Chapter).filter(Chapter.id == chapter_id).first()
+        if chapter:
+            chapter.difficulty = difficulty
+            db.flush()
 
     @staticmethod
     def create(db: Session, chapter: Chapter):

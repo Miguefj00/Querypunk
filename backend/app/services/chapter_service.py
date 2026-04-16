@@ -37,7 +37,7 @@ class ChapterService:
 
         chapter = ChapterRepository.get_by_id(db, chapter_id)
         chapter.difficulty = new_difficulty
-        db.commit()
+        db.flush()
 
     # SQLITE VERSION(Generator)
     @staticmethod

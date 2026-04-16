@@ -11,7 +11,8 @@ class Chapter(Base):
     title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("User.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
 
     owner = relationship("User")
 

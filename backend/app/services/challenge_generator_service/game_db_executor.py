@@ -59,3 +59,18 @@ def save_challenge_to_db(chapter:int, challenge, expected_rows, hints, difficult
 
     conn.commit()
     conn.close()
+
+
+def run_solution_and_get_result(_, sql: str):
+    try:
+        conn = sqlite3.connect(f"file:{GAME_SQLITE_PATH}?mode=ro", uri=True)
+        cursor = conn.cursor()
+
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [list(row) for row in rows]
+
+    except Exception:
+        return None

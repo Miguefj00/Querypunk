@@ -2,12 +2,15 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from app.database.enums import DifficultyEnum
+
 
 class ChallengePublic(BaseModel):
     id: int
     chapter_id: int
     title: str
     description: str
+    difficulty: DifficultyEnum
 
     class Config:
         from_attributes = True
@@ -35,11 +38,19 @@ class ChallengeCreate(BaseModel):
     validation_rules: Optional[ValidationRules] = None
 
 
+class ChallengeCreateWithExpectedQuery(ChallengeCreate):
+    expected_result: str
+
+
 class ChallengeUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
     solution: str | None = None
     validation_rules: Optional[ValidationRules] = None
+
+
+class ChallengeUpdateWithExpectedQuery(ChallengeUpdate):
+    expected_result: str
 
 
 

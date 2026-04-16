@@ -21,7 +21,7 @@ class DifficultyService:
         )
 
         challenge.difficulty = difficulty
-        db.commit()
+        db.flush()
 
     @staticmethod
     def recalc_chapter_difficulty(db: Session, chapter_id: int):
@@ -37,8 +37,8 @@ class DifficultyService:
         avg_value = round(sum(numeric_values) / len(numeric_values))
         chapter_difficulty = VALUE_TO_DIFFICULTY[avg_value]
 
-        ChapterRepository.update_difficulty_sqlite(
-            db.connection(),
+        ChapterRepository.update_difficulty(
+            db,
             chapter_id,
             chapter_difficulty
         )
