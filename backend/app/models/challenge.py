@@ -13,11 +13,11 @@ class Challenge(Base):
     title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     solution: Mapped[str] = mapped_column(Text, nullable=False)
-    expected_result: Mapped[list] = mapped_column(JSON, nullable=False)
+    expected_result: Mapped[list] = mapped_column(JSON, nullable=True)
     validation_rules: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
     generated_by_system: Mapped[bool] = mapped_column(Boolean, default=False)
 
     difficulty: Mapped[DifficultyEnum] = mapped_column(
         Enum(DifficultyEnum),
-        nullable=False
+        nullable=True
     )
