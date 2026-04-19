@@ -17,7 +17,6 @@ def submit_query(
         db: Session = Depends(get_db),
         current_user = Depends(get_current_user_from_token)
 ):
-
     return GameplayService.submit_query(
         db,
         current_user.id,

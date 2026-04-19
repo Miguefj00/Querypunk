@@ -2,10 +2,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database.current_session import get_db
-from app.utils.role_utils import require_role, ROLE_ADMIN, ROLE_TEACHER, ROLE_STUDENT
+from app.utils.role_utils import require_role, ROLE_ADMIN, ROLE_TEACHER
 from app.models import User
 from app.schemas.hint import HintCreate, HintUpdate, HintResponse
 from app.services.hint_service import HintService
+from app.utils.user_utils import get_current_user_from_token
 
 router = APIRouter(
     prefix="/chapters/{chapter_id}/challenges/{challenge_id}/hints",
@@ -29,11 +30,7 @@ def get_hints(
         chapter_id: int,
         challenge_id: int,
         db: Session = Depends(get_db),
-        current_user: User = Depends(require_role([
-            ROLE_ADMIN,
-            ROLE_TEACHER,
-            ROLE_STUDENT
-        ]))
+        current_user = Depends(get_current_user_from_token)
 ):
     return HintService.get_by_challenge(db, chapter_id, challenge_id, current_user)
 
@@ -44,11 +41,7 @@ def get_hint(
         challenge_id: int,
         hint_id: int,
         db: Session = Depends(get_db),
-        current_user: User = Depends(require_role([
-            ROLE_ADMIN,
-            ROLE_TEACHER,
-            ROLE_STUDENT
-        ]))
+        current_user = Depends(get_current_user_from_token)
 ):
     return HintService.get_by_id(db, chapter_id, challenge_id, hint_id, current_user)
 

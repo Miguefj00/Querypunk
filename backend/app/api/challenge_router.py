@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.utils.role_utils import require_role, ROLE_ADMIN, ROLE_TEACHER, ROLE_STUDENT
+from app.utils.role_utils import require_role, ROLE_ADMIN, ROLE_TEACHER
 from app.database.current_session import get_db
 from app.models import User
 from app.schemas.challenge import ChallengeUpdate, ChallengeCreate, ChallengeCreateWithExpectedQuery, \
     ChallengeUpdateWithExpectedQuery
 from app.services.challenge_service import ChallengeService
+from app.utils.user_utils import get_current_user_from_token
 
 router = APIRouter(prefix="/chapters/{chapter_id}/challenges", tags=["Challenges"])
 
@@ -25,11 +26,7 @@ def create_challenge(
 def get_challenges(
         chapter_id: int,
         db: Session = Depends(get_db),
-        current_user: User = Depends(require_role([
-            ROLE_ADMIN,
-            ROLE_TEACHER,
-            ROLE_STUDENT
-        ]))
+        current_user = Depends(get_current_user_from_token)
 ):
     return ChallengeService.get_by_chapter(db, chapter_id, current_user)
 
@@ -39,11 +36,7 @@ def get_challenge(
         chapter_id: int,
         challenge_id: int,
         db: Session = Depends(get_db),
-        current_user: User = Depends(require_role([
-            ROLE_ADMIN,
-            ROLE_TEACHER,
-            ROLE_STUDENT
-        ]))
+        current_user = Depends(get_current_user_from_token)
 ):
     return ChallengeService.get_by_id(db, chapter_id, challenge_id, current_user)
 
