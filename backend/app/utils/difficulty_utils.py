@@ -14,21 +14,17 @@ VALUE_TO_DIFFICULTY = {v: k for k, v in DIFFICULTY_TO_VALUE.items()}
 
 
 def evaluate_sql_difficulty(sql: str, rules: ValidationRules) -> str:
-    sql = sql.lower()
+    sql = sql.lower().strip()
 
     score = 1
 
-    # -----------------------
-    # SQl Complexity
-    # -----------------------
-
+    # ----------------------
+    #     SQL Complexity
+    # ----------------------
     if "where" in sql:
         score += 1
 
     if re.search(r"\b(and|or)\b", sql):
-        score += 1
-
-    if re.search(r"[<>]=?|=", sql):
         score += 1
 
     if "join" in sql:
@@ -38,7 +34,7 @@ def evaluate_sql_difficulty(sql: str, rules: ValidationRules) -> str:
         score += 2
 
     if "having" in sql:
-        score += 2
+        score += 1
 
     if any(func in sql for func in ["avg(", "count(", "sum(", "min(", "max("]):
         score += 1
@@ -55,14 +51,12 @@ def evaluate_sql_difficulty(sql: str, rules: ValidationRules) -> str:
     if "case" in sql:
         score += 2
 
-    # Subquery
     if re.search(r"select .*select", sql):
         score += 3
 
-    # -----------------------
-    # VALIDATION RULES
-    # -----------------------
-
+    # ----------------------
+    #    VALIDATION RULES
+    # ----------------------
     if rules.must_use_join:
         score += 2
 
@@ -81,10 +75,9 @@ def evaluate_sql_difficulty(sql: str, rules: ValidationRules) -> str:
     if rules.no_group_by:
         score -= 1
 
-    # -----------------------
-    # NORMALIZE
-    # -----------------------
-
+    # ----------------------
+    #       NORMALIZE
+    # ----------------------
     score = max(1, min(score, 5))
     return VALUE_TO_DIFFICULTY[score]
 

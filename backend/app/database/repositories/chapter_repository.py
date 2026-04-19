@@ -20,6 +20,14 @@ class ChapterRepository:
             db.flush()
 
     @staticmethod
+    def update_difficulty_sqlite(conn, chapter_id: int, difficulty: str):
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE Chapter SET difficulty = ? WHERE id = ?",
+            (difficulty, chapter_id)
+        )
+
+    @staticmethod
     def create(db: Session, chapter: Chapter):
         db.add(chapter)
         db.commit()

@@ -23,22 +23,6 @@ class ChapterService:
 
         return chapter
 
-    # ORM VERSION(API)
-    @staticmethod
-    def recalculate_chapter_difficulty(db: Session, chapter_id: int):
-        difficulties = ChallengeRepository.get_difficulties_by_chapter(db, chapter_id)
-
-        if not difficulties:
-            return
-
-        numeric_values = [DIFFICULTY_TO_VALUE[d] for d in difficulties]
-        avg_value = sum(numeric_values) / len(numeric_values)
-        new_difficulty = VALUE_TO_DIFFICULTY[round(avg_value)]
-
-        chapter = ChapterRepository.get_by_id(db, chapter_id)
-        chapter.difficulty = new_difficulty
-        db.flush()
-
     # SQLITE VERSION(Generator)
     @staticmethod
     def recalculate_chapter_difficulty_sqlite(conn, chapter_id: int):
@@ -52,7 +36,7 @@ class ChapterService:
         avg_value = sum(numeric_values) / len(numeric_values)
         new_difficulty = VALUE_TO_DIFFICULTY[round(avg_value)]
 
-        ChapterRepository.update_difficulty(conn, chapter_id, new_difficulty)
+        ChapterRepository.update_difficulty_sqlite(conn, chapter_id, new_difficulty)
 
     @staticmethod
     def create(db: Session, data, current_user):
