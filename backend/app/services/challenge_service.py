@@ -130,12 +130,13 @@ class ChallengeService:
 
             ChallengeRepository.delete(db, challenge)
 
+            db.flush()
+
             DifficultyService.recalc_chapter_difficulty(db, chapter_id)
 
             db.commit()
 
             return {"detail": "Challenge deleted successfully"}
-
         except:
             db.rollback()
             raise

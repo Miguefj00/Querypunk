@@ -28,6 +28,7 @@ class DifficultyService:
         difficulties = ChallengeRepository.get_difficulties_by_chapter(db, chapter_id)
 
         if not difficulties:
+            ChapterRepository.update_difficulty(db, chapter_id, "")
             return
 
         numeric_values = [

@@ -64,4 +64,3 @@ class ChallengeRepository:
     @staticmethod
     def delete(db: Session, challenge: Challenge):
         db.delete(challenge)
-        db.flush()
