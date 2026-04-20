@@ -12,3 +12,15 @@ class AttemptRepository:
             Attempt.challenge_id == challenge_id,
             Attempt.is_correct == False
         ).count()
+
+    @staticmethod
+    def get_first_attempt(db: Session, user_id: int, challenge_id: int):
+        return (
+            db.query(Attempt)
+            .filter(
+                Attempt.user_id == user_id,
+                Attempt.challenge_id == challenge_id
+            )
+            .order_by(Attempt.created_at.asc())
+            .first()
+        )

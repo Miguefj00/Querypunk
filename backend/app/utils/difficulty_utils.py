@@ -10,7 +10,29 @@ DIFFICULTY_TO_VALUE = {
     "EXPERT": 5,
 }
 
+DIFFICULTY_SCORE = {
+    "VERY_EASY": 50,
+    "EASY": 100,
+    "MEDIUM": 200,
+    "HARD": 350,
+    "EXPERT": 500,
+}
+
 VALUE_TO_DIFFICULTY = {v: k for k, v in DIFFICULTY_TO_VALUE.items()}
+
+
+def get_time_factor(seconds: float) -> float:
+    if seconds < 60:
+        return 1.3
+    if seconds < 180:
+        return 1.15
+    if seconds < 300:
+        return 1.0
+    if seconds < 600:
+        return 0.9
+    if seconds < 1200:
+        return 0.75
+    return 0.6
 
 
 def evaluate_sql_difficulty(sql: str, rules: ValidationRules) -> str:

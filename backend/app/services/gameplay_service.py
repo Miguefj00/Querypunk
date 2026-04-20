@@ -1,4 +1,6 @@
 import time
+from datetime import datetime
+
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError, DBAPIError
 
@@ -7,6 +9,8 @@ from app.models.attempt import Attempt
 from app.database.repositories.challenge_repository import ChallengeRepository
 from app.database.game_connection import run_query
 from app.services.hint_service import HintService
+from app.database.repositories.leaderboard_repository import LeaderboardRepository
+from app.utils.difficulty_utils import DIFFICULTY_SCORE, get_time_factor
 from app.utils.sql_validator import compare_results, validate_query
 
 
@@ -52,12 +56,25 @@ class GameplayService:
 
         is_correct = compare_results(student_rows, solution_rows)
 
+        resolution_time = None
+
+        if is_correct:
+            first_attempt = AttemptRepository.get_first_attempt(
+                db, user_id, challenge_id
+            )
+
+            if first_attempt:
+                resolution_time = (
+                        datetime.utcnow() - first_attempt.created_at
+                ).total_seconds()
+
         attempt = Attempt(
             user_id=user_id,
             challenge_id=challenge_id,
             submitted_query=query,
             is_correct=is_correct,
             execution_time=execution_time,
+            resolution_time=resolution_time,
             rows_returned=len(student_rows)
         )
 
@@ -67,15 +84,20 @@ class GameplayService:
         db.commit()
 
         if is_correct:
+
             failed_attempts = AttemptRepository.count_failed_attempts(
                 db,
                 user_id,
                 challenge_id
             )
 
-            score = max(100 - (failed_attempts * 10), 10)
+            base_points = DIFFICULTY_SCORE[challenge.difficulty]
 
-            from app.database.repositories.leaderboard_repository import LeaderboardRepository
+            performance_factor = max(1 - (failed_attempts * 0.1), 0.1)
+
+            time_factor = get_time_factor(resolution_time)
+
+            score = int(base_points * performance_factor * time_factor)
 
             entry = LeaderboardRepository.upsert_score(
                 db,

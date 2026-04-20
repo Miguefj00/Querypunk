@@ -14,5 +14,6 @@ class Attempt(Base):
     submitted_query: Mapped[str] = mapped_column(Text)
     is_correct: Mapped[bool] = mapped_column(Boolean)
     execution_time: Mapped[float] = mapped_column(Float)
+    resolution_time: Mapped[float | None] = mapped_column(Float, nullable=True)
     rows_returned: Mapped[int] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
