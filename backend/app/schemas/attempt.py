@@ -15,3 +15,5 @@ class AttemptResponse(BaseModel):
     rows: List[List[Any]]
     hints: Optional[List[str]] = None
     score: Optional[int] = None
+    run_score: int | None = None
+    best_score: int | None = None

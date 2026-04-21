@@ -4,6 +4,7 @@ from datetime import datetime
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError, DBAPIError
 
+from app.database.repositories import challenge_run_repository
 from app.database.repositories.attempt_repository import AttemptRepository
 from app.models.attempt import Attempt
 from app.database.repositories.challenge_repository import ChallengeRepository
@@ -27,6 +28,11 @@ class GameplayService:
             )
 
         validate_query(query, challenge)
+
+        challenge_run = challenge_run_repository.get_active_run(db, user_id, challenge_id)
+
+        if not challenge_run:
+            challenge_run = challenge_run_repository.create_run(db, user_id, challenge_id)
 
         start = time.time()
 
@@ -57,18 +63,16 @@ class GameplayService:
         is_correct = compare_results(student_rows, solution_rows)
 
         resolution_time = None
+        run_score = None
+        best_score = None
 
         if is_correct:
-            first_attempt = AttemptRepository.get_first_attempt(
-                db, user_id, challenge_id
-            )
-
-            if first_attempt:
-                resolution_time = (
-                        datetime.utcnow() - first_attempt.created_at
-                ).total_seconds()
+            resolution_time = (
+                    datetime.utcnow() - challenge_run.started_at
+            ).total_seconds()
 
         attempt = Attempt(
+            challenge_run_id=challenge_run.id,
             user_id=user_id,
             challenge_id=challenge_id,
             submitted_query=query,
@@ -78,18 +82,12 @@ class GameplayService:
             rows_returned=len(student_rows)
         )
 
-        score = None
-
         db.add(attempt)
         db.commit()
 
         if is_correct:
 
-            failed_attempts = AttemptRepository.count_failed_attempts(
-                db,
-                user_id,
-                challenge_id
-            )
+            failed_attempts = AttemptRepository.count_failed_attempts_in_run(db, challenge_run.id)
 
             base_points = DIFFICULTY_SCORE[challenge.difficulty]
 
@@ -97,24 +95,24 @@ class GameplayService:
 
             time_factor = get_time_factor(resolution_time)
 
-            score = int(base_points * performance_factor * time_factor)
+            run_score = int(base_points * performance_factor * time_factor)
 
             entry = LeaderboardRepository.upsert_score(
                 db,
                 user_id=user_id,
                 challenge_id=challenge_id,
-                score=score
+                score=run_score
             )
 
-            score = entry.score
+            best_score = entry.score
+            challenge_run_repository.complete_run(db, challenge_run.id)
 
         hints = []
 
         if not is_correct:
-            failed_attempts = AttemptRepository.count_failed_attempts(
+            failed_attempts = AttemptRepository.count_failed_attempts_in_run(
                 db,
-                user_id,
-                challenge_id
+                challenge_run.id
             )
 
             hints = HintService.get_unlocked_hints(
@@ -130,8 +128,9 @@ class GameplayService:
             "rows": [list(row) for row in student_rows],
         }
 
-        if score is not None:
-            response["score"] = score
+        if run_score is not None:
+            response["run_score"] = run_score
+            response["best_score"] = best_score
 
         if hints:
             response["hints"] = [h.content for h in hints]
