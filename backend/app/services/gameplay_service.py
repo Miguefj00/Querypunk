@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError, DBAPIError
 
-from app.database.repositories import challenge_run_repository
+from app.database.repositories.challenge_run_repository import ChallengeRunRepository
 from app.database.repositories.attempt_repository import AttemptRepository
 from app.models.attempt import Attempt
 from app.database.repositories.challenge_repository import ChallengeRepository
@@ -29,10 +29,10 @@ class GameplayService:
 
         validate_query(query, challenge)
 
-        challenge_run = challenge_run_repository.get_active_run(db, user_id, challenge_id)
+        challenge_run = ChallengeRunRepository.get_active_run(db, user_id, challenge_id)
 
         if not challenge_run:
-            challenge_run = challenge_run_repository.create_run(db, user_id, challenge_id)
+            challenge_run = ChallengeRunRepository.create_run(db, user_id, challenge_id)
 
         start = time.time()
 
@@ -105,7 +105,7 @@ class GameplayService:
             )
 
             best_score = entry.score
-            challenge_run_repository.complete_run(db, challenge_run.id)
+            ChallengeRunRepository.complete_run(db, challenge_run.id)
 
         hints = []
 

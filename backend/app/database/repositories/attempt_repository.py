@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from sqlalchemy.orm import Session
 from app.models.attempt import Attempt
 
@@ -23,3 +25,14 @@ class AttemptRepository:
             .order_by(Attempt.created_at.asc())
             .first()
         )
+
+    @staticmethod
+    def delete_old_attempts(db: Session, days: int = 180):
+        limit_date = datetime.utcnow() - timedelta(days=days)
+
+        deleted = db.query(Attempt).filter(
+            Attempt.created_at < limit_date
+        ).delete(synchronize_session=False)
+
+        db.commit()
+        print(f"{deleted} old attempts deleted")
