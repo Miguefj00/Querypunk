@@ -8,6 +8,18 @@ from app.database.connection import Base, engine
 app = FastAPI(
     title="Querypunk API",
     description="Backend del videojuego serio Querypunk",
+    openapi_tags=[
+        {"name": "Auth", "description": "Responsible for authentication and session management"},
+        {"name": "Users", "description": "CRUD operations for users and password management"},
+        {"name": "Groups", "description": "CRUD operations for groups and students groups/classes management"},
+        {"name": "Chapters", "description": "CRUD operations for chapters"},
+        {"name": "Challenges", "description": "CRUD operations for challenges"},
+        {"name": "Hints", "description": "CRUD operations for hints"},
+        {"name": "Gameplay", "description": "Entry point for the SQL gameplay engine"},
+        {"name": "Leaderboard", "description": "Game ranking endpoints"},
+        {"name": "Analytics", "description": "Responsible for exposing learning analytics"},
+        {"name": "Challenges_generator", "description": "Automatic challenge generation and AI narrative endpoint"},
+    ],
     version="0.1.0"
 )
 

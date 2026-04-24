@@ -8,6 +8,7 @@ from app.services.leaderboard_service import LeaderboardService
 from app.schemas.leaderboard import LeaderboardEntry
 from app.utils.user_utils import get_current_user_from_token
 
+# Game ranking endpoints
 router = APIRouter(prefix="/leaderboard", tags=["Leaderboard"])
 
 
@@ -17,6 +18,7 @@ def get_challenge_leaderboard(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token)
 ):
+    # Ranking per challenge
     return LeaderboardService.get_challenge_leaderboard(db, challenge_id)
 
 
@@ -26,6 +28,7 @@ def get_chapter_leaderboard(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token)
 ):
+    # Ranking per chapter
     return LeaderboardService.get_chapter_leaderboard(db, chapter_id)
 
 
@@ -34,4 +37,5 @@ def get_global_leaderboard(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token)
 ):
+    # Global game ranking
     return LeaderboardService.get_global_leaderboard(db)

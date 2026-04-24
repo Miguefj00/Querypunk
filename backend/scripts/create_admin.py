@@ -38,7 +38,7 @@ def create_admin():
             email=email,
             password_hash=hash_password(password),
             role_id=ROLE_ADMIN,
-            created_at=datetime.utcnow().isoformat(),
+            created_at=datetime.utcnow(),
             last_login=None,
         )
 

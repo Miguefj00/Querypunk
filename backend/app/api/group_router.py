@@ -11,7 +11,27 @@ from app.utils.role_utils import require_role
 from app.utils.role_utils import ROLE_ADMIN, ROLE_TEACHER
 from app.models.user import User
 
+# CRUD operations for groups and students groups/classes management
 router = APIRouter(prefix="/groups", tags=["Groups"])
+
+
+@router.get("", response_model=List[GroupListResponse])
+def get_all_groups(
+        db: Session = Depends(get_db),
+        current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
+):
+    # List all groups (ADMIN/TEACHER only)
+    return GroupService.get_all_groups(db)
+
+
+@router.get("/{group_id}/users", response_model=List[UserInGroupResponse])
+def get_group_users(
+        group_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
+):
+    # List users belonging to a group (ADMIN/TEACHER only)
+    return GroupService.get_group_users(db, group_id)
 
 
 @router.post("", response_model=GroupResponse)
@@ -21,6 +41,7 @@ def create_group(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
+    # Create group (ADMIN/TEACHER only)
     group = GroupService.create_group(
         db=db,
         name=name,
@@ -39,30 +60,13 @@ async def upload_students_to_group(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-
+    # Bulk import students via CSV (ADMIN/TEACHER only)
     return await GroupService.upload_students_to_group(
         db=db,
         group_id=group_id,
         file=file,
         background_tasks=background_tasks
     )
-
-
-@router.get("", response_model=List[GroupListResponse])
-def get_all_groups(
-        db: Session = Depends(get_db),
-        current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
-):
-    return GroupService.get_all_groups(db)
-
-
-@router.get("/{group_id}/users", response_model=List[UserInGroupResponse])
-def get_group_users(
-        group_id: int,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
-):
-    return GroupService.get_group_users(db, group_id)
 
 
 @router.put("/{group_id}")
@@ -73,6 +77,7 @@ def update_group(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
+    # Update group (ADMIN/TEACHER only)
     return GroupService.update_group(
         db=db,
         group_id=group_id,
@@ -88,6 +93,7 @@ def delete_group(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
+    # Delete group (ADMIN/TEACHER only)
     return GroupService.delete_group(
         db=db,
         group_id=group_id,

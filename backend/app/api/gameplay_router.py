@@ -6,6 +6,7 @@ from app.utils.user_utils import get_current_user_from_token
 from app.schemas.attempt import AttemptCreate, AttemptResponse
 from app.services.gameplay_service import GameplayService
 
+# Entry point for the SQL game engine
 router = APIRouter(prefix="/gameplay", tags=["Gameplay"])
 
 
@@ -17,6 +18,14 @@ def submit_query(
         db: Session = Depends(get_db),
         current_user = Depends(get_current_user_from_token)
 ):
+    """
+    Core gameplay endpoint:
+    - Executes user SQL query
+    - Compares with expected solution
+    - Stores attempt
+    - Calculates score
+    - Updates leaderboard
+    """
     return GameplayService.submit_query(
         db,
         current_user.id,
