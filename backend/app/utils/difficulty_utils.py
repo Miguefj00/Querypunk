@@ -103,3 +103,7 @@ def evaluate_sql_difficulty(sql: str, rules: ValidationRules) -> str:
     score = max(1, min(score, 5))
     return VALUE_TO_DIFFICULTY[score]
 
+
+def get_ordered_difficulties() -> list[str]:
+    return sorted(DIFFICULTY_TO_VALUE, key=DIFFICULTY_TO_VALUE.get)
+
