@@ -5,6 +5,7 @@ from app.database.connection import Base
 
 
 class UserGroup(Base):
+    """Represents association table between user and group"""
     __tablename__ = "UserGroup"
 
     user_id: Mapped[int] = mapped_column(

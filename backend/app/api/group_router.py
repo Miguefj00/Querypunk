@@ -20,7 +20,7 @@ def get_all_groups(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # List all groups (ADMIN/TEACHER only)
+    """List all groups (ADMIN/TEACHER only)"""
     return GroupService.get_all_groups(db)
 
 
@@ -30,7 +30,7 @@ def get_group_users(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # List users belonging to a group (ADMIN/TEACHER only)
+    """List users belonging to a group (ADMIN/TEACHER only)"""
     return GroupService.get_group_users(db, group_id)
 
 
@@ -41,7 +41,7 @@ def create_group(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # Create group (ADMIN/TEACHER only)
+    """Create group (ADMIN/TEACHER only)"""
     group = GroupService.create_group(
         db=db,
         name=name,
@@ -60,7 +60,7 @@ async def upload_students_to_group(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # Bulk import students via CSV (ADMIN/TEACHER only)
+    """Bulk import students via CSV (ADMIN/TEACHER only)"""
     return await GroupService.upload_students_to_group(
         db=db,
         group_id=group_id,
@@ -77,7 +77,7 @@ def update_group(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # Update group (ADMIN/TEACHER only)
+    """Update group (ADMIN/TEACHER only)"""
     return GroupService.update_group(
         db=db,
         group_id=group_id,
@@ -93,7 +93,7 @@ def delete_group(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # Delete group (ADMIN/TEACHER only)
+    """Delete group (ADMIN/TEACHER only)"""
     return GroupService.delete_group(
         db=db,
         group_id=group_id,

@@ -8,7 +8,7 @@ from app.utils.role_utils import ROLE_TEACHER, ROLE_STUDENT, ROLE_ADMIN
 from app.database.repositories.user_repository import UserRepository
 from app.models.user import User
 from app.schemas.user import UserCreate, ChangePasswordRequest, UserUpdate
-from app.security.auth import verify_password
+from app.security.password import verify_password
 from app.security.password import hash_password
 from app.utils.user_utils import generate_username_from_name
 

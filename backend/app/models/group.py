@@ -7,6 +7,7 @@ from app.database.connection import Base
 
 
 class Group(Base):
+    """Represents a students group/class"""
     __tablename__ = "Group"
 
     id: Mapped[int] = mapped_column(primary_key=True)

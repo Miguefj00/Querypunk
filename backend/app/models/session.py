@@ -5,6 +5,7 @@ from app.database.connection import Base
 
 
 class Session(Base):
+    """Represents session registered in system when a user logs in"""
     __tablename__ = "Session"
 
     id: Mapped[int] = mapped_column(primary_key=True)

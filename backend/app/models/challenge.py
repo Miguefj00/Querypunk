@@ -6,6 +6,7 @@ from app.database.enums import DifficultyEnum
 
 
 class Challenge(Base):
+    """Represents SQL game challenges"""
     __tablename__ = "Challenge"
 
     id: Mapped[int] = mapped_column(primary_key=True)

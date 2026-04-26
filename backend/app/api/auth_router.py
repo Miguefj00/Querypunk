@@ -17,8 +17,7 @@ def login(
         form_data: OAuth2PasswordRequestForm = Depends(),
         db: Session = Depends(get_db),
 ):
-
-    # OAuth2 login → validates credentials and creates DB session
+    """OAuth2 login → validates credentials and creates DB session"""
     return AuthService.login(
         db=db,
         username=form_data.username,
@@ -32,8 +31,7 @@ def logout(
         db: Session = Depends(get_db),
         user: User = Depends(get_current_user_from_token),
 ):
-
-    # Closes the active session of the authenticated user
+    """Closes the active session of the authenticated user"""
     return AuthService.logout(
         db=db,
         user_id=user.id

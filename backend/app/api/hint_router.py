@@ -22,7 +22,7 @@ def get_hints(
         db: Session = Depends(get_db),
         current_user = Depends(get_current_user_from_token)
 ):
-    # Get all hints for a challenge
+    """Get all hints for a challenge"""
     return HintService.get_by_challenge(db, chapter_id, challenge_id, current_user)
 
 
@@ -34,7 +34,7 @@ def get_hint(
         db: Session = Depends(get_db),
         current_user = Depends(get_current_user_from_token)
 ):
-    # Get a specific hint
+    """Get a specific hint"""
     return HintService.get_by_id(db, chapter_id, challenge_id, hint_id, current_user)
 
 
@@ -46,7 +46,7 @@ def create_hint(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # Create hint (ADMIN/TEACHER only)
+    """Create hint (ADMIN/TEACHER only)"""
     return HintService.create(db, chapter_id, challenge_id, data, current_user)
 
 
@@ -59,7 +59,7 @@ def update_hint(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # Update hint (ADMIN/TEACHER only)
+    """Update hint (ADMIN/TEACHER only)"""
     return HintService.update(db, chapter_id, challenge_id, hint_id, data, current_user)
 
 
@@ -71,5 +71,5 @@ def delete_hint(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # Delete hint (ADMIN/TEACHER only)
+    """Delete hint (ADMIN/TEACHER only)"""
     return HintService.delete(db, chapter_id, challenge_id, hint_id, current_user)

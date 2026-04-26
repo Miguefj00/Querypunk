@@ -15,7 +15,7 @@ def get_overview(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # Returns global platform analytics (ADMIN/TEACHER only)
+    """Returns global platform analytics (ADMIN/TEACHER only)"""
     return AnalyticsService.get_overview(db)
 
 
@@ -24,7 +24,7 @@ def get_challenges_analytics(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # Returns analytics aggregated per challenge (ADMIN/TEACHER only)
+    """Returns analytics aggregated per challenge (ADMIN/TEACHER only)"""
     return AnalyticsService.get_challenges_analytics(db)
 
 
@@ -34,6 +34,6 @@ def get_user_analytics(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    # Returns analytics dashboard for a specific user (ADMIN/TEACHER only)
+    """Returns analytics dashboard for a specific user (ADMIN/TEACHER only)"""
     return AnalyticsService.get_user_dashboard(db, user_id)
 

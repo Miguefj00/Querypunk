@@ -5,6 +5,7 @@ from app.database.enums import DifficultyEnum
 
 
 class Chapter(Base):
+    """Represents an entire chapter that contains the game challenges"""
     __tablename__ = "Chapter"
 
     id: Mapped[int] = mapped_column(primary_key=True)

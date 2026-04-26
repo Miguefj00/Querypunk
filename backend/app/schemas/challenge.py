@@ -6,6 +6,7 @@ from app.database.enums import DifficultyEnum
 
 
 class ChallengePublic(BaseModel):
+    """Public challenge data"""
     id: int
     chapter_id: int
     title: str
@@ -17,11 +18,13 @@ class ChallengePublic(BaseModel):
 
 
 class ChallengeWithSolution(ChallengePublic):
+    """Extended challenge data including solution for teachers/admins"""
     solution: str
     generated_by_system: int
 
 
 class ValidationRules(BaseModel):
+    """Rules used to validate or enforce SQL constraints in a challenge"""
     must_use_avg: bool = False
     must_use_subquery: bool = False
     forbid_literals: bool = False
@@ -32,6 +35,7 @@ class ValidationRules(BaseModel):
 
 
 class ChallengeCreate(BaseModel):
+    """Payload to create a new challenge."""
     title: str
     description: str
     solution: str
@@ -39,10 +43,12 @@ class ChallengeCreate(BaseModel):
 
 
 class ChallengeCreateWithExpectedQuery(ChallengeCreate):
+    """Challenge creation including expected query result snapshot"""
     expected_result: str
 
 
 class ChallengeUpdate(BaseModel):
+    """Payload to update a challenge."""
     title: str | None = None
     description: str | None = None
     solution: str | None = None
@@ -50,6 +56,7 @@ class ChallengeUpdate(BaseModel):
 
 
 class ChallengeUpdateWithExpectedQuery(ChallengeUpdate):
+    """Challenge update including expected result snapshot."""
     expected_result: str
 
 
