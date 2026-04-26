@@ -8,6 +8,7 @@ class AttemptRepository:
 
     @staticmethod
     def count_failed_attempts_in_run(db: Session, run_id: int):
+        # Counts incorrect submissions inside a challenge run
         return (
             db.query(Attempt)
             .filter(
@@ -18,16 +19,8 @@ class AttemptRepository:
         )
 
     @staticmethod
-    def get_first_attempt_in_run(db: Session, run_id: int):
-        return (
-            db.query(Attempt)
-            .filter(Attempt.challenge_run_id == run_id)
-            .order_by(Attempt.created_at.asc())
-            .first()
-        )
-
-    @staticmethod
-    def delete_old_attempts(db: Session, days: int = 180):
+    def delete_old_attempts(db: Session, days: int):
+        # Removes historical attempts to keep DB size under control
         limit_date = datetime.utcnow() - timedelta(days=days)
 
         deleted = db.query(Attempt).filter(

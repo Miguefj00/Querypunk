@@ -5,6 +5,7 @@ class LeaderboardRepository:
 
     @staticmethod
     def upsert_score(db, user_id, challenge_id, score):
+        # Updates score if new score is higher
         entry = db.query(Leaderboard).filter_by(
             user_id=user_id,
             challenge_id=challenge_id

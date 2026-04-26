@@ -2,7 +2,6 @@ from fastapi import HTTPException
 import json
 
 from app.services.challenge_generator_service.game_db_executor import run_solution_and_get_result
-from app.services.difficulty_service import DifficultyService
 from app.utils.role_utils import ROLE_TEACHER, ROLE_STUDENT
 from app.database.repositories.challenge_repository import ChallengeRepository
 from app.database.repositories.chapter_repository import ChapterRepository
@@ -78,17 +77,16 @@ class ChallengeService:
             if not challenge.validation_rules:
                 challenge.validation_rules = DEFAULT_RULES
 
-            DifficultyService.recalc_challenge_difficulty(db, challenge)
+            ChallengeRepository.recalc_challenge_difficulty(db, challenge)
 
             db.add(challenge)
             db.commit()
             db.refresh(challenge)
 
-            DifficultyService.recalc_chapter_difficulty(db, chapter_id)
+            ChapterRepository.recalc_chapter_difficulty(db, chapter_id)
             db.commit()
 
             return challenge
-
         except:
             db.rollback()
             raise
@@ -111,13 +109,13 @@ class ChallengeService:
 
         challenge.expected_result = json.dumps(expected)
 
-        DifficultyService.recalc_challenge_difficulty(db, challenge)
+        ChallengeRepository.recalc_challenge_difficulty(db, challenge)
 
         db.add(challenge)
         db.commit()
         db.refresh(challenge)
 
-        DifficultyService.recalc_chapter_difficulty(db, chapter_id)
+        ChapterRepository.recalc_chapter_difficulty(db, chapter_id)
         db.commit()
 
         return challenge
@@ -132,7 +130,7 @@ class ChallengeService:
 
             db.flush()
 
-            DifficultyService.recalc_chapter_difficulty(db, chapter_id)
+            ChapterRepository.recalc_chapter_difficulty(db, chapter_id)
 
             db.commit()
 

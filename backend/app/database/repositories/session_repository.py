@@ -7,6 +7,7 @@ class SessionRepository:
 
     @staticmethod
     def create(db: Session, user_id: int, ip: str) -> UserSession:
+        # Creates a new login session
         session = UserSession(
             user_id=user_id,
             login_time=datetime.utcnow(),
@@ -20,10 +21,12 @@ class SessionRepository:
 
     @staticmethod
     def get_by_id(db: Session, session_id: int) -> UserSession | None:
+        # Retrieves session by id
         return db.get(UserSession, session_id)
 
     @staticmethod
     def close_active_sessions_by_user(db: Session, user_id: int) -> None:
+        # Closes any open sessions when user logs out
         sessions = (
             db.query(UserSession)
             .filter(
@@ -39,8 +42,8 @@ class SessionRepository:
         db.commit()
 
     @staticmethod
-    def delete_old_sessions(db: Session, days: int = 5):
-
+    def delete_old_sessions(db: Session, days: int):
+        # Cleanup of historical login sessions for DB size control
         limit_date = datetime.utcnow() - timedelta(days=days)
 
         deleted = db.query(UserSession).filter(
