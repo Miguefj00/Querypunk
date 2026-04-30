@@ -136,3 +136,21 @@ class GameplayService:
             response["hints"] = [h.content for h in hints]
 
         return response
+
+    @staticmethod
+    def reset_run(db, user_id, challenge_id):
+        challenge = ChallengeRepository.get_by_id(db, challenge_id)
+
+        if not challenge:
+            raise HTTPException(status_code=404, detail="Challenge not found")
+
+        ChallengeRunRepository.close_active_run(db, user_id, challenge_id)
+
+        new_run = ChallengeRunRepository.create_run(
+            db, user_id, challenge_id
+        )
+
+        return {
+            "message": "Run reset successfully",
+            "new_run_id": new_run.id
+        }

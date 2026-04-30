@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database.current_session import get_db
+from app.schemas.gameplay import ResetRunRequest
 from app.utils.user_utils import get_current_user_from_token
 from app.schemas.attempt import AttemptCreate, AttemptResponse
 from app.services.gameplay_service import GameplayService
@@ -34,3 +35,20 @@ def submit_query(
     )
 
 
+@router.post("/reset-run")
+def reset_run(
+        data: ResetRunRequest,
+        db: Session = Depends(get_db),
+        current_user = Depends(get_current_user_from_token)
+):
+    """
+    Resets current challenge run:
+    - Closes active run WITHOUT scoring
+    - Starts a new run
+    - Keeps full attempt history
+    """
+    return GameplayService.reset_run(
+        db,
+        current_user.id,
+        data.challenge_id
+    )

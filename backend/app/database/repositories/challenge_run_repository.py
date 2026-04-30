@@ -31,6 +31,24 @@ class ChallengeRunRepository:
         return run
 
     @staticmethod
+    def close_active_run(db: Session, user_id: int, challenge_id: int):
+        run = (
+            db.query(ChallengeRun)
+            .filter(
+                ChallengeRun.user_id == user_id,
+                ChallengeRun.challenge_id == challenge_id,
+                ChallengeRun.finished_at.is_(None)
+            )
+            .first()
+        )
+
+        if run:
+            run.finished_at = datetime.utcnow()
+            db.commit()
+
+        return run
+
+    @staticmethod
     def complete_run(db: Session, run_id: int):
         # Marks a run as finished
         run = db.query(ChallengeRun).filter(ChallengeRun.id == run_id).first()
