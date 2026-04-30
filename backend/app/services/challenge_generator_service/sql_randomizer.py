@@ -66,9 +66,33 @@ def pick_column(table, numeric_only=False, text_only=False, allow_ids=False):
         valid_cols.append(col)
 
     if not valid_cols:
-        valid_cols = list(columns.keys())
+        return None
 
-    return random.choice(valid_cols)
+    return random.choice(valid_cols) if valid_cols else None
+
+
+def pick_numeric_column_safe(table, tries=15):
+    for _ in range(tries):
+        col = pick_column(table, numeric_only=True, allow_ids=False)
+        if col:
+            return col
+    return None
+
+
+def pick_text_column_safe(table, tries=15):
+    for _ in range(tries):
+        col = pick_column(table, text_only=True, allow_ids=False)
+        if col:
+            return col
+    return None
+
+
+def pick_any_column_safe(table, tries=15):
+    for _ in range(tries):
+        col = pick_column(table, allow_ids=False)
+        if col:
+            return col
+    return None
 
 
 def pick_join():

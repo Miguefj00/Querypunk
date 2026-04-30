@@ -1,6 +1,8 @@
+import re
 import sqlite3
 
 from app.services.challenge_generator_service.game_db_executor import SYSTEM_SQLITE_PATH
+from app.services.challenge_generator_service.schema_structured_service import get_structured_schema
 
 
 def is_duplicate_query(sql: str):
@@ -12,20 +14,6 @@ def is_duplicate_query(sql: str):
     conn.close()
 
     return count > 0
-
-
-def validate_language(challenge):
-    title = challenge["title"]
-    desc = challenge["description"]
-
-    if any(c in title for c in "ñáéíóú"):
-        return False
-
-    spanish_markers = [" el ", " la ", " los ", " las ", " obtiene ", " lista "]
-    if not any(w in desc.lower() for w in spanish_markers):
-        return False
-
-    return True
 
 
 def uses_forbidden_columns(sql: str):
@@ -41,3 +29,30 @@ def uses_forbidden_columns(sql: str):
     ]
 
     return any(pattern in sql_lower for pattern in forbidden_patterns)
+
+
+def title_not_immersive(title: str):
+    forbidden = ["SQL", "Database", "Query", "Table", "Column"]
+    return any(word.lower() in title.lower() for word in forbidden)
+
+
+def has_type_mismatch(sql: str) -> bool:
+    schema = get_structured_schema()
+    sql_lower = sql.lower()
+
+    pattern = r"(\w+)\s*(>|<|>=|<=)\s*(\d+)"
+    matches = re.findall(pattern, sql_lower)
+
+    for column, op, number in matches:
+        for table in schema:
+            cols = schema[table]["columns"]
+            if column in [c.lower() for c in cols]:
+                col_type = cols[next(c for c in cols if c.lower()==column)]
+
+                numeric_types = ["INT","INTEGER","REAL","NUMERIC","FLOAT","DOUBLE"]
+                is_numeric = any(t in col_type.upper() for t in numeric_types)
+
+                if not is_numeric:
+                    return True  # mismatch real
+
+    return False

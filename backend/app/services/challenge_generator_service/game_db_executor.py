@@ -74,3 +74,52 @@ def run_solution_and_get_result(_, sql: str):
 
     except Exception:
         return None
+
+
+def get_column_numeric_range(table: str, column: str):
+    """
+    Returns real MIN/MAX values from the game database.
+    This prevents generating unrealistic conditions like Budget > 3.
+    """
+    conn = sqlite3.connect(GAME_SQLITE_PATH)
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(f"SELECT MIN({column}), MAX({column}) FROM {table}")
+        result = cursor.fetchone()
+        conn.close()
+
+        if not result or result[0] is None or result[1] is None:
+            return None
+
+        return result
+    except:
+        conn.close()
+        return None
+
+
+def get_random_existing_value(table: str, column: str):
+    """
+    Returns a random existing value from the DB for realistic WHERE clauses.
+    """
+    conn = sqlite3.connect(GAME_SQLITE_PATH)
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(f"""
+            SELECT {column}
+            FROM {table}
+            WHERE {column} IS NOT NULL
+            ORDER BY RANDOM()
+            LIMIT 1
+        """)
+        result = cursor.fetchone()
+        conn.close()
+
+        if not result:
+            return None
+
+        return result[0]
+    except:
+        conn.close()
+        return None

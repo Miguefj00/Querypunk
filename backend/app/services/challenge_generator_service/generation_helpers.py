@@ -1,24 +1,26 @@
 import random
 
-from app.services.challenge_generator_service.sql_randomizer import pick_column
+from app.services.challenge_generator_service.sql_randomizer import pick_any_column_safe
 
 
-def random_numeric_condition(table, alias=""):
-    col = pick_column(table, numeric_only=True, allow_ids=False)
-    number = random.randint(1, 10)
-    op = random.choice([">", "<", ">=", "<="])
+def build_select_list(table: str, alias: str | None = None, allow_two_cols_prob: float = 0.3):
+    """
+    Devuelve una lista SELECT válida de 1 o 2 columnas reales.
+    - Nunca devuelve columnas duplicadas
+    - Siempre intenta usar columnas existentes
+    """
+
     prefix = f"{alias}." if alias else ""
-    return f"{prefix}{col} {op} {number}"
 
+    col1 = pick_any_column_safe(table)
+    if not col1:
+        return None
 
-def random_text_condition(table, alias=""):
-    col = pick_column(table, text_only=True, allow_ids=False)
-    letter = random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-    prefix = f"{alias}." if alias else ""
-    return f"{prefix}{col} LIKE '{letter}%'"
+    if random.random() > allow_two_cols_prob:
+        return f"{prefix}{col1}"
 
+    col2 = pick_any_column_safe(table)
+    if not col2 or col2 == col1:
+        return f"{prefix}{col1}"
 
-def random_where_clause(table, alias=""):
-    if random.random() < 0.5:
-        return random_numeric_condition(table, alias)
-    return random_text_condition(table, alias)
+    return f"{prefix}{col1}, {prefix}{col2}"

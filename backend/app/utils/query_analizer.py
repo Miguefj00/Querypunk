@@ -15,6 +15,13 @@ class QueryAnalyzer:
             )
 
     @staticmethod
+    def has_join(parsed):
+        return any(
+            isinstance(node, sqlglot.expressions.Join)
+            for node in parsed.walk()
+        )
+
+    @staticmethod
     def has_aggregate(parsed, func_name: str):
         func_name = func_name.lower()
 
