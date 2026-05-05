@@ -23,47 +23,41 @@ class AnalyticsService:
 
         total_runs = db.query(func.count(ChallengeRun.id)).scalar()
 
-        completed_runs = (
-            db.query(func.count(ChallengeRun.id))
-            .filter(ChallengeRun.finished_at.isnot(None))
-            .scalar()
-        )
+        finished_runs = db.query(func.count(ChallengeRun.id)).filter(
+            ChallengeRun.finished_at.isnot(None)
+        ).scalar()
 
-        completion_rate = (
-            (completed_runs / total_runs) * 100 if total_runs else 0
+        successful_runs = db.query(func.count(ChallengeRun.id)).filter(
+            ChallengeRun.is_successful.is_(True)
+        ).scalar()
+
+        cancelled_or_reset_runs = db.query(func.count(ChallengeRun.id)).filter(
+            ChallengeRun.is_successful.is_(False)
+        ).scalar()
+
+        run_success_rate = (
+            successful_runs / finished_runs * 100 if finished_runs else 0
         )
 
         total_attempts = db.query(func.count(Attempt.id)).scalar()
 
-        correct_attempts = (
-            db.query(func.count(Attempt.id))
+        avg_resolution_time = (
+            db.query(func.avg(Attempt.resolution_time))
             .filter(Attempt.is_correct.is_(True))
             .scalar()
         )
 
-        success_rate = (
-            (correct_attempts / total_attempts) * 100 if total_attempts else 0
-        )
-
-        avg_resolution_time = (
-            db.query(func.avg(Attempt.resolution_time))
-            .filter(Attempt.resolution_time.isnot(None))
-            .scalar()
-        )
-
         avg_attempts_per_run = (
-            total_attempts / completed_runs if completed_runs else 0
+            total_attempts / finished_runs if finished_runs else 0
         )
 
         return {
             "active_users_30d": active_users,
             "total_runs": total_runs,
-            "completed_runs": completed_runs,
-            "completion_rate": round(completion_rate, 2),
-
+            "successful_runs": successful_runs,
+            "cancelled_or_reset_runs": cancelled_or_reset_runs,
+            "run_success_rate": round(run_success_rate, 2),
             "total_attempts": total_attempts,
-            "success_rate": round(success_rate, 2),
-
             "avg_resolution_time_seconds": round(avg_resolution_time or 0, 2),
             "avg_attempts_per_run": round(avg_attempts_per_run, 2)
         }
@@ -71,70 +65,50 @@ class AnalyticsService:
     @staticmethod
     def get_challenges_analytics(db: Session):
         challenges = db.query(Challenge.id).all()
-
         results = []
 
         for (challenge_id,) in challenges:
 
-            total_runs = (
-                db.query(func.count(ChallengeRun.id))
-                .filter(ChallengeRun.challenge_id == challenge_id)
-                .scalar()
+            finished_runs = db.query(func.count(ChallengeRun.id)).filter(
+                ChallengeRun.challenge_id == challenge_id,
+                ChallengeRun.finished_at.isnot(None)
+            ).scalar()
+
+            successful_runs = db.query(func.count(ChallengeRun.id)).filter(
+                ChallengeRun.challenge_id == challenge_id,
+                ChallengeRun.is_successful.is_(True)
+            ).scalar()
+
+            cancelled_or_reset_runs = db.query(func.count(ChallengeRun.id)).filter(
+                ChallengeRun.challenge_id == challenge_id,
+                ChallengeRun.is_successful.is_(False)
+            ).scalar()
+
+            run_success_rate = (
+                successful_runs / finished_runs * 100 if finished_runs else 0
             )
 
-            completed_runs = (
-                db.query(func.count(ChallengeRun.id))
-                .filter(
-                    ChallengeRun.challenge_id == challenge_id,
-                    ChallengeRun.finished_at.isnot(None)
-                )
-                .scalar()
-            )
+            total_attempts = db.query(func.count(Attempt.id)).filter(
+                Attempt.challenge_id == challenge_id
+            ).scalar()
 
-            completion_rate = (
-                (completed_runs / total_runs) * 100 if total_runs else 0
-            )
-
-            total_attempts = (
-                db.query(func.count(Attempt.id))
-                .filter(Attempt.challenge_id == challenge_id)
-                .scalar()
-            )
-
-            correct_attempts = (
-                db.query(func.count(Attempt.id))
-                .filter(
-                    Attempt.challenge_id == challenge_id,
-                    Attempt.is_correct.is_(True)
-                )
-                .scalar()
-            )
-
-            success_rate = (
-                (correct_attempts / total_attempts) * 100 if total_attempts else 0
-            )
-
-            avg_resolution_time = (
-                db.query(func.avg(Attempt.resolution_time))
-                .filter(
-                    Attempt.challenge_id == challenge_id,
-                    Attempt.resolution_time.isnot(None)
-                )
-                .scalar()
-            )
+            avg_resolution_time = db.query(func.avg(Attempt.resolution_time)).filter(
+                Attempt.challenge_id == challenge_id,
+                Attempt.is_correct.is_(True)
+            ).scalar()
 
             avg_attempts_per_run = (
-                total_attempts / completed_runs if completed_runs else 0
+                total_attempts / finished_runs if finished_runs else 0
             )
 
             results.append({
                 "challenge_id": challenge_id,
-                "total_runs": total_runs,
-                "completed_runs": completed_runs,
-                "completion_rate": round(completion_rate, 2),
+                "total_runs": finished_runs,
+                "successful_runs": successful_runs,
+                "cancelled_or_reset_runs": cancelled_or_reset_runs,
+                "run_success_rate": round(run_success_rate, 2),
                 "avg_attempts_per_run": round(avg_attempts_per_run, 2),
                 "avg_resolution_time_seconds": round(avg_resolution_time or 0, 2),
-                "success_rate": round(success_rate, 2),
             })
 
         return results
@@ -152,78 +126,80 @@ class AnalyticsService:
         total_score, challenges_solved = db.query(
             func.coalesce(func.sum(Leaderboard.score), 0),
             func.count(Leaderboard.challenge_id)
-        ).filter(
-            Leaderboard.user_id == user_id
-        ).first()
-
-        total_runs = db.query(func.count(ChallengeRun.id)).filter(
-            ChallengeRun.user_id == user_id
-        ).scalar()
+        ).filter(Leaderboard.user_id == user_id).first()
 
         avg_score = db.query(func.avg(Leaderboard.score)).filter(
             Leaderboard.user_id == user_id
         ).scalar() or 0
 
-        avg_resolution_time = db.query(
-            func.avg(Attempt.resolution_time)
-        ).filter(
+        avg_resolution_time = db.query(func.avg(Attempt.resolution_time)).filter(
             Attempt.user_id == user_id,
-            Attempt.is_correct == True
+            Attempt.is_correct.is_(True)
         ).scalar() or 0
 
         return {
             "total_score": int(total_score),
             "challenges_solved": challenges_solved,
-            "total_runs": total_runs,
             "avg_score_per_challenge": round(avg_score, 2),
             "avg_resolution_time_sec": round(avg_resolution_time, 2)
         }
 
     @staticmethod
     def _get_user_behaviour(db, user_id: int):
-        total_attempts = db.query(func.count(Attempt.id)) \
-            .filter(Attempt.user_id == user_id).scalar()
-
-        correct_attempts = db.query(func.count(Attempt.id)) \
-            .filter(
-            Attempt.user_id == user_id,
-            Attempt.is_correct == True
+        finished_runs = db.query(func.count(ChallengeRun.id)).filter(
+            ChallengeRun.user_id == user_id,
+            ChallengeRun.finished_at.isnot(None)
         ).scalar()
 
-        total_runs = db.query(func.count(ChallengeRun.id)) \
-            .filter(ChallengeRun.user_id == user_id).scalar()
+        successful_runs = db.query(func.count(ChallengeRun.id)).filter(
+            ChallengeRun.user_id == user_id,
+            ChallengeRun.is_successful.is_(True)
+        ).scalar()
 
-        success_rate = correct_attempts / total_attempts if total_attempts else 0
-        avg_attempts_per_run = total_attempts / total_runs if total_runs else 0
+        cancelled_or_reset_runs = db.query(func.count(ChallengeRun.id)).filter(
+            ChallengeRun.user_id == user_id,
+            ChallengeRun.is_successful.is_(False)
+        ).scalar()
 
-        runs_with_attempt_count = db.query(
+        run_success_rate = (
+            successful_runs / finished_runs * 100 if finished_runs else 0
+        )
+
+        total_attempts = db.query(func.count(Attempt.id)).filter(
+            Attempt.user_id == user_id
+        ).scalar()
+
+        avg_attempts_per_run = (
+            total_attempts / finished_runs if finished_runs else 0
+        )
+
+        runs_attempts = db.query(
             Attempt.challenge_run_id,
             func.count(Attempt.id).label("attempts")
         ).filter(
             Attempt.user_id == user_id
-        ).group_by(
-            Attempt.challenge_run_id
-        ).subquery()
+        ).group_by(Attempt.challenge_run_id).subquery()
 
-        first_try_runs = db.query(func.count(ChallengeRun.id)) \
-            .join(
-            runs_with_attempt_count,
-            runs_with_attempt_count.c.challenge_run_id == ChallengeRun.id
-        ) \
-            .join(Attempt, Attempt.challenge_run_id == ChallengeRun.id) \
-            .filter(
+        first_try_success_runs = db.query(func.count(ChallengeRun.id)).join(
+            runs_attempts,
+            runs_attempts.c.challenge_run_id == ChallengeRun.id
+        ).filter(
             ChallengeRun.user_id == user_id,
-            runs_with_attempt_count.c.attempts == 1,
-            Attempt.is_correct == True
+            ChallengeRun.is_successful.is_(True),
+            runs_attempts.c.attempts == 1
         ).scalar()
 
-        first_try_rate = first_try_runs / total_runs if total_runs else 0
+        first_try_rate = (
+            first_try_success_runs / successful_runs * 100 if successful_runs else 0
+        )
 
         return {
-            "total_attempts": total_attempts,
-            "success_rate": round(success_rate, 3),
+            "total_runs": finished_runs,
+            "successful_runs": successful_runs,
+            "cancelled_or_reset_runs": cancelled_or_reset_runs,
+            "run_success_rate": round(run_success_rate, 2),
             "avg_attempts_per_run": round(avg_attempts_per_run, 2),
-            "first_try_success_rate": round(first_try_rate, 3)
+            "first_try_success_rate": round(first_try_rate, 2)
         }
 
     @staticmethod

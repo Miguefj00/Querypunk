@@ -7,4 +7,4 @@ class LeaderboardEntry(BaseModel):
     user_id: int
     username: str
     score: int
-    
+    runs_count: int

@@ -52,3 +52,22 @@ def reset_run(
         current_user.id,
         data.challenge_id
     )
+
+
+@router.post("/cancel-run")
+def cancel_run(
+        data: ResetRunRequest,
+        db: Session = Depends(get_db),
+        current_user = Depends(get_current_user_from_token)
+):
+    """
+    Cancels current challenge run:
+    - Closes active run
+    - Does NOT start a new run
+    - Used when leaving a challenge
+    """
+    return GameplayService.cancel_run(
+        db,
+        current_user.id,
+        data.challenge_id
+    )

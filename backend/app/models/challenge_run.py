@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import ForeignKey, DateTime
+from sqlalchemy import ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.connection import Base
 
@@ -20,3 +20,4 @@ class ChallengeRun(Base):
 
     started_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    is_successful: Mapped[bool | None] = mapped_column(Boolean, nullable=True)

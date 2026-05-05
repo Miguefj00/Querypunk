@@ -144,6 +144,14 @@ class GameplayService:
         if not challenge:
             raise HTTPException(status_code=404, detail="Challenge not found")
 
+        active_run = ChallengeRunRepository.get_active_run(db, user_id, challenge_id)
+
+        if not active_run:
+            raise HTTPException(
+                status_code=404,
+                detail="No active run to reset"
+        )
+
         ChallengeRunRepository.close_active_run(db, user_id, challenge_id)
 
         new_run = ChallengeRunRepository.create_run(
@@ -153,4 +161,27 @@ class GameplayService:
         return {
             "message": "Run reset successfully",
             "new_run_id": new_run.id
+        }
+
+    @staticmethod
+    def cancel_run(db, user_id, challenge_id):
+        """
+        Cancels the current run WITHOUT creating a new one.
+        Used when the player leaves the challenge.
+        """
+        challenge = ChallengeRepository.get_by_id(db, challenge_id)
+
+        if not challenge:
+            raise HTTPException(status_code=404, detail="Challenge not found")
+
+        run = ChallengeRunRepository.close_active_run(db, user_id, challenge_id)
+
+        if not run:
+            raise HTTPException(
+                status_code=404,
+                detail="No active run to cancel"
+            )
+
+        return {
+            "message": "Run cancelled successfully"
         }

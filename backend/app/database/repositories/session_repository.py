@@ -42,7 +42,7 @@ class SessionRepository:
         db.commit()
 
     @staticmethod
-    def delete_old_sessions(db: Session, days: int):
+    def delete_old_sessions(db: Session, days: int = 3):
         # Cleanup of historical login sessions for DB size control
         limit_date = datetime.utcnow() - timedelta(days=days)
 

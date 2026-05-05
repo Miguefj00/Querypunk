@@ -19,7 +19,7 @@ class AttemptRepository:
         )
 
     @staticmethod
-    def delete_old_attempts(db: Session, days: int):
+    def delete_old_attempts(db: Session, days: int = 3):
         # Removes historical attempts to keep DB size under control
         limit_date = datetime.utcnow() - timedelta(days=days)
 

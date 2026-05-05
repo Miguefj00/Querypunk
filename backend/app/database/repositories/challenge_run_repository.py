@@ -23,7 +23,8 @@ class ChallengeRunRepository:
         # Creates and starts a new challenge run
         run = ChallengeRun(
             user_id=user_id,
-            challenge_id=challenge_id
+            challenge_id=challenge_id,
+            is_successful=None
         )
         db.add(run)
         db.commit()
@@ -44,6 +45,7 @@ class ChallengeRunRepository:
 
         if run:
             run.finished_at = datetime.utcnow()
+            run.is_successful = False
             db.commit()
 
         return run
@@ -54,10 +56,11 @@ class ChallengeRunRepository:
         run = db.query(ChallengeRun).filter(ChallengeRun.id == run_id).first()
         if run:
             run.finished_at = datetime.utcnow()
+            run.is_successful = True
             db.commit()
 
     @staticmethod
-    def delete_old_runs(db: Session, days: int):
+    def delete_old_runs(db: Session, days: int = 3):
         # Cleanup old gameplay runs for DB size control
         limit_date = datetime.utcnow() - timedelta(days=days)
 

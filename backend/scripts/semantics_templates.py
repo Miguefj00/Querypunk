@@ -34,3 +34,4 @@ def generate_semantics_template():
 
 generate_semantics_template()
 
+
