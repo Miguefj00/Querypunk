@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
+
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func, distinct
 
-from app.models import Challenge, Leaderboard
+from app.models import Challenge, Leaderboard, User
 from app.models.attempt import Attempt
 from app.models.challenge_run import ChallengeRun
 from app.utils.difficulty_utils import get_ordered_difficulties
@@ -249,3 +251,59 @@ class AnalyticsService:
             "global_challenges": global_challenges,
             "played_challenges": played_challenges
         }
+
+    @staticmethod
+    def get_student_attempts_history(db: Session, user_id: int):
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        rows = (
+            db.query(
+                Challenge.id.label("challenge_id"),
+                Challenge.title.label("challenge_title"),
+                ChallengeRun.id.label("run_id"),
+                ChallengeRun.started_at,
+                Attempt.id.label("attempt_id"),
+                Attempt.submitted_query,
+                Attempt.is_correct
+            )
+            .join(ChallengeRun, ChallengeRun.challenge_id == Challenge.id)
+            .join(Attempt, Attempt.challenge_run_id == ChallengeRun.id)
+            .filter(ChallengeRun.user_id == user_id)
+            .order_by(Challenge.id, ChallengeRun.id, Attempt.id)
+            .all()
+        )
+
+        challenges_map = {}
+
+        for row in rows:
+            ch_id = row.challenge_id
+            run_id = row.run_id
+
+            if ch_id not in challenges_map:
+                challenges_map[ch_id] = {
+                    "challenge_id": ch_id,
+                    "challenge_title": row.challenge_title,
+                    "runs": {}
+                }
+
+            if run_id not in challenges_map[ch_id]["runs"]:
+                challenges_map[ch_id]["runs"][run_id] = {
+                    "run_id": run_id,
+                    "started_at": row.started_at,
+                    "attempts": []
+                }
+
+            challenges_map[ch_id]["runs"][run_id]["attempts"].append({
+                "attempt_id": row.attempt_id,
+                "query": row.submitted_query,
+                "is_correct": row.is_correct
+            })
+
+        response = []
+        for ch in challenges_map.values():
+            ch["runs"] = list(ch["runs"].values())
+            response.append(ch)
+
+        return response

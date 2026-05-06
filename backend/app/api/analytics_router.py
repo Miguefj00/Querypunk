@@ -37,3 +37,13 @@ def get_user_analytics(
     """Returns analytics dashboard for a specific user (ADMIN/TEACHER only)"""
     return AnalyticsService.get_user_dashboard(db, user_id)
 
+
+@router.get("/student/{user_id}/attempts")
+def get_student_attempts_history(
+        user_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
+):
+    """Complete track record of queries executed by a student in each challenge (ADMIN/TEACHER only)"""
+    return AnalyticsService.get_student_attempts_history(db, user_id)
+
