@@ -9,6 +9,15 @@ from app.database.repositories.user_repository import UserRepository
 from app.models.user_group import UserGroup
 from app.security.auth import decode_token
 
+"""
+Authentication helpers and user management utilities.
+
+Includes:
+- JWT user extraction
+- Username/password generation for bulk imports
+- Group assignment helpers
+"""
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
@@ -16,6 +25,17 @@ def get_current_user_from_token(
         token: str = Depends(oauth2_scheme),
         db: Session = Depends(get_db)
 ):
+    """
+    Extracts and validates the authenticated user from JWT token.
+
+    Checks:
+    - Token integrity
+    - Active session existence
+    - Session ownership
+
+    Returns the authenticated User object.
+    Raises HTTP 401 if validation fails.
+    """
     try:
         payload = decode_token(token)
         user_id = payload.get("user_id")
@@ -58,6 +78,12 @@ def get_current_user_from_token(
 
 
 def generate_password_from_identifier(identifier: str) -> str:
+    """
+    Generates a default password from an external identifier.
+
+    Extracts the last 4 digits of the identifier.
+    Used during bulk student import.
+    """
     if not identifier:
         raise HTTPException(
             status_code=400,
@@ -72,12 +98,22 @@ def generate_password_from_identifier(identifier: str) -> str:
 
 
 def generate_username_from_name(nombre: str, apellido: str) -> str:
+    """
+    Generates a normalized username from first and last name.
+
+    Removes spaces, accents and special characters.
+    """
     username = f"{nombre}_{apellido}".lower().replace(" ", "")
     username = unicodedata.normalize("NFKD", username).encode("ascii", "ignore").decode("ascii")
     return username
 
 
 def assign_user_to_group(db: Session, user_id: int, group_id: int):
+    """
+    Assigns a user to a group if not already assigned.
+
+    Returns True if relation was created, False if it already existed.
+    """
     existing = (
         db.query(UserGroup)
         .filter_by(user_id=user_id, group_id=group_id)

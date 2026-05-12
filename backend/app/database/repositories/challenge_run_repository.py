@@ -33,6 +33,7 @@ class ChallengeRunRepository:
 
     @staticmethod
     def close_active_run(db: Session, user_id: int, challenge_id: int):
+        # Closes an incomplete/active run
         run = (
             db.query(ChallengeRun)
             .filter(
@@ -52,7 +53,7 @@ class ChallengeRunRepository:
 
     @staticmethod
     def complete_run(db: Session, run_id: int):
-        # Marks a run as finished
+        # Marks a run as completed
         run = db.query(ChallengeRun).filter(ChallengeRun.id == run_id).first()
         if run:
             run.finished_at = datetime.utcnow()
@@ -60,7 +61,7 @@ class ChallengeRunRepository:
             db.commit()
 
     @staticmethod
-    def delete_old_runs(db: Session, days: int = 3):
+    def delete_old_runs(db: Session, days: int = 30):
         # Cleanup old gameplay runs for DB size control
         limit_date = datetime.utcnow() - timedelta(days=days)
 

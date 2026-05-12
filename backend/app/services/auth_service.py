@@ -12,7 +12,10 @@ class AuthService:
 
     @staticmethod
     def login(db: Session, username: str, password: str, ip: str):
-
+        """
+        Authenticates user, closes previous sessions,
+        creates a new session and returns an access JWT.
+        """
         user = UserRepository.get_by_username(db, username)
 
         if not user or not verify_password(password, user.password_hash):
@@ -48,7 +51,7 @@ class AuthService:
 
     @staticmethod
     def logout(db: Session, user_id: int):
-
+        """ Closes all active sessions of the user. """
         SessionRepository.close_active_sessions_by_user(db, user_id)
 
         return {"message": "Logout successful"}

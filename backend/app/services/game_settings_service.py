@@ -7,6 +7,7 @@ class GameSettingsService:
 
     @staticmethod
     def get_settings(db: Session):
+        """ Retrieves global game configuration. """
         settings = GameSettingsRepository.get_settings(db)
 
         if not settings:
@@ -16,6 +17,7 @@ class GameSettingsService:
 
     @staticmethod
     def update_settings(db: Session, payload):
+        """ Updates visibility of global, chapter and challenge leaderboards. """
         settings = GameSettingsRepository.update_settings(
             db,
             payload.show_global_leaderboard,

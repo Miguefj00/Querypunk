@@ -1,11 +1,10 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
-
 from app.database.connection import Base
 
 
 class UserGroup(Base):
-    """Represents association table between user and group"""
+    """ Represents association table between user and group. """
     __tablename__ = "UserGroup"
 
     user_id: Mapped[int] = mapped_column(

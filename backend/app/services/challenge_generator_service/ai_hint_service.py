@@ -7,6 +7,23 @@ from app.utils.query_analizer import QueryAnalyzer
 
 MODEL = "llama3"
 
+"""
+AI Hint Generator
+
+Generates 3 progressive hints that guide the student's reasoning
+WITHOUT revealing the SQL solution.
+
+Hints focus on:
+    - How to think about the data
+    - What type of operations are needed
+    - Increasing specificity
+
+Hints must NEVER mention:
+    - Table names
+    - Column names
+    - SQL keywords
+"""
+
 
 def generate_hints(sql_query: str, description: str):
     """

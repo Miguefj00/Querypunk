@@ -2,6 +2,8 @@ import re
 
 from app.schemas.challenge import ValidationRules
 
+""" Utilities for evaluating SQL difficulty and computing scoring factors. """
+
 DIFFICULTY_TO_VALUE = {
     "VERY_EASY": 1,
     "EASY": 2,
@@ -22,6 +24,12 @@ VALUE_TO_DIFFICULTY = {v: k for k, v in DIFFICULTY_TO_VALUE.items()}
 
 
 def get_time_factor(seconds: float) -> float:
+    """
+    Returns a score multiplier based on solution speed.
+
+    Faster resolutions grant bonus points,
+    while slow resolutions apply penalties.
+    """
     if seconds < 60:
         return 1.3
     if seconds < 180:
@@ -36,6 +44,13 @@ def get_time_factor(seconds: float) -> float:
 
 
 def evaluate_sql_difficulty(sql: str, rules: ValidationRules) -> str:
+    """
+    Heuristically estimates SQL query difficulty.
+
+    Difficulty is based on:
+    - SQL constructs used (joins, aggregates, subqueries, etc.)
+    - Validation rules required by the challenge
+    """
     sql = sql.lower().strip()
 
     score = 1
@@ -105,5 +120,6 @@ def evaluate_sql_difficulty(sql: str, rules: ValidationRules) -> str:
 
 
 def get_ordered_difficulties() -> list[str]:
+    """ Returns difficulties sorted from easiest to hardest. """
     return sorted(DIFFICULTY_TO_VALUE, key=DIFFICULTY_TO_VALUE.get)
 

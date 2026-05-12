@@ -15,7 +15,7 @@ def get_settings(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    """Get game settings (ADMIN/TEACHER)"""
+    """ Get game settings (ADMIN/TEACHER). """
     return GameSettingsService.get_settings(db)
 
 
@@ -25,5 +25,5 @@ def update_settings(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    """Update game settings (ADMIN/TEACHER)"""
+    """ Update game settings (ADMIN/TEACHER). """
     return GameSettingsService.update_settings(db, payload)

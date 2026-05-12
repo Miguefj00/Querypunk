@@ -19,7 +19,7 @@ def get_challenges(
         db: Session = Depends(get_db),
         current_user = Depends(get_current_user_from_token)
 ):
-    """Get all challenges in a chapter"""
+    """ Get all challenges in a chapter. """
     return ChallengeService.get_by_chapter(db, chapter_id, current_user)
 
 
@@ -30,7 +30,7 @@ def get_challenge(
         db: Session = Depends(get_db),
         current_user=Depends(get_current_user_from_token)
 ):
-    """Get details of a specific challenge"""
+    """ Get details of a specific challenge. """
     return ChallengeService.get_by_id(db, chapter_id, challenge_id, current_user)
 
 
@@ -41,7 +41,7 @@ def create_challenge(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    """Create challenge (ADMIN/TEACHER only)"""
+    """ Create challenge (ADMIN/TEACHER only). """
     return ChallengeService.create(db, chapter_id, data, current_user)
 
 
@@ -53,7 +53,7 @@ def update_challenge(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    """Update challenge (ADMIN/TEACHER only)"""
+    """ Update challenge (ADMIN/TEACHER only). """
     return ChallengeService.update(db, chapter_id, challenge_id, data, current_user)
 
 
@@ -64,5 +64,5 @@ def delete_challenge(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    """Delete challenge (ADMIN/TEACHER only)"""
+    """ Delete challenge (ADMIN/TEACHER only). """
     return ChallengeService.delete(db, chapter_id, challenge_id, current_user)

@@ -5,7 +5,7 @@ from app.database.connection import Base
 
 
 class ChallengeRun(Base):
-    """Represents a user run in a challenge"""
+    """ Represents a user run in a challenge. """
     __tablename__ = "ChallengeRun"
 
     id: Mapped[int] = mapped_column(primary_key=True)

@@ -3,6 +3,7 @@ from app.database.connection import Base
 
 
 class GameSettings(Base):
+    """ Represents game configuration. """
     __tablename__ = "GameSettings"
 
     id = Column(Integer, primary_key=True, index=True)

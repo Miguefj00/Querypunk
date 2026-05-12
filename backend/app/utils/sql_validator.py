@@ -2,6 +2,13 @@ from fastapi import HTTPException
 
 from app.utils.query_analizer import QueryAnalyzer
 
+"""
+Student SQL query validation and result comparison utilities.
+
+Ensures queries are safe, read-only and respect challenge constraints.
+"""
+
+# Prevent any data modification or schema manipulation
 FORBIDDEN_KEYWORDS = {
     "INSERT",
     "UPDATE",
@@ -17,7 +24,16 @@ FORBIDDEN_KEYWORDS = {
 
 
 def validate_query(query: str, challenge=None):
+    """
+    Validates a student SQL query before execution.
 
+    Validation layers:
+    1. Security validation (read-only SQL only)
+    2. Global platform rules (no LIMIT, UNION, comments…)
+    3. Challenge-specific rules (aggregates, subqueries, literals…)
+
+    Raises HTTPException if validation fails.
+    """
     q = query.upper().strip()
 
     # Basic validation
@@ -74,4 +90,10 @@ def validate_query(query: str, challenge=None):
 
 
 def compare_results(student_rows, solution_rows):
+    """
+    Compares query results ignoring row order.
+
+    Sorting ensures that equivalent result sets
+    are considered correct even if ordering differs.
+    """
     return sorted(student_rows) == sorted(solution_rows)

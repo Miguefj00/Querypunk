@@ -4,7 +4,7 @@ from app.database.connection import Base
 
 
 class Leaderboard(Base):
-    """Represents game ranking with gamification purposes"""
+    """ Represents game ranking with gamification purposes. """
     __tablename__ = "Leaderboard"
 
     id: Mapped[int] = mapped_column(primary_key=True)

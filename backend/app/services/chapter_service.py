@@ -13,6 +13,7 @@ class ChapterService:
 
     @staticmethod
     def get_owned_chapter(db: Session, chapter_id: int, user: User):
+        """ Retrieves a chapter ensuring ownership or admin permissions. """
         chapter = ChapterRepository.get_by_id(db, chapter_id)
 
         if not chapter:
@@ -23,10 +24,9 @@ class ChapterService:
 
         return chapter
 
-    # SQLITE VERSION(Generator)
     @staticmethod
     def recalculate_chapter_difficulty_sqlite(conn, chapter_id: int):
-
+        """ Recalculates average chapter difficulty (SQLite generator mode). """
         difficulties = ChallengeRepository.get_difficulties_by_chapter_sqlite(conn, chapter_id)
 
         if not difficulties:
@@ -40,6 +40,7 @@ class ChapterService:
 
     @staticmethod
     def create(db: Session, data, current_user):
+        """ Creates a new chapter assigned to the teacher. """
         chapter = Chapter(
             title=data.title,
             description=data.description,
@@ -49,10 +50,12 @@ class ChapterService:
 
     @staticmethod
     def get_all(db: Session, current_user):
+        """ Returns all chapters. """
         return ChapterRepository.get_all(db)
 
     @staticmethod
     def get_by_id(db: Session, chapter_id: int):
+        """ Retrieves a chapter by ID. """
         chapter = ChapterRepository.get_by_id(db, chapter_id)
 
         if not chapter:
@@ -62,6 +65,7 @@ class ChapterService:
 
     @staticmethod
     def update(db: Session, chapter_id: int, data, current_user):
+        """ Updates chapter title and description. """
         chapter = ChapterService.get_owned_chapter(db, chapter_id, current_user)
 
         if data.title is not None:
@@ -75,6 +79,7 @@ class ChapterService:
 
     @staticmethod
     def delete(db: Session, chapter_id: int, current_user):
+        """ Deletes a chapter. """
         chapter = ChapterService.get_owned_chapter(db, chapter_id, current_user)
 
         ChapterRepository.delete(db, chapter)

@@ -21,7 +21,7 @@ def get_users(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token)
 ):
-    """List users"""
+    """ List users. """
     return UserService.get_all(db, current_user)
 
 
@@ -31,7 +31,7 @@ def get_user_by_id(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token)
 ):
-    """Get user profile"""
+    """ Get user profile. """
     return UserService.get_by_id(db, user_id, current_user)
 
 
@@ -41,7 +41,7 @@ def create_user(
         db: Session = Depends(get_db),
         user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    """Create user (ADMIN/TEACHER only)"""
+    """ Create user (ADMIN/TEACHER only). """
     return UserService.create(db, data)
 
 
@@ -51,7 +51,7 @@ def change_password(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token),
 ):
-    """Change password of authenticated user"""
+    """ Change password of authenticated user. """
     return UserService.change_password(db, current_user, data)
 
 
@@ -62,7 +62,7 @@ def update_user(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token),
 ):
-    """Update own user"""
+    """ Update own user. """
     return UserService.update(db, user_id, user_update, current_user)
 
 
@@ -72,7 +72,7 @@ def delete_user(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER])),
 ):
-    """Delete own user or student user (ADMIN/TEACHER only)"""
+    """ Delete own user or student user (ADMIN/TEACHER only). """
     return UserService.delete(db, user_id, current_user)
 
 
@@ -82,6 +82,6 @@ def delete_users(
         db: Session = Depends(get_db),
         current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER])),
 ):
-    """Bulk delete own user or student user (ADMIN/TEACHER only)"""
+    """ Bulk delete own user or student user (ADMIN/TEACHER only). """
     return UserService.delete_bulk(db, data.user_ids, current_user)
 

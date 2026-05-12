@@ -14,6 +14,10 @@ class AnalyticsService:
 
     @staticmethod
     def get_overview(db: Session):
+        """
+        Returns global system metrics (last 30 days + totals):
+        active users, runs, attempts, success rates and averages.
+        """
         now = datetime.utcnow()
         last_30_days = now - timedelta(days=30)
 
@@ -66,6 +70,10 @@ class AnalyticsService:
 
     @staticmethod
     def get_challenges_analytics(db: Session):
+        """
+        Returns aggregated analytics per challenge:
+        finished runs, successes, cancellations, avg attempts and avg time.
+        """
         challenges = db.query(Challenge.id).all()
         results = []
 
@@ -117,6 +125,10 @@ class AnalyticsService:
 
     @staticmethod
     def get_user_dashboard(db, user_id: int):
+        """
+        Returns the full student dashboard:
+        overview + behaviour + progress.
+        """
         return {
             "overview": AnalyticsService._get_user_overview(db, user_id),
             "behaviour": AnalyticsService._get_user_behaviour(db, user_id),
@@ -125,6 +137,10 @@ class AnalyticsService:
 
     @staticmethod
     def _get_user_overview(db, user_id: int):
+        """
+        Global student metrics:
+        total score, solved challenges and average resolution time.
+        """
         total_score, challenges_solved = db.query(
             func.coalesce(func.sum(Leaderboard.score), 0),
             func.count(Leaderboard.challenge_id)
@@ -148,6 +164,10 @@ class AnalyticsService:
 
     @staticmethod
     def _get_user_behaviour(db, user_id: int):
+        """
+        Analyzes student behaviour:
+        total runs, success rate, attempts per run and first-try success rate.
+        """
         finished_runs = db.query(func.count(ChallengeRun.id)).filter(
             ChallengeRun.user_id == user_id,
             ChallengeRun.finished_at.isnot(None)
@@ -206,6 +226,10 @@ class AnalyticsService:
 
     @staticmethod
     def _get_user_progress(db, user_id: int):
+        """
+        Returns student progress grouped by difficulty:
+        global challenges vs played challenges.
+        """
         difficulties = get_ordered_difficulties()
 
         total_per_difficulty = dict(
@@ -254,6 +278,11 @@ class AnalyticsService:
 
     @staticmethod
     def get_student_attempts_history(db: Session, user_id: int):
+        """
+        Returns the complete SQL query history of a student:
+        Challenges → Runs → Executed attempts.
+        Designed for teacher visualization.
+        """
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")

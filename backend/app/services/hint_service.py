@@ -11,7 +11,7 @@ class HintService:
 
     @staticmethod
     def _get_hint_in_challenge(db: Session, challenge_id: int, hint_id: int):
-
+        """ Retrieves a hint ensuring it belongs to the given challenge. """
         hint = HintRepository.get_by_id(db, hint_id)
 
         if not hint:
@@ -24,7 +24,7 @@ class HintService:
 
     @staticmethod
     def get_by_id(db: Session, chapter_id: int, challenge_id: int, hint_id: int, current_user: User):
-
+        """ Returns a specific hint (teachers/admin only). """
         ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
 
         if current_user.role_id not in [ROLE_ADMIN, ROLE_TEACHER]:
@@ -34,7 +34,7 @@ class HintService:
 
     @staticmethod
     def get_by_challenge(db: Session, chapter_id: int, challenge_id: int, current_user: User):
-
+        """ Returns all hints of a challenge (teachers/admin only). """
         ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
 
         if current_user.role_id not in [ROLE_ADMIN, ROLE_TEACHER]:
@@ -44,7 +44,10 @@ class HintService:
 
     @staticmethod
     def get_unlocked_hints(db, challenge_id, attempts):
-
+        """
+        Returns hints unlocked according to number of failed attempts.
+        Used during gameplay.
+        """
         hints = HintRepository.get_by_challenge(db, challenge_id)
 
         hints = sorted(hints, key=lambda h: h.order_index)
@@ -59,7 +62,10 @@ class HintService:
 
     @staticmethod
     def create(db: Session, chapter_id: int, challenge_id: int, data: HintCreate, current_user: User):
-
+        """
+        Creates a new hint for a challenge.
+        Only challenge owners can create hints.
+        """
         challenge = ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
 
         ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)
@@ -68,7 +74,7 @@ class HintService:
 
     @staticmethod
     def update(db: Session, chapter_id: int, challenge_id: int, hint_id: int, data: HintUpdate, current_user: User):
-
+        """ Updates an existing hint. """
         challenge = ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
 
         ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)
@@ -79,7 +85,7 @@ class HintService:
 
     @staticmethod
     def delete(db: Session, chapter_id: int, challenge_id: int, hint_id: int, current_user: User):
-
+        """ Deletes a hint. """
         challenge = ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
 
         ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)

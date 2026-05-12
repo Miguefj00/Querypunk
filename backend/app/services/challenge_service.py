@@ -15,6 +15,10 @@ class ChallengeService:
 
     @staticmethod
     def check_teacher_owns_challenge(db: Session, challenge: Challenge, user: User):
+        """
+        Ensures a teacher owns the challenge's chapter.
+        Prevents editing challenges from other teachers.
+        """
         chapter = ChapterRepository.get_by_id(db, challenge.chapter_id)
 
         if user.role_id == ROLE_TEACHER and chapter.user_id != user.id:
@@ -22,6 +26,7 @@ class ChallengeService:
 
     @staticmethod
     def get_challenge_in_chapter(db: Session, chapter_id: int, challenge_id: int):
+        """ Retrieves a challenge ensuring it belongs to the given chapter. """
         challenge = ChallengeRepository.get_by_id(db, challenge_id)
 
         if not challenge:
@@ -34,7 +39,11 @@ class ChallengeService:
 
     @staticmethod
     def get_by_chapter(db: Session, chapter_id: int, current_user: User):
-
+        """
+        Lists challenges of a chapter.
+        - Students: without solution.
+        - Teachers/Admins: with solution.
+        """
         chapter = ChapterRepository.get_by_id(db, chapter_id)
 
         if not chapter:
@@ -49,7 +58,7 @@ class ChallengeService:
 
     @staticmethod
     def get_by_id(db: Session, chapter_id: int, challenge_id: int, current_user: User):
-
+        """ Returns a specific challenge adapted to the user's role. """
         challenge = ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
 
         if current_user.role_id == ROLE_STUDENT:
@@ -59,6 +68,11 @@ class ChallengeService:
 
     @staticmethod
     def create(db: Session, chapter_id: int, data: ChallengeCreate, current_user: User):
+        """
+        Creates a new challenge:
+        - Executes the SQL solution to store expected_result.
+        - Recalculates challenge and chapter difficulty.
+        """
         try:
             ChapterService.get_owned_chapter(db, chapter_id, current_user)
 
@@ -93,6 +107,10 @@ class ChallengeService:
 
     @staticmethod
     def update(db: Session, chapter_id: int, challenge_id: int, data: ChallengeUpdate, current_user: User):
+        """
+        Updates an existing challenge and recalculates difficulty
+        and expected SQL result.
+        """
         challenge = ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
 
         ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)
@@ -122,6 +140,7 @@ class ChallengeService:
 
     @staticmethod
     def delete(db: Session, chapter_id: int, challenge_id: int, current_user: User):
+        """ Deletes a challenge and recalculates chapter difficulty. """
         try:
             challenge = ChallengeService.get_challenge_in_chapter(db, chapter_id, challenge_id)
             ChallengeService.check_teacher_owns_challenge(db, challenge, current_user)

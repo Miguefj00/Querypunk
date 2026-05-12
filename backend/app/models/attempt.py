@@ -1,12 +1,11 @@
 from datetime import datetime
-
 from sqlalchemy import Boolean, Float, Text, ForeignKey, Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.connection import Base
 
 
 class Attempt(Base):
-    """Represents a single user attempt at solving a challenge"""
+    """ Represents a single user attempt at solving a challenge. """
     __tablename__ = "Attempt"
 
     id: Mapped[int] = mapped_column(primary_key=True)

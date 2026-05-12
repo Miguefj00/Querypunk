@@ -24,6 +24,7 @@ class UserService:
             password: str,
             role_id: int
     ) -> User:
+        """ Internal helper that creates a user with hashed password. """
         user = User(
             username=username,
             email=email,
@@ -41,6 +42,10 @@ class UserService:
 
     @staticmethod
     def create(db: Session, data: UserCreate):
+        """
+        Creates a user manually (teacher or student).
+        Ensures username and email uniqueness.
+        """
         if UserRepository.get_by_username(db, data.username):
             raise HTTPException(status_code=409, detail="Username already exists")
 
@@ -68,7 +73,7 @@ class UserService:
             email: str,
             password: str
     ) -> User:
-
+        """ Automatically creates a student (used during CSV import). """
         username = generate_username_from_name(nombre, apellido)
 
         if UserRepository.get_by_email(db, email):
@@ -84,6 +89,7 @@ class UserService:
 
     @staticmethod
     def change_password(db: Session, current_user: User, data: ChangePasswordRequest):
+        """ Allows a user to change their password after verifying the current one. """
         if not verify_password(data.current_password, current_user.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -104,6 +110,10 @@ class UserService:
 
     @staticmethod
     def get_all(db: Session, current_user: User):
+        """
+        Returns all users.
+        Non-admins cannot see admin accounts.
+        """
         users = UserRepository.get_all(db)
 
         if current_user.role_id != ROLE_ADMIN:
@@ -113,6 +123,7 @@ class UserService:
 
     @staticmethod
     def get_by_id(db: Session, user_id: int, current_user: User):
+        """ Returns a user by ID with role-based access restrictions. """
         user = UserRepository.get_by_id(db, user_id)
 
         if not user:
@@ -125,6 +136,10 @@ class UserService:
 
     @staticmethod
     def update(db: Session, user_id: int, user_update: UserUpdate, current_user: User):
+        """
+        Updates user data.
+        Users can update themselves, admins can update anyone.
+        """
         user = UserRepository.get_by_id(db, user_id)
 
         if not user:
@@ -142,6 +157,11 @@ class UserService:
 
     @staticmethod
     def delete(db: Session, user_id: int, current_user: User):
+        """
+        Deletes a user with strict role rules:
+        - Users can delete themselves (except admin)
+        - Admin/Teacher can delete students only.
+        """
         target_user = UserRepository.get_by_id(db, user_id)
 
         if not target_user:
@@ -172,7 +192,7 @@ class UserService:
 
     @staticmethod
     def delete_bulk(db: Session, user_ids: list[int], current_user: User):
-
+        """ Bulk deletion of students based on permissions. """
         users = UserRepository.get_by_ids(db, user_ids)
 
         if not users:

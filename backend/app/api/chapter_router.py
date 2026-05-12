@@ -16,7 +16,7 @@ def get_all_chapters(
         db: Session = Depends(get_db),
         current_user = Depends(get_current_user_from_token)
 ):
-    """Returns all chapters"""
+    """ Returns all chapters. """
     return ChapterService.get_all(db, current_user)
 
 
@@ -26,7 +26,7 @@ def get_chapter(
         db: Session = Depends(get_db),
         current_user = Depends(get_current_user_from_token)
 ):
-    """Returns a specific chapter"""
+    """ Returns a specific chapter. """
     return ChapterService.get_by_id(db, chapter_id)
 
 
@@ -36,7 +36,7 @@ def create_chapter(
         db: Session = Depends(get_db),
         current_user = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    """Create chapter (ADMIN/TEACHER only)"""
+    """ Create chapter (ADMIN/TEACHER only). """
     return ChapterService.create(db, data, current_user)
 
 
@@ -47,7 +47,7 @@ def update_chapter(
         db: Session = Depends(get_db),
         current_user = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    """Update chapter (ADMIN/TEACHER only)"""
+    """ Update chapter (ADMIN/TEACHER only). """
     return ChapterService.update(db, chapter_id, data, current_user)
 
 
@@ -57,6 +57,6 @@ def delete_chapter(
         db: Session = Depends(get_db),
         current_user = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
 ):
-    """Delete chapter (ADMIN/TEACHER only)"""
+    """ Delete chapter (ADMIN/TEACHER only). """
     ChapterService.delete(db, chapter_id, current_user)
     return {"detail": "Chapter deleted successfully"}

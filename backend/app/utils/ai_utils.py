@@ -1,6 +1,15 @@
 import json
 import re
 
+"""
+Utilities and prompt context used by the AI challenge generator.
+
+This module provides:
+- Global world-building context for SQL challenge generation
+- Semantic schema descriptions for LLM prompts
+- JSON cleaning utilities for repairing imperfect model outputs
+"""
+
 
 # Global world context injected into every LLM call.
 GAME_WORLD_CONTEXT = """
@@ -35,6 +44,7 @@ HINT_SYSTEM_CONTEXT = """
     Avoid roleplay or cyberpunk storytelling.
 """
 
+# Human-readable explanation of semantic column types used by the LLM
 COLUMN_TYPE_GUIDE = """
     COLUMN SEMANTIC TYPES:
     
@@ -46,6 +56,7 @@ COLUMN_TYPE_GUIDE = """
     foreign_key → relationships between entities (used for combining data)
 """
 
+# Semantic description of the game database used to guide AI challenge generation.
 SCHEMA_SEMANTICS = {
     "Corporation": {
         "description": "Mega-corporations that control most economic and political power in the city.",
@@ -168,6 +179,7 @@ SCHEMA_SEMANTICS = {
 
 
 def _escape_control_chars_in_strings(json_text: str) -> str:
+    """ Escapes control characters inside JSON string literals. """
     def replacer(match):
         content = match.group(0)
 
@@ -181,6 +193,16 @@ def _escape_control_chars_in_strings(json_text: str) -> str:
 
 
 def clean_llm_json(text: str) -> str:
+    """
+    Repairs malformed JSON responses produced by LLMs.
+
+    Fixes common issues such as:
+    - Missing closing braces
+    - Control characters inside strings
+    - Extra text before JSON block
+
+    Raises an error if the JSON cannot be repaired.
+    """
     start = text.find("{")
     if start == -1:
         raise ValueError("No se encontró JSON en la respuesta del modelo")

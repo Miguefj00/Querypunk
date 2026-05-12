@@ -12,6 +12,13 @@ class LeaderboardService:
 
     @staticmethod
     def get_challenge_leaderboard(db, challenge_id: int):
+        """
+       Returns the ranking for a single challenge.
+
+       Ranking is ordered by:
+       1. Highest score achieved in the challenge.
+       2. Lowest number of runs required to solve it.
+       """
         settings = GameSettingsRepository.get_settings(db)
         if not settings.show_challenge_leaderboard:
             raise HTTPException(
@@ -58,6 +65,13 @@ class LeaderboardService:
 
     @staticmethod
     def get_chapter_leaderboard(db, chapter_id: int):
+        """
+        Returns ranking aggregated across all challenges in a chapter.
+
+        Ranking is ordered by:
+        1. Sum of scores from all challenges in the chapter.
+        2. Lowest number of total runs across those challenges.
+        """
         settings = GameSettingsRepository.get_settings(db)
 
         if not settings.show_chapter_leaderboard:
@@ -66,7 +80,7 @@ class LeaderboardService:
                 detail="Chapter leaderboard is disabled by instructor"
             )
 
-        # Runs totales del usuario en el chapter
+        # Total user runs in chapter
         runs_subq = db.query(
             ChallengeRun.user_id,
             func.count(ChallengeRun.id).label("runs_count")
@@ -114,6 +128,13 @@ class LeaderboardService:
 
     @staticmethod
     def get_global_leaderboard(db):
+        """
+        Returns global ranking across the entire game.
+
+        Ranking is ordered by:
+        1. Total accumulated score.
+        2. Lowest number of total runs in the platform.
+        """
         settings = GameSettingsRepository.get_settings(db)
 
         if not settings.show_global_leaderboard:

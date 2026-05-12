@@ -7,7 +7,7 @@ class EmailService:
 
     @staticmethod
     def build_html_email(content: str):
-
+        """ Builds the base HTML template for system emails. """
         return f"""
         <html>
         <body style="font-family: Arial, Helvetica, sans-serif; background:#f4f6f8; padding:40px;">
@@ -40,7 +40,7 @@ class EmailService:
 
     @staticmethod
     def send_email(to_email: str, subject: str, body: str, html_body: str | None = None):
-
+        """ Sends an email via SMTP (plain text + optional HTML). """
         smtp_host = os.getenv("SMTP_HOST")
         smtp_port = int(os.getenv("SMTP_PORT"))
         smtp_user = os.getenv("SMTP_USER")
@@ -64,7 +64,7 @@ class EmailService:
 
     @staticmethod
     def send_existing_user_added(email: str, group_name: str):
-
+        """ Notifies an existing user that they were added to a group. """
         subject = "Has sido asignado a un grupo"
 
         body = f"""
@@ -96,7 +96,7 @@ class EmailService:
 
     @staticmethod
     def send_new_user_credentials(email: str, username: str, password: str, group_name: str):
-
+        """ Sends initial credentials to a newly created user. """
         subject = "Tu cuenta ha sido creada"
 
         body = f"""

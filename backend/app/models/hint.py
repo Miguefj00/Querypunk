@@ -4,7 +4,7 @@ from app.database.connection import Base
 
 
 class Hint(Base):
-    """Represents a hint inside the game challenge"""
+    """ Represents a hint inside the game challenge. """
     __tablename__ = "Hint"
 
     id: Mapped[int] = mapped_column(primary_key=True)

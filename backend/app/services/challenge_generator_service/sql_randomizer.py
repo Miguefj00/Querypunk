@@ -2,6 +2,19 @@ import random
 from app.services.challenge_generator_service.schema_structured_service import get_structured_schema
 from app.services.challenge_generator_service.get_recent_tables_usage import get_recent_tables_usage
 
+"""
+SQL Randomizer
+
+This module is responsible for selecting tables, columns and joins
+in a SAFE and CONTROLLED way.
+
+The goal is to generate realistic SQL queries while avoiding:
+    - Technical/internal columns (IDs, timestamps)
+    - Boolean-like fields used incorrectly
+    - Overused tables (to improve content variety)
+"""
+
+# Columns that should never appear in generated challenges.
 FORBIDDEN_COLUMNS = {
     "id",
     "Id",
@@ -11,11 +24,13 @@ FORBIDDEN_COLUMNS = {
     "timestamp"
 }
 
+# Column names that usually represent booleans.
 BOOLEAN_KEYWORDS = [
     "Main",
     "Legality"
 ]
 
+# Tables excluded from generation.
 FORBIDDEN_TABLES = {
     "Corporation_sector",
     "Personnel_implant",
@@ -23,6 +38,16 @@ FORBIDDEN_TABLES = {
 
 
 def pick_table():
+    """
+   Selects a table with variety bias.
+
+   Strategy:
+       - Avoid forbidden tables
+       - Prefer tables that were NOT recently used
+       - Fall back to all allowed tables if needed
+
+   This keeps the generated challenges diverse.
+   """
     schema = get_structured_schema()
     most_used, least_used = get_recent_tables_usage()
 
@@ -36,6 +61,14 @@ def pick_table():
 
 
 def pick_column(table, numeric_only=False, text_only=False, allow_ids=False):
+    """
+    Selects a valid column from a table applying multiple filters:
+
+    Filters applied:
+        - Remove technical columns (ids, timestamps)
+        - Optional numeric-only / text-only filtering
+        - Avoid boolean-like columns in numeric comparisons
+    """
     schema = get_structured_schema()
     columns = schema[table]["columns"]
 
@@ -45,6 +78,8 @@ def pick_column(table, numeric_only=False, text_only=False, allow_ids=False):
     valid_cols = []
 
     for col, col_type in columns.items():
+        # Boolean-like columns are excluded from numeric comparisons
+        # to prevent unrealistic conditions.
         col_lower = col.lower()
 
         is_boolean = any(k in col_lower for k in BOOLEAN_KEYWORDS)
@@ -72,6 +107,7 @@ def pick_column(table, numeric_only=False, text_only=False, allow_ids=False):
 
 
 def pick_numeric_column_safe(table, tries=15):
+    """ Retries numeric column selection multiple times for robustness. """
     for _ in range(tries):
         col = pick_column(table, numeric_only=True, allow_ids=False)
         if col:
@@ -80,6 +116,7 @@ def pick_numeric_column_safe(table, tries=15):
 
 
 def pick_text_column_safe(table, tries=15):
+    """ Retries text column selection multiple times for robustness. """
     for _ in range(tries):
         col = pick_column(table, text_only=True, allow_ids=False)
         if col:
@@ -88,6 +125,7 @@ def pick_text_column_safe(table, tries=15):
 
 
 def pick_any_column_safe(table, tries=15):
+    """ Retries generic column selection multiple times for robustness. """
     for _ in range(tries):
         col = pick_column(table, allow_ids=False)
         if col:
@@ -96,6 +134,14 @@ def pick_any_column_safe(table, tries=15):
 
 
 def pick_join():
+    """
+   Automatically discovers valid JOIN relationships using FK metadata.
+
+   Returns:
+       (table_a, table_b, column_a, column_b)
+
+   This ensures all generated joins are valid and executable.
+   """
     schema = get_structured_schema()
     tables = [t for t in schema.keys() if t not in FORBIDDEN_TABLES]
     random.shuffle(tables)
@@ -103,6 +149,7 @@ def pick_join():
     valid_joins = []
 
     for table in tables:
+        # We only accept joins backed by real foreign keys.
         fks = schema[table]["foreign_keys"]
 
         for fk in fks:

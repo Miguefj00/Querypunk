@@ -10,8 +10,21 @@ load_dotenv()
 GAME_SQLITE_PATH = os.getenv("GAME_SQLITE_PATH")
 SYSTEM_SQLITE_PATH = os.getenv("SYSTEM_SQLITE_PATH")
 
+"""
+Game Database Executor
+
+This module acts as the bridge between:
+    - Game SQLite database (read-only gameplay data)
+    - System SQLite database (challenges, hints, metadata)
+
+Separation of databases is intentional:
+    GAME DB   → student queries run here
+    SYSTEM DB → platform data lives here
+"""
+
 
 def execute_query_and_get_expected(sql_query:str):
+    """ Executes generated SQL on the GAME database to obtain expected results. """
     conn = sqlite3.connect(GAME_SQLITE_PATH)
     cursor = conn.cursor()
 
@@ -26,6 +39,10 @@ def execute_query_and_get_expected(sql_query:str):
 
 
 def save_challenge_to_db(chapter:int, challenge, expected_rows, hints, difficulty):
+    """
+    Persists generated challenge and hints into the SYSTEM database.
+    Also triggers chapter difficulty recalculation.
+    """
     conn = sqlite3.connect(SYSTEM_SQLITE_PATH)
     cursor = conn.cursor()
 
@@ -62,6 +79,7 @@ def save_challenge_to_db(chapter:int, challenge, expected_rows, hints, difficult
 
 
 def run_solution_and_get_result(_, sql: str):
+    """ Executes student SQL in read-only mode. """
     try:
         conn = sqlite3.connect(f"file:{GAME_SQLITE_PATH}?mode=ro", uri=True)
         cursor = conn.cursor()
@@ -79,7 +97,7 @@ def run_solution_and_get_result(_, sql: str):
 def get_column_numeric_range(table: str, column: str):
     """
     Returns real MIN/MAX values from the game database.
-    This prevents generating unrealistic conditions like Budget > 3.
+    This prevents generating unrealistic conditions.
     """
     conn = sqlite3.connect(GAME_SQLITE_PATH)
     cursor = conn.cursor()
@@ -99,9 +117,7 @@ def get_column_numeric_range(table: str, column: str):
 
 
 def get_random_existing_value(table: str, column: str):
-    """
-    Returns a random existing value from the DB for realistic WHERE clauses.
-    """
+    """ Returns a random existing value from the DB. """
     conn = sqlite3.connect(GAME_SQLITE_PATH)
     cursor = conn.cursor()
 

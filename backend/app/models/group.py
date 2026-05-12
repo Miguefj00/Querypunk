@@ -1,13 +1,11 @@
 from datetime import datetime
-
 from sqlalchemy import String, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship, mapped_column, Mapped
-
 from app.database.connection import Base
 
 
 class Group(Base):
-    """Represents a students group/class"""
+    """ Represents a students group/class. """
     __tablename__ = "Group"
 
     id: Mapped[int] = mapped_column(primary_key=True)

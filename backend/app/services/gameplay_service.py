@@ -19,6 +19,11 @@ class GameplayService:
 
     @staticmethod
     def submit_query(db, user_id, challenge_id, query):
+        """
+        Main gameplay entrypoint.
+        Executes the student's SQL query, compares results with the solution,
+        stores the attempt, calculates score, unlocks hints and completes the run if correct.
+        """
         challenge = ChallengeRepository.get_by_id(db, challenge_id)
 
         if not challenge:
@@ -139,6 +144,11 @@ class GameplayService:
 
     @staticmethod
     def reset_run(db, user_id, challenge_id):
+        """
+        Resets an already started run by closing the current one
+        and immediately creating a new run.
+        Used when the player wants to restart the challenge.
+        """
         challenge = ChallengeRepository.get_by_id(db, challenge_id)
 
         if not challenge:
@@ -165,10 +175,7 @@ class GameplayService:
 
     @staticmethod
     def cancel_run(db, user_id, challenge_id):
-        """
-        Cancels the current run WITHOUT creating a new one.
-        Used when the player leaves the challenge.
-        """
+        """ Cancels the current run. """
         challenge = ChallengeRepository.get_by_id(db, challenge_id)
 
         if not challenge:

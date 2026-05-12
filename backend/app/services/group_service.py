@@ -18,7 +18,7 @@ class GroupService:
 
     @staticmethod
     def create_group(db: Session, name: str, description: str, created_by: int):
-
+        """ Creates a new student group ensuring unique name. """
         existing = db.query(Group).filter(Group.name == name).first()
         if existing:
             raise HTTPException(status_code=409, detail="Group already exists")
@@ -41,7 +41,11 @@ class GroupService:
             file: UploadFile,
             background_tasks: BackgroundTasks
     ):
-
+        """
+        Bulk import students from CSV file.
+        Existing users are assigned to the group,
+        new users are automatically created and emailed.
+        """
         group = db.query(Group).filter(Group.id == group_id).first()
 
         if not group:
@@ -124,7 +128,7 @@ class GroupService:
 
     @staticmethod
     def get_all_groups(db: Session):
-
+        """ Returns all groups with number of students per group. """
         results = (
             db.query(
                 Group.id,
@@ -149,7 +153,7 @@ class GroupService:
 
     @staticmethod
     def get_group_users(db: Session, group_id: int):
-
+        """ Returns all users belonging to a group. """
         group = db.query(Group).filter(Group.id == group_id).first()
         if not group:
             raise HTTPException(status_code=404, detail="Group not found")
@@ -171,7 +175,10 @@ class GroupService:
             description: str,
             current_user: User
     ):
-
+        """
+        Updates group name and description.
+        Teachers can only modify their own groups.
+        """
         group = db.query(Group).filter(Group.id == group_id).first()
         if not group:
             raise HTTPException(status_code=404, detail="Group not found")
@@ -193,7 +200,7 @@ class GroupService:
             group_id: int,
             current_user: User
     ):
-
+        """ Deletes a group and all its user assignments. """
         group = db.query(Group).filter(Group.id == group_id).first()
         if not group:
             raise HTTPException(status_code=404, detail="Group not found")

@@ -25,11 +25,51 @@ load_dotenv()
 MODEL = "llama3"
 
 
+"""
+AI + Procedural SQL Challenge Generator
+
+This module is the core of the automatic challenge generation pipeline.
+
+The generation pipeline has TWO major phases:
+
+PHASE 1 — Procedural SQL generation (NO AI)
+------------------------------------------
+We generate a valid SQL query using deterministic + random rules.
+The query must pass strict validators:
+    - Not duplicated
+    - Executable against the game DB
+    - Returns rows
+    - No forbidden columns
+    - No type mismatches
+
+PHASE 2 — AI narrative generation (LLM)
+---------------------------------------
+Once a valid SQL exists, the LLM generates:
+    - Immersive title
+    - Natural language description
+    - Progressive hints
+
+AI narrative is in testing phase, it becomes less accurate as the challenge difficulty increases
+"""
+
+
 def alias(table: str):
+    """ Returns a short alias for a table (first letter). Used in JOIN queries. """
     return table[0]
 
 
 def generate_very_easy_sql():
+    """
+    Generates the simplest possible SQL query.
+
+    Characteristics:
+    - Single table
+    - No WHERE clause
+    - No joins
+    - No aggregation
+
+    This difficulty is meant for learning SELECT.
+    """
     table = pick_table()
 
     select_list = build_select_list(table, allow_two_cols_prob=0.5)
@@ -40,6 +80,15 @@ def generate_very_easy_sql():
 
 
 def generate_easy_sql():
+    """
+    Generates single-table queries with a WHERE clause.
+
+    Two main patterns:
+        • Numeric filtering (>, <, =, BETWEEN, !=)
+        • Text filtering (LIKE, =, prefix matching)
+
+    Real DB statistics are used when possible to avoid unrealistic values.
+    """
     table = pick_table()
     select_list = build_select_list(table, allow_two_cols_prob=0.35)
     if not select_list:
@@ -48,6 +97,8 @@ def generate_easy_sql():
     mode = random.choice(["numeric", "text"])
 
     # ───────────── NUMERIC ─────────────
+    # We use real MIN/MAX values from the DB when possible.
+    # This prevents nonsense conditions like "salary > 3".
     if mode == "numeric":
         col = pick_numeric_column_safe(table)
         if not col:
@@ -85,6 +136,8 @@ def generate_easy_sql():
         return f"SELECT {select_list} FROM {table} WHERE {col} BETWEEN {low} AND {high}"
 
     # ───────────── TEXT ─────────────
+    # We try to reuse real values from the DB.
+    # If unavailable, we fallback to realistic LIKE patterns.
     col = pick_text_column_safe(table)
     if not col:
         return None
@@ -107,6 +160,16 @@ def generate_easy_sql():
 
 
 def generate_medium_sql():
+    """
+    Generates JOIN queries without aggregation.
+
+    Skills introduced:
+        - Basic JOIN
+        - Optional filtering
+        - ORDER BY / DISTINCT
+
+    Still avoids GROUP BY to keep complexity moderate.
+    """
     join = pick_join()
     if not join:
         return None
@@ -174,6 +237,16 @@ def generate_medium_sql():
 
 
 def generate_hard_sql():
+    """
+   Generates JOIN + AGGREGATION queries.
+
+   Skills introduced:
+       - GROUP BY
+       - HAVING
+       - Aggregations (COUNT, SUM, AVG, MIN, MAX)
+
+   These queries represent real analytical tasks.
+   """
     agg = random.choices(
         ["COUNT", "AVG", "SUM", "MAX", "MIN"],
         weights=[40, 15, 15, 15, 15]
@@ -245,6 +318,17 @@ def generate_hard_sql():
 
 
 def generate_expert_sql():
+    """
+   Generates advanced SQL using subqueries.
+
+   Skills introduced:
+       - EXISTS / NOT EXISTS
+       - Correlated subqueries
+       - Comparisons against averages
+       - Nested logic
+
+   This is the highest difficulty level.
+   """
     join = pick_join()
     if not join:
         return None
@@ -330,7 +414,19 @@ def generate_expert_sql():
 
 
 def generate_ai_backstory_challenge(sql_query, previous_attempt=None, feedback=None):
+    """
+    Uses the LLM to transform SQL into an immersive narrative challenge.
 
+    IMPORTANT:
+    The AI NEVER sees the expected results.
+    It only sees:
+        - Database schema
+        - SQL analysis metadata
+        - Strict rules to avoid hallucinations
+
+    If the AI output fails validation, we retry with feedback.
+    This creates a self-correcting generation loop.
+    """
     schema_text = format_schema_for_llm()
 
     parsed = QueryAnalyzer.parse(sql_query)
@@ -366,6 +462,8 @@ def generate_ai_backstory_challenge(sql_query, previous_attempt=None, feedback=N
             If the narrative is already good, keep it and only fix the title tone.
             """
     else:
+        # When the AI fails validation, we send the previous output
+        # and feedback so the model can iteratively fix mistakes.
         correction_block = ""
 
     prompt = f"""
@@ -439,6 +537,8 @@ def generate_ai_backstory_challenge(sql_query, previous_attempt=None, feedback=N
         }}
     """
 
+    # We force the model to output STRICT JSON.
+    # clean_llm_json() later removes markdown/code fences if the model cheats.
     response = ollama.chat(
         model=MODEL,
         options={"temperature": 0.5},
@@ -468,6 +568,7 @@ def generate_ai_backstory_challenge(sql_query, previous_attempt=None, feedback=N
 
 
 def generate_sql_by_difficulty(difficulty):
+    """ Routes difficulty string to the correct SQL generator. """
     if difficulty == "VERY_EASY":
         return generate_very_easy_sql()
     if difficulty == "EASY":
@@ -531,6 +632,14 @@ def generate_valid_sql_with_rows(difficulty: str, max_tries: int = 15):
 
 
 def generate_realistic_condition(table: str, alias: str | None = None):
+    """
+    Generates realistic WHERE conditions using real DB values.
+
+    This prevents:
+        - Impossible filters
+        - Empty result sets
+        - Unrealistic numeric thresholds
+    """
     prefix = f"{alias}." if alias else ""
     column_type = random.choice(["numeric", "text"])
 
@@ -569,35 +678,49 @@ def generate_realistic_condition(table: str, alias: str | None = None):
 
 
 def generate_and_store_challenge(chapter: int, difficulty: str):
+    """
+    Challenge generation entrypoint.
+
+    Pipeline overview:
+    ------------------------------------------------
+    1) Generate VALID SQL (no AI)
+    2) Generate narrative using LLM
+    3) Validate narrative immersion
+    4) Generate progressive hints
+    5) Persist challenge in system DB
+
+    The pipeline retries AI generation up to 5 times if needed.
+    If AI repeatedly fails → challenge is discarded.
+    """
     valid_difficulties = DIFFICULTY_TO_VALUE
 
     if difficulty not in valid_difficulties:
         raise ValueError(f"Invalid difficulty: {difficulty}")
 
     # ─────────────────────────────────────────────
-    # FASE 1 — GENERAR SQL VÁLIDA (SIN IA)
+    # Generate valid SQL
     # ─────────────────────────────────────────────
-    print("\n🛠️ GENERANDO SQL VÁLIDA...")
+    print("\nGENERANDO SQL VÁLIDA...")
 
     generated_sql, result = generate_valid_sql_with_rows(difficulty)
 
     if not generated_sql:
-        print("💥 No se pudo generar SQL válida")
+        print("No se pudo generar SQL válida")
         return {"error": "SQL generation failed"}
 
-    print("\n💾 SQL FINAL ELEGIDA:")
+    print("\nSQL FINAL ELEGIDA:")
     print(generated_sql)
-    print(f"📊 Filas devueltas: {len(result)}")
+    print(f"Filas devueltas: {len(result)}")
 
     # ─────────────────────────────────────────────
-    # FASE 2 — GENERAR NARRATIVA CON IA
+    # Generate backstory with IA
     # ─────────────────────────────────────────────
     previous_attempt = None
     feedback = "El título debe ser narrativo e inmersivo."
 
     for attempt in range(5):
-        print(f"\n🤖 ===== IA INTENTO {attempt + 1} =====")
-        print("📝 FEEDBACK IA:", feedback if feedback else "Sin feedback")
+        print(f"\n===== IA INTENTO {attempt + 1} =====")
+        print("FEEDBACK IA:", feedback if feedback else "Sin feedback")
 
         challenge = generate_ai_backstory_challenge(
             generated_sql,
@@ -606,28 +729,28 @@ def generate_and_store_challenge(chapter: int, difficulty: str):
         )
 
         if not challenge:
-            print("❌ IA no devolvió JSON válido")
+            print("IA no devolvió JSON válido")
             continue
 
-        print("\n🧠 RESPUESTA IA:")
+        print("\nRESPUESTA IA:")
         print(json.dumps(challenge, indent=2, ensure_ascii=False))
 
-        # ───────── VALIDACIONES SOLO DE NARRATIVA ─────────
+        # ───────── Backstory Validation ─────────
 
         if title_not_immersive(challenge["title"]):
             previous_attempt = challenge
-            print("❌ Título rompe inmersión")
+            print("Título rompe inmersión")
             feedback = "El título debe ser narrativo e inmersivo."
             continue
 
-        print("✅ Narrativa aceptada")
+        print("Narrativa aceptada")
 
         # ─────────────────────────────────────────────
-        # GENERAR HINTS + GUARDAR RETO
+        # Hint generation with IA + save challenge
         # ─────────────────────────────────────────────
         hints = generate_hints(generated_sql, challenge["description"])
 
-        print("💡 Hints generados:")
+        print("Hints generados:")
         for h in hints:
             print("-", h)
 
@@ -643,11 +766,11 @@ def generate_and_store_challenge(chapter: int, difficulty: str):
             difficulty
         )
 
-        print("💾 RETO GUARDADO EN BD")
+        print("RETO GUARDADO EN BD")
         return {"status": "challenge created"}
 
     # ─────────────────────────────────────────────
-    # SI LA IA FALLA TRAS 5 INTENTOS
+    # IA fails after 5 attempts
     # ─────────────────────────────────────────────
-    print("\n💥 La IA falló tras 5 intentos")
+    print("\nLa IA falló tras 5 intentos")
     return {"error": "AI failed after 5 attempts"}

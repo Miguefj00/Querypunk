@@ -2,12 +2,19 @@ import random
 
 from app.services.challenge_generator_service.sql_randomizer import pick_any_column_safe
 
+"""
+Helper utilities for SQL generation.
+"""
+
 
 def build_select_list(table: str, alias: str | None = None, allow_two_cols_prob: float = 0.3):
     """
-    Devuelve una lista SELECT válida de 1 o 2 columnas reales.
-    - Nunca devuelve columnas duplicadas
-    - Siempre intenta usar columnas existentes
+    Builds a safe SELECT clause using real columns.
+
+    Guarantees:
+        - Existing columns only
+        - No duplicates
+        - 1–2 columns max (difficulty control)
     """
 
     prefix = f"{alias}." if alias else ""

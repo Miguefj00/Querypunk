@@ -5,6 +5,12 @@ from fastapi.responses import RedirectResponse
 
 from app.database.connection import Base, engine
 
+"""
+Querypunk Backend Application Entry Point.
+
+Initializes the FastAPI app, database and registers all routers.
+"""
+
 app = FastAPI(
     title="Querypunk API",
     description="Backend del videojuego serio Querypunk",
@@ -26,11 +32,14 @@ app = FastAPI(
 
 @app.get("/", include_in_schema=False)
 def root():
+    """ Redirects base URL to interactive Swagger documentation. """
     return RedirectResponse(url="/docs")
 
 
+# Create database tables if they do not exist
 Base.metadata.create_all(bind=engine)
 
+# API routers grouped by domain
 app.include_router(auth_router.router)
 app.include_router(user_router.router)
 app.include_router(group_router.router)

@@ -18,7 +18,7 @@ def get_challenge_leaderboard(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token)
 ):
-    """Ranking per challenge"""
+    """ Ranking per challenge. """
     return LeaderboardService.get_challenge_leaderboard(db, challenge_id)
 
 
@@ -28,7 +28,7 @@ def get_chapter_leaderboard(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token)
 ):
-    """Ranking per chapter"""
+    """ Ranking per chapter. """
     return LeaderboardService.get_chapter_leaderboard(db, chapter_id)
 
 
@@ -37,5 +37,5 @@ def get_global_leaderboard(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token)
 ):
-    """Global game ranking"""
+    """ Global game ranking. """
     return LeaderboardService.get_global_leaderboard(db)

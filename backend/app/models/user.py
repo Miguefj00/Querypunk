@@ -5,7 +5,7 @@ from app.database.connection import Base
 
 
 class User(Base):
-    """Represents user registered in system"""
+    """ Represents user registered in system. """
     __tablename__ = "User"
 
     id: Mapped[int] = mapped_column(primary_key=True)
