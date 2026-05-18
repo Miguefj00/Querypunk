@@ -34,9 +34,22 @@ class GameplayService:
 
         validate_query(query, challenge)
 
-        challenge_run = ChallengeRunRepository.get_active_run(db, user_id, challenge_id)
+        active_run = ChallengeRunRepository.get_user_active_run(db, user_id)
 
-        if not challenge_run:
+        if active_run:
+            # If the active run belongs to another challenge → BLOCK
+            if active_run.challenge_id != challenge_id:
+                raise HTTPException(
+                    status_code=409,
+                    detail=(
+                        "You already have an active run in another challenge. "
+                        "Cancel or finish it before starting a new one."
+                    )
+                )
+            # If same challenge → reuse run
+            challenge_run = active_run
+        else:
+            # No active run → create new one
             challenge_run = ChallengeRunRepository.create_run(db, user_id, challenge_id)
 
         start = time.time()

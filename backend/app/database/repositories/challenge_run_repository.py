@@ -19,6 +19,18 @@ class ChallengeRunRepository:
         )
 
     @staticmethod
+    def get_user_active_run(db: Session, user_id: int) -> ChallengeRun | None:
+        # Returns the active run of a user across ALL challenges.
+        return (
+            db.query(ChallengeRun)
+            .filter(
+                ChallengeRun.user_id == user_id,
+                ChallengeRun.finished_at.is_(None)
+            )
+            .first()
+        )
+
+    @staticmethod
     def create_run(db: Session, user_id: int, challenge_id: int) -> ChallengeRun:
         # Creates and starts a new challenge run
         run = ChallengeRun(
