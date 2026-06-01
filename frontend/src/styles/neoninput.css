@@ -1,0 +1,88 @@
+.neon-input-wrapper {
+
+    position: relative;
+
+    width: 100%;
+}
+
+.neon-input {
+
+    width: 100%;
+
+    padding: 14px;
+
+    padding-right: 55px;
+
+    background:
+            rgba(15,23,42,0.72);
+
+    border:
+            1px solid rgba(0,255,231,0.35);
+
+    border-radius: 12px;
+
+    color: white;
+
+    outline: none;
+
+    transition:
+            var(--transition-fast);
+
+    font-size: 15px;
+
+    backdrop-filter: blur(8px);
+}
+
+.neon-input:focus {
+
+    border-color:
+            var(--neon-blue);
+
+    box-shadow:
+            0 0 12px rgba(0,255,231,0.45);
+}
+
+.neon-input::placeholder {
+
+    color: #64748b;
+}
+
+/* ========= TOGGLE ========= */
+
+.password-toggle {
+
+    position: absolute;
+
+    top: 50%;
+    right: 14px;
+
+    transform: translateY(-50%);
+
+    background: transparent;
+
+    border: none;
+
+    color: var(--neon-blue);
+
+    cursor: pointer;
+
+    font-size: 18px;
+
+    transition:
+            var(--transition-fast);
+
+    text-shadow:
+            0 0 10px rgba(0,229,255,0.6);
+}
+
+.password-toggle:hover {
+
+    color: var(--neon-pink);
+
+    text-shadow:
+            0 0 12px rgba(255,0,200,0.8);
+
+    transform:
+            translateY(-50%)
+            scale(1.1);
+}

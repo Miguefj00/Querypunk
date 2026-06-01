@@ -1,0 +1,53 @@
+:root {
+
+    /* ========= COLORS ========= */
+
+    --bg-primary: #050816;
+
+    --bg-secondary: #0b1023;
+
+    --bg-card: rgba(15, 23, 42, 0.72);
+
+    --bg-glass: rgba(255,255,255,0.03);
+
+    --neon-pink: #ff00c8;
+
+    --neon-blue: #00e5ff;
+
+    --neon-purple: #9d00ff;
+
+    --text-primary: #f8fafc;
+
+    --text-secondary: #94a3b8;
+
+    --error-color: #ff4d6d;
+
+    /* ========= SHADOWS ========= */
+
+    --shadow-pink:
+            0 0 10px rgba(255,0,200,0.5),
+            0 0 20px rgba(255,0,200,0.4);
+
+    --shadow-blue:
+            0 0 10px rgba(0,229,255,0.5),
+            0 0 20px rgba(0,229,255,0.4);
+
+    /* ========= BORDERS ========= */
+
+    --border-neon:
+            1px solid rgba(0,229,255,0.4);
+
+    /* ========= RADII ========= */
+
+    --radius-lg: 18px;
+
+    --radius-md: 12px;
+
+    --radius-sm: 8px;
+
+    /* ========= TRANSITIONS ========= */
+
+    --transition-fast: 0.2s ease;
+
+    --transition-normal: 0.3s ease;
+}

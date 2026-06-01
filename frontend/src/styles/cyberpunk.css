@@ -1,0 +1,60 @@
+.glass-panel {
+
+    background: rgba(10,15,30,0.72);
+
+    backdrop-filter: blur(14px);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    box-shadow:
+            0 0 25px rgba(0,229,255,0.08);
+
+    border-radius: var(--radius-lg);
+}
+
+.neon-text {
+
+    color: var(--neon-pink);
+
+    text-shadow:
+            0 0 5px rgba(255,0,200,0.8),
+            0 0 15px rgba(255,0,200,0.6);
+}
+
+.neon-border-blue {
+
+    border: 1px solid rgba(0,229,255,0.5);
+
+    box-shadow: var(--shadow-blue);
+}
+
+.neon-border-pink {
+
+    border: 1px solid rgba(255,0,200,0.5);
+
+    box-shadow: var(--shadow-pink);
+}
+
+.cyberpunk-grid {
+
+    position: absolute;
+
+    inset: 0;
+
+    background-image:
+            linear-gradient(
+                    rgba(255,255,255,0.03) 1px,
+                    transparent 1px
+            ),
+            linear-gradient(
+                    90deg,
+                    rgba(255,255,255,0.03) 1px,
+                    transparent 1px
+            );
+
+    background-size: 40px 40px;
+
+    pointer-events: none;
+
+    opacity: 0.15;
+}

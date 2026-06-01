@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
+
 from app.api import gameplay_router, auth_router, user_router, chapter_router, challenge_router, group_router, \
     hint_router, leaderboard_router, generator_and_ai_router, analytics_router, game_settings_router
 from fastapi.responses import RedirectResponse
@@ -35,6 +37,17 @@ def root():
     """ Redirects base URL to interactive Swagger documentation. """
     return RedirectResponse(url="/docs")
 
+
+# React frontend Cors
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Create database tables if they do not exist
 Base.metadata.create_all(bind=engine)

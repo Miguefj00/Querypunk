@@ -1,0 +1,38 @@
+.neon-button {
+
+    width: 100%;
+
+    padding: 14px;
+
+    background:
+            linear-gradient(
+                    90deg,
+                    #ff00ff,
+                    #00ffe7
+            );
+
+    border: none;
+
+    border-radius: 12px;
+
+    color: black;
+
+    font-weight: 700;
+
+    font-size: 15px;
+
+    cursor: pointer;
+
+    transition: var(--transition-fast);
+
+    box-shadow:
+            0 0 12px rgba(255,0,255,0.5);
+}
+
+.neon-button:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+            0 0 20px rgba(0,255,231,0.8);
+}

@@ -1,0 +1,149 @@
+.auth-layout {
+
+    width: 100vw;
+    height: 100vh;
+
+    position: relative;
+
+    overflow: hidden;
+
+    background-image:
+            linear-gradient(
+                    rgba(255,255,255,0.015) 1px,
+                    transparent 1px
+            ),
+            linear-gradient(
+                    90deg,
+                    rgba(255,255,255,0.015) 1px,
+                    transparent 1px
+            );
+
+    background-size: 60px 60px;
+}
+
+.auth-layout::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+            radial-gradient(
+                    circle at 20% 20%,
+                    rgba(255,0,200,0.12),
+                    transparent 30%
+            ),
+            radial-gradient(
+                    circle at 80% 80%,
+                    rgba(0,255,255,0.10),
+                    transparent 30%
+            );
+
+    pointer-events: none;
+}
+
+/* ========= GRID ========= */
+
+.cyberpunk-grid {
+
+    position: absolute;
+
+    inset: 0;
+
+    background-image:
+            linear-gradient(
+                    rgba(255,255,255,0.03) 1px,
+                    transparent 1px
+            ),
+            linear-gradient(
+                    90deg,
+                    rgba(255,255,255,0.03) 1px,
+                    transparent 1px
+            );
+
+    background-size: 40px 40px;
+
+    animation:
+            gridMove 18s linear infinite;
+
+    opacity: 0.12;
+}
+
+/* ========= OVERLAY ========= */
+
+.auth-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+            radial-gradient(
+                    circle at 20% 20%,
+                    rgba(255,0,200,0.08),
+                    transparent 25%
+            ),
+            radial-gradient(
+                    circle at 80% 80%,
+                    rgba(0,229,255,0.08),
+                    transparent 25%
+            );
+}
+
+/* ========= SCANLINES ========= */
+
+.scanlines {
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+            repeating-linear-gradient(
+                    to bottom,
+                    rgba(255,255,255,0.02),
+                    rgba(255,255,255,0.02) 1px,
+                    transparent 2px,
+                    transparent 4px
+            );
+
+    opacity: 0.08;
+
+    pointer-events: none;
+}
+
+/* ========= CONTENT ========= */
+
+.auth-content {
+
+    position: relative;
+
+    z-index: 5;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 40px;
+}
+
+/* ========= ANIMATIONS ========= */
+
+@keyframes gridMove {
+
+    from {
+
+        transform: translateY(0);
+    }
+
+    to {
+
+        transform: translateY(40px);
+    }
+}
