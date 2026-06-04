@@ -24,8 +24,6 @@ class AuthService:
                 detail="Invalid credentials"
             )
 
-        SessionRepository.close_active_sessions_by_user(db, user.id)
-
         session = SessionRepository.create(
             db=db,
             user_id=user.id,
@@ -50,8 +48,11 @@ class AuthService:
         }
 
     @staticmethod
-    def logout(db: Session, user_id: int):
-        """ Closes all active sessions of the user. """
-        SessionRepository.close_active_sessions_by_user(db, user_id)
+    def logout(
+            db: Session,
+            session_id: int
+    ):
+        """ Closes user active session. """
+        SessionRepository.close_session(db, session_id)
 
         return {"message": "Logout successful"}

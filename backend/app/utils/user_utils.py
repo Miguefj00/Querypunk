@@ -77,6 +77,64 @@ def get_current_user_from_token(
     return user
 
 
+def get_current_session_from_token(
+        token: str = Depends(oauth2_scheme),
+        db: Session = Depends(get_db)
+):
+    """
+    Extracts and validates the authenticated user session from JWT token.
+
+    Checks:
+    - Token integrity
+    - Active session existence
+
+    Returns the authenticated Session object.
+    Raises HTTP 401 if validation fails.
+    """
+    try:
+
+        payload = decode_token(token)
+
+        session_id = payload.get(
+            "session_id"
+        )
+
+        if not session_id:
+
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token"
+            )
+
+    except Exception:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token"
+        )
+
+    session = SessionRepository.get_by_id(
+        db,
+        session_id
+    )
+
+    if not session:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Session not found"
+        )
+
+    if session.logout_time is not None:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Session expired"
+        )
+
+    return session
+
+
 def generate_password_from_identifier(identifier: str) -> str:
     """
     Generates a default password from an external identifier.

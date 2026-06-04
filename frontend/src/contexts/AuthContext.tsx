@@ -6,6 +6,7 @@ import {
 } from "react";
 
 import { jwtDecode } from "jwt-decode";
+import {getUserById} from "../services/users.service.ts";
 
 interface JwtPayload {
     sub: string;
@@ -19,6 +20,7 @@ interface User {
     username: string;
     user_id: number;
     role_id: number;
+    email?: string;
 }
 
 interface AuthContextType {
@@ -52,18 +54,27 @@ export const AuthProvider = ({
             : null;
     });
 
-    const login = (token: string) => {
+    const login = async(token: string) => {
+
+        localStorage.setItem(
+            "token",
+            token
+        );
 
         const decoded =
             jwtDecode<JwtPayload>(token);
+
+        const fullUser =
+            await getUserById(
+                decoded.user_id
+            );
 
         const userData: User = {
             username: decoded.sub,
             user_id: decoded.user_id,
             role_id: decoded.role_id,
+            email: fullUser.email,
         };
-
-        localStorage.setItem("token", token);
 
         localStorage.setItem(
             "user",

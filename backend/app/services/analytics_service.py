@@ -336,3 +336,19 @@ class AnalyticsService:
             response.append(ch)
 
         return response
+
+    @staticmethod
+    def get_my_progress(
+            db: Session,
+            user_id: int
+    ):
+        """
+        Returns only the progress section
+        for the currently authenticated user.
+        """
+
+        return AnalyticsService._get_user_progress(
+            db,
+            user_id
+        )
+    

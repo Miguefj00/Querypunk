@@ -43,7 +43,9 @@ export default function LoginPage() {
                 password
             );
 
-            login(data.access_token);
+            await login(
+                data.access_token
+            );
 
             const user = JSON.parse(
                 localStorage.getItem("user")!

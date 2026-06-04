@@ -25,21 +25,22 @@ class SessionRepository:
         return db.get(UserSession, session_id)
 
     @staticmethod
-    def close_active_sessions_by_user(db: Session, user_id: int) -> None:
-        # Closes any open sessions when user logs out
-        sessions = (
+    def close_session(
+            db: Session,
+            session_id: int
+    ):
+        # Close user active session
+        session = (
             db.query(UserSession)
-            .filter(
-                UserSession.user_id == user_id,
-                UserSession.logout_time.is_(None)
-            )
-            .all()
+            .filter(UserSession.id == session_id)
+            .first()
         )
 
-        for session in sessions:
+        if session and session.logout_time is None:
+
             session.logout_time = datetime.utcnow()
 
-        db.commit()
+            db.commit()
 
     @staticmethod
     def delete_old_sessions(db: Session, days: int = 30):

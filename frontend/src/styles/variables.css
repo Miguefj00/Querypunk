@@ -51,3 +51,33 @@
 
     --transition-normal: 0.3s ease;
 }
+
+/* Scrollbar general */
+
+::-webkit-scrollbar {
+
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+
+    background:
+            rgba(5,10,25,0.95);
+}
+
+::-webkit-scrollbar-thumb {
+
+    background:
+            rgba(80,90,120,0.7);
+
+    border-radius: 20px;
+
+    border:
+            2px solid rgba(5,10,25,0.95);
+}
+
+::-webkit-scrollbar-thumb:hover {
+
+    background:
+            rgba(120,130,170,0.9);
+}

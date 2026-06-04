@@ -6,6 +6,7 @@ from app.schemas.game_settings import GameSettingsUpdate, GameSettingsResponse
 from app.services.game_settings_service import GameSettingsService
 from app.utils.role_utils import require_role, ROLE_ADMIN, ROLE_TEACHER
 from app.models import User
+from app.utils.user_utils import get_current_user_from_token
 
 router = APIRouter(prefix="/game-settings", tags=["Game Settings"])
 
@@ -13,9 +14,9 @@ router = APIRouter(prefix="/game-settings", tags=["Game Settings"])
 @router.get("/", response_model=GameSettingsResponse)
 def get_settings(
         db: Session = Depends(get_db),
-        current_user: User = Depends(require_role([ROLE_ADMIN, ROLE_TEACHER]))
+        current_user = Depends(get_current_user_from_token)
 ):
-    """ Get game settings (ADMIN/TEACHER). """
+    """ Get game settings """
     return GameSettingsService.get_settings(db)
 
 

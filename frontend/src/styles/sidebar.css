@@ -1,0 +1,55 @@
+.sidebar {
+
+    width: 260px;
+
+    background: rgba(5,10,25,0.95);
+
+    border-right:
+            1px solid rgba(0,229,255,0.2);
+
+    padding: 30px;
+}
+
+.sidebar-logo {
+
+    margin-bottom: 40px;
+
+    font-family: Orbitron;
+}
+
+.sidebar-logo span {
+
+    color: var(--neon-pink);
+}
+
+.sidebar nav {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 16px;
+}
+
+.sidebar a {
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    transition: 0.2s;
+}
+
+.sidebar a:hover {
+
+    background:
+            rgba(0,229,255,0.08);
+}
+
+.sidebar a.active {
+
+    background:
+            rgba(255,0,200,0.12);
+
+    color: var(--neon-pink);
+}
