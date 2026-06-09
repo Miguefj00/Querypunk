@@ -8,3 +8,13 @@ export async function getMyProgress() {
 
     return response.data;
 }
+
+export async function getMyChallengesProgress() {
+
+    const response =
+        await api.get(
+            "/progress/my-challenges"
+        );
+
+    return response.data;
+}

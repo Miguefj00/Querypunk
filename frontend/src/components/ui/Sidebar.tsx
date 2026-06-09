@@ -1,8 +1,39 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate }
+    from "react-router-dom";
 
 import "../../styles/sidebar.css";
 
+import {
+    logout
+} from "../../services/auth.service";
+import {useAuth} from "../../contexts/AuthContext.tsx";
+
 export default function Sidebar() {
+
+    const navigate =
+        useNavigate();
+
+    const { logout: logoutContext } =
+        useAuth();
+
+    const handleLogout =
+        async () => {
+
+            try {
+
+                await logout();
+
+            } catch (error) {
+
+                console.error(error);
+
+            } finally {
+
+                logoutContext();
+
+                navigate("/");
+            }
+        };
 
     return (
 
@@ -26,17 +57,19 @@ export default function Sidebar() {
                     🏆 Rankings
                 </NavLink>
 
-                <NavLink to="/student/progress">
-                    📈 Mi progreso
-                </NavLink>
-
                 <NavLink to="/student/profile">
                     👤 Mi perfil
                 </NavLink>
 
+                <button
+                    className="logout-button"
+                    onClick={handleLogout}
+                >
+                    Cerrar sesión
+                </button>
+
             </nav>
 
         </aside>
-
     );
 }

@@ -2,19 +2,25 @@
 
     width: 260px;
 
+    height: 100vh;
+
     background: rgba(5,10,25,0.95);
 
     border-right:
             1px solid rgba(0,229,255,0.2);
 
     padding: 30px;
+
+    display: flex;
+
+    flex-direction: column;
 }
 
 .sidebar-logo {
 
     margin-bottom: 40px;
 
-    font-family: Orbitron;
+    font-family: Orbitron, serif;
 }
 
 .sidebar-logo span {
@@ -29,6 +35,8 @@
     flex-direction: column;
 
     gap: 16px;
+
+    flex: 1;
 }
 
 .sidebar a {
@@ -52,4 +60,39 @@
             rgba(255,0,200,0.12);
 
     color: var(--neon-pink);
+}
+
+.logout-button {
+
+    width: 100%;
+
+    margin-top: auto;
+
+    padding: 14px;
+
+    border: 1px solid
+    rgba(255,0,100,0.35);
+
+    background:
+            rgba(255,0,100,0.08);
+
+    color: #ff5a8a;
+
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    transition: .25s;
+}
+
+.logout-button:hover {
+
+    background:
+            rgba(255,0,100,0.15);
+
+    border-color:
+            rgba(255,0,100,0.6);
+
+    transform:
+            translateY(-2px);
 }

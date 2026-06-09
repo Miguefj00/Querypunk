@@ -346,9 +346,38 @@ class AnalyticsService:
         Returns only the progress section
         for the currently authenticated user.
         """
-
         return AnalyticsService._get_user_progress(
             db,
             user_id
         )
-    
+
+    @staticmethod
+    def get_my_challenges_progress(
+            db: Session,
+            user_id: int
+    ):
+        """ Returns progress inside a chapter. """
+        solved = (
+            db.query(
+                Leaderboard.challenge_id,
+                Challenge.chapter_id,
+                Leaderboard.score
+            )
+            .join(
+                Challenge,
+                Challenge.id == Leaderboard.challenge_id
+            )
+            .filter(
+                Leaderboard.user_id == user_id
+            )
+            .all()
+        )
+
+        return [
+            {
+                "challenge_id": row.challenge_id,
+                "chapter_id": row.chapter_id,
+                "best_score": row.score
+            }
+            for row in solved
+        ]

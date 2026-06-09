@@ -9,9 +9,8 @@ import LoginPage from "./pages/auth/LoginPage";
 import StudentLayout from "./components/layout/StudentLayout";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
-import ChaptersPage from "./pages/student/ChaptersPage";
+import Gameplay from "./pages/student/Gameplay.tsx";
 import RankingsPage from "./pages/student/RankingsPage";
-import ProgressPage from "./pages/student/ProgressPage";
 import ProfilePage from "./pages/student/ProfilePage";
 
 function App() {
@@ -39,17 +38,12 @@ function App() {
 
                     <Route
                         path="chapters"
-                        element={<ChaptersPage />}
+                        element={<Gameplay />}
                     />
 
                     <Route
                         path="rankings"
                         element={<RankingsPage />}
-                    />
-
-                    <Route
-                        path="progress"
-                        element={<ProgressPage />}
                     />
 
                     <Route

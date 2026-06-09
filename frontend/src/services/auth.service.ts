@@ -30,6 +30,11 @@ export const loginRequest = async (
     return response.data;
 };
 
-export const logoutRequest = async () => {
-    return await api.post("/auth/logout");
+export const logout = async () => {
+
+    const response = await api.post(
+        "/auth/logout"
+    );
+
+    return response.data;
 };
