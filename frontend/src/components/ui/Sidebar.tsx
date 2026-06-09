@@ -45,7 +45,10 @@ export default function Sidebar() {
 
             <nav>
 
-                <NavLink to="/student">
+                <NavLink
+                    to="/student"
+                    end
+                >
                     🏠 Inicio
                 </NavLink>
 
