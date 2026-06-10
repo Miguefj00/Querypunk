@@ -240,7 +240,7 @@ export default function ChallengeModal({
                         <div className="hint-panel">
 
                             <h3>
-                                💡 PISTAS DESBLOQUEADAS
+                                PISTAS DESBLOQUEADAS
                             </h3>
 
                             {

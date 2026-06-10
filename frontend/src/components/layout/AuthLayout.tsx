@@ -13,7 +13,7 @@ export default function AuthLayout({
 
         <div className="auth-layout">
 
-            {/* GRID CYBERPUNK */}
+            {/* CYBERPUNK GRID */}
             <div className="cyberpunk-grid" />
 
             {/* GLOW */}

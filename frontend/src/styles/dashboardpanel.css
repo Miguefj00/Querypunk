@@ -10,7 +10,7 @@
 
     padding: 25px;
 
-    min-height: 320px;
+    min-height: 280px;
 
     box-shadow:
             0 0 15px rgba(0,229,255,0.08);
@@ -99,17 +99,43 @@
     text-transform: uppercase;
 }
 
-.network-status {
+.system-status-grid {
 
     display: flex;
 
     flex-direction: column;
 
-    gap: 18px;
+    gap: 12px;
+}
 
-    color: white;
+.system-status-item {
 
-    font-size: 16px;
+    display: flex;
+
+    justify-content: space-between;
+
+    padding: 10px 14px;
+
+    border-radius: 10px;
+
+    background:
+            rgba(255,255,255,.03);
+}
+
+.system-status-item strong {
+
+    color: var(--neon-blue);
+}
+
+.system-status-footer {
+
+    margin-top: 10px;
+
+    text-align: center;
+
+    opacity: .8;
+
+    font-size: .85rem;
 }
 
 .progress-header {
@@ -322,7 +348,7 @@
 
     color: var(--neon-blue);
 
-    font-family: Orbitron;
+    font-family: Orbitron, serif;
 }
 
 .users-modal-header button {

@@ -238,7 +238,7 @@ export default function StudentDashboard() {
             <div className="dashboard-grid">
 
                 <DashboardPanel
-                    title="MIEMBROS DE NIGHT CITY"
+                    title="USUARIOS DE NIGHT CITY"
                 >
 
                     <div className="agent-list">
@@ -293,49 +293,71 @@ export default function StudentDashboard() {
                 </DashboardPanel>
 
                 <DashboardPanel
-                    title="ESTADO DE LA RED"
+                    title="CONFIGURACIÓN DEL SISTEMA"
                 >
 
                     {settings && (
 
-                        <div className="network-status">
+                        <div className="system-status-grid">
 
-                            <div>
+                            <div className="system-status-item">
 
-                                {
-                                    settings.show_global_leaderboard
-                                        ? "🟢"
-                                        : "🔴"
-                                }
+                <span>
+                    Ranking Global
+                </span>
 
-                                {" "}
-                                Ranking Global
-
-                            </div>
-
-                            <div>
-
-                                {
-                                    settings.show_chapter_leaderboard
-                                        ? "🟢"
-                                        : "🔴"
-                                }
-
-                                {" "}
-                                Ranking por Capítulos
+                                <strong>
+                                    {
+                                        settings.show_global_leaderboard
+                                            ? "ACTIVO"
+                                            : "OCULTO"
+                                    }
+                                </strong>
 
                             </div>
 
-                            <div>
+                            <div className="system-status-item">
+
+                <span>
+                    Ranking Capítulos
+                </span>
+
+                                <strong>
+                                    {
+                                        settings.show_chapter_leaderboard
+                                            ? "ACTIVO"
+                                            : "OCULTO"
+                                    }
+                                </strong>
+
+                            </div>
+
+                            <div className="system-status-item">
+
+                <span>
+                    Ranking Retos
+                </span>
+
+                                <strong>
+                                    {
+                                        settings.show_challenge_leaderboard
+                                            ? "ACTIVO"
+                                            : "OCULTO"
+                                    }
+                                </strong>
+
+                            </div>
+
+                            <div className="system-status-footer">
 
                                 {
-                                    settings.show_challenge_leaderboard
-                                        ? "🟢"
-                                        : "🔴"
+                                    [
+                                        settings.show_global_leaderboard,
+                                        settings.show_chapter_leaderboard,
+                                        settings.show_challenge_leaderboard
+                                    ].filter(Boolean).length
                                 }
-
-                                {" "}
-                                Ranking por Retos
+                                / 3 módulos públicos
 
                             </div>
 
@@ -348,24 +370,12 @@ export default function StudentDashboard() {
                 <div className="full-width-panel">
 
                     <DashboardPanel
-                        title="PROGRESO DEL AGENTE"
+                        title="PROGRESO DEL USUARIO"
                     >
 
                         {progress && (
 
                             <>
-
-                                <div className="progress-header">
-
-                                    <span>
-                                        Progreso global
-                                    </span>
-
-                                                                    <span>
-                                        {progressPercentage}%
-                                    </span>
-
-                                </div>
 
                                 <div className="progress-bar">
 
@@ -387,7 +397,9 @@ export default function StudentDashboard() {
 
                                     {totalChallengesGlobal}
 
-                                    {" retos completados"}
+                                    {" retos completados "}
+
+                                    ({progressPercentage}%)
 
                                 </div>
 
