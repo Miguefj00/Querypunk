@@ -17,6 +17,8 @@ interface Props {
     challenge: any;
 
     onClose: () => void;
+
+    onChallengeSolved: () => void;
 }
 
 const DEFAULT_QUERY =
@@ -25,7 +27,8 @@ FROM table_name;`;
 
 export default function ChallengeModal({
                                            challenge,
-                                           onClose
+                                           onClose,
+                                           onChallengeSolved
                                        }: Props) {
 
 
@@ -74,6 +77,14 @@ export default function ChallengeModal({
                 setRunStarted(false);
 
                 setQuery(DEFAULT_QUERY);
+
+                await onChallengeSolved();
+
+                setTimeout(() => {
+
+                    onClose();
+
+                }, 9000);
             }
 
         } catch (error: any) {

@@ -73,6 +73,14 @@ export default function GameplayPage() {
             }
         };
 
+    const refreshProgress = async () => {
+
+        const progressData =
+            await getMyChallengesProgress();
+
+        setProgress(progressData);
+    };
+
     useEffect(() => {
 
         async function loadData() {
@@ -169,6 +177,7 @@ export default function GameplayPage() {
                         onClose={() =>
                             setSelectedChallenge(null)
                         }
+                        onChallengeSolved={refreshProgress}
                     />
 
                 )

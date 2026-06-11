@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Literal, Optional, List
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 
 
 class UserCreate(BaseModel):
@@ -12,12 +12,29 @@ class UserCreate(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    """ Payload to update user profile data. """
-    username: Optional[str] = None
-    email: Optional[EmailStr] = None
+    """ Payload to update and validate user profile data. """
+    username: str | None = None
+    email: EmailStr | None = None
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, value):
 
-    class Config:
-        from_attributes = True
+        if value is None:
+            return value
+
+        value = value.strip()
+
+        if len(value) == 0:
+            raise ValueError(
+                "Username cannot be empty"
+            )
+
+        if len(value) < 3:
+            raise ValueError(
+                "Username must contain at least 3 characters"
+            )
+
+        return value
 
 
 class ChangePasswordRequest(BaseModel):

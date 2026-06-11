@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.models.user import User
@@ -46,15 +48,52 @@ class UserRepository:
         )
 
     @staticmethod
-    def update(db: Session, user: User, user_update: UserUpdate) -> User:
-        # Update of user profile
-        update_data = user_update.model_dump(exclude_unset=True)
+    def update(
+            db: Session,
+            user: User,
+            user_update: UserUpdate
+    ) -> User:
+
+        update_data = (
+            user_update.model_dump(
+                exclude_unset=True
+            )
+        )
 
         for field, value in update_data.items():
             setattr(user, field, value)
 
-        db.commit()
+        try:
+
+            db.commit()
+
+        except IntegrityError as e:
+
+            db.rollback()
+
+            error_message = str(e.orig)
+
+            if "User.username" in error_message:
+
+                raise HTTPException(
+                    status_code=409,
+                    detail="Username already exists"
+                )
+
+            if "User.email" in error_message:
+
+                raise HTTPException(
+                    status_code=409,
+                    detail="Email already exists"
+                )
+
+            raise HTTPException(
+                status_code=400,
+                detail="Database constraint violation"
+            )
+
         db.refresh(user)
+
         return user
 
     @staticmethod

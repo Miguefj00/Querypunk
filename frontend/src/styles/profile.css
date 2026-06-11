@@ -1,0 +1,143 @@
+.profile-page {
+
+    padding: 30px;
+}
+
+.profile-grid {
+
+    display: grid;
+
+    gap: 30px;
+
+    max-width: 900px;
+
+    margin: 0 auto;
+}
+
+.profile-section {
+
+    background:
+            rgba(8,12,25,0.8);
+
+    border:
+            1px solid rgba(
+                    0,
+                    229,
+                    255,
+                    0.2
+            );
+
+    border-radius: 20px;
+
+    padding: 25px;
+
+    box-shadow:
+            0 0 15px rgba(
+                    0,
+                    229,
+                    255,
+                    0.08
+            );
+}
+
+.profile-section h2 {
+
+    margin-bottom: 20px;
+
+    color: var(--neon-blue);
+
+    font-family:
+            Orbitron,
+            sans-serif;
+
+    font-size: 18px;
+}
+
+.profile-form {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+.profile-form label {
+
+    color: white;
+
+    font-size: 14px;
+}
+
+.profile-form input {
+
+    background:
+            rgba(
+                    255,
+                    255,
+                    255,
+                    0.04
+            );
+
+    border:
+            1px solid rgba(
+                    255,
+                    255,
+                    255,
+                    0.08
+            );
+
+    border-radius: 10px;
+
+    padding: 12px;
+
+    color: white;
+
+    font-size: 14px;
+}
+
+.profile-form input:focus {
+
+    outline: none;
+
+    border-color:
+            var(--neon-blue);
+
+    box-shadow:
+            0 0 10px rgba(
+                    0,
+                    229,
+                    255,
+                    0.2
+            );
+}
+
+.profile-error {
+
+    display: block;
+
+    margin-top: 10px;
+
+    color: #ff4d6d;
+
+    font-size: 0.9rem;
+
+    text-shadow:
+            0 0 5px #ff4d6d,
+            0 0 10px #ff4d6d;
+}
+
+.profile-success {
+
+    display: block;
+
+    margin-top: 10px;
+
+    color: #00ff9f;
+
+    font-size: 0.9rem;
+
+    text-shadow:
+            0 0 5px #00ff9f,
+            0 0 10px #00ff9f;
+}

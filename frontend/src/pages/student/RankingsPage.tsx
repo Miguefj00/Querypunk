@@ -23,7 +23,7 @@ import {
 } from "../../services/settings.service";
 
 import LeaderboardTable
-    from "../../components/ranking/LeaderboardTable";
+    from "../../components/LeaderboardTable.tsx";
 
 import "../../styles/rankings.css"
 

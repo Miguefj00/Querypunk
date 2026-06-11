@@ -1,0 +1,47 @@
+.confirmation-modal {
+
+    background: #0b0f1a;
+
+    border: 2px solid #00ffff;
+
+    box-shadow:
+            0 0 10px #00ffff,
+            0 0 30px #00ffff;
+
+    padding: 2rem;
+
+    width: 450px;
+
+    text-align: center;
+}
+
+.confirmation-modal h2 {
+
+    color: #00ffff;
+
+    text-transform: uppercase;
+
+    margin-bottom: 1rem;
+}
+
+.confirmation-modal p {
+
+    color: white;
+
+    margin-bottom: 2rem;
+}
+.confirmation-actions {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 1rem;
+
+    margin-top: 2rem;
+}
+
+.confirmation-actions button {
+
+    min-width: 160px;
+}
