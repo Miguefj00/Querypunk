@@ -1,17 +1,19 @@
 import {
     BrowserRouter,
     Routes,
-    Route,
+    Route
 } from "react-router-dom";
 
 import LoginPage from "./pages/auth/LoginPage";
 
-import StudentLayout from "./components/layout/StudentLayout";
+import UserLayout from "./components/layout/UserLayout.tsx";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
-import Gameplay from "./pages/student/Gameplay.tsx";
-import RankingsPage from "./pages/student/RankingsPage";
-import ProfilePage from "./pages/student/ProfilePage";
+import TeacherDashboard from "./pages/teacher/TeacherDashboard";
+
+import Gameplay from "./pages/user/Gameplay";
+import RankingsPage from "./pages/user/RankingsPage";
+import ProfilePage from "./pages/user/ProfilePage";
 
 function App() {
 
@@ -28,12 +30,39 @@ function App() {
 
                 <Route
                     path="/student"
-                    element={<StudentLayout />}
+                    element={<UserLayout />}
                 >
 
                     <Route
                         index
                         element={<StudentDashboard />}
+                    />
+
+                    <Route
+                        path="chapters"
+                        element={<Gameplay />}
+                    />
+
+                    <Route
+                        path="rankings"
+                        element={<RankingsPage />}
+                    />
+
+                    <Route
+                        path="profile"
+                        element={<ProfilePage />}
+                    />
+
+                </Route>
+
+                <Route
+                    path="/teacher"
+                    element={<UserLayout />}
+                >
+
+                    <Route
+                        index
+                        element={<TeacherDashboard />}
                     />
 
                     <Route

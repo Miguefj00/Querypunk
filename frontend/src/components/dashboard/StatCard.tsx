@@ -1,15 +1,15 @@
 import "../../styles/statcard.css";
 
 interface Props {
-
     title: string;
-
     value: number;
+    suffix?: string;
 }
 
 export default function StatCard({
                                      title,
                                      value,
+                                     suffix = ""
                                  }: Props) {
 
     return (
@@ -21,7 +21,7 @@ export default function StatCard({
             </span>
 
             <span className="stat-value">
-                {value}
+                {value}{suffix}
             </span>
 
         </div>

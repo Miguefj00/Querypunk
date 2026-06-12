@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import {
     updateUser,
     changePassword, getUserById
-} from "../../services/users.service";
+} from "../../services/users.service.ts";
 
-import NeonInput from "../../components/ui/NeonInput";
+import NeonInput from "../../components/ui/NeonInput.tsx";
 
 import "../../styles/profile.css";
 

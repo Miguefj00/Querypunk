@@ -1,21 +1,12 @@
-import { NavLink, useNavigate }
-    from "react-router-dom";
-
-import { useState } from "react";
-
-import "../../styles/sidebar.css";
-import "../../styles/confirmationlogout.css";
-
-import ConfirmationModal
-    from "../ui/ConfirmationModal";
-
-import {
-    logout
-} from "../../services/auth.service";
-
 import {
     useAuth
 } from "../../contexts/AuthContext.tsx";
+import {useState} from "react";
+import {NavLink, useNavigate} from "react-router-dom";
+import {logout} from "../../services/auth.service.ts";
+import "../../styles/sidebar.css"
+import ConfirmationModal from "./ConfirmationModal.tsx";
+import "../../styles/confirmationlogout.css"
 
 export default function Sidebar() {
 
@@ -28,6 +19,15 @@ export default function Sidebar() {
     const [showLogoutModal,
         setShowLogoutModal] =
         useState(false);
+
+    const user = JSON.parse(
+        localStorage.getItem("user") || "{}"
+    );
+
+    const basePath =
+        user.role_id === 2
+            ? "/teacher"
+            : "/student";
 
     const handleLogout =
         async () => {
@@ -59,21 +59,27 @@ export default function Sidebar() {
             <nav>
 
                 <NavLink
-                    to="/student"
+                    to={basePath}
                     end
                 >
                     🏠 Inicio
                 </NavLink>
 
-                <NavLink to="/student/chapters">
+                <NavLink
+                    to={`${basePath}/chapters`}
+                >
                     🎮 Jugar
                 </NavLink>
 
-                <NavLink to="/student/rankings">
+                <NavLink
+                    to={`${basePath}/rankings`}
+                >
                     🏆 Rankings
                 </NavLink>
 
-                <NavLink to="/student/profile">
+                <NavLink
+                    to={`${basePath}/profile`}
+                >
                     👤 Mi perfil
                 </NavLink>
 

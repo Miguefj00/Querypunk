@@ -209,6 +209,19 @@
     margin-top: 25px;
 }
 
+.difficulty-grid.teacher-summary {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.difficulty-grid.teacher-summary .difficulty-card {
+    flex: 0 1 260px;
+    min-width: 220px;
+    padding: 25px;
+}
+
 .difficulty-card {
 
     background:

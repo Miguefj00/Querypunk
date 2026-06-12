@@ -6,7 +6,7 @@ import Topbar from "../ui/Topbar.tsx";
 
 import "../../styles/studentlayout.css";
 
-export default function StudentLayout() {
+export default function UserLayout() {
 
     return (
 

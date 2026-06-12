@@ -2,25 +2,25 @@ import { useEffect, useState } from "react";
 
 import {
     getChapters
-} from "../../services/chapters.service";
+} from "../../services/chapters.service.ts";
 
 import {
     getChallenges
-} from "../../services/challenges.service";
+} from "../../services/challenges.service.ts";
 
 import {
     getChapterLeaderboard,
     getGlobalLeaderboard
-} from "../../services/rankings.service";
+} from "../../services/rankings.service.ts";
 
 import {
     getChallengeLeaderboard
-} from "../../services/rankings.service";
+} from "../../services/rankings.service.ts";
 
 
 import {
     getGameSettings
-} from "../../services/settings.service";
+} from "../../services/settings.service.ts";
 
 import LeaderboardTable
     from "../../components/LeaderboardTable.tsx";

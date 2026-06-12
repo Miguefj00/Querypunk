@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
 
 import ChapterList
-    from "../../components/gameplay/ChapterList";
+    from "../../components/gameplay/ChapterList.tsx";
 
 import ChallengeList
-    from "../../components/gameplay/ChallengeList";
+    from "../../components/gameplay/ChallengeList.tsx";
 
 import "../../styles/challenge.css";
 
 import {
     getChapters
-} from "../../services/chapters.service";
+} from "../../services/chapters.service.ts";
 
 import {
     getMyChallengesProgress
-} from "../../services/progress.service";
+} from "../../services/progress.service.ts";
 
 import ChallengeModal
-    from "../../components/gameplay/ChallengeModal";
+    from "../../components/gameplay/ChallengeModal.tsx";
 
 import "../../styles/gameplay.css"
 import {getChallenges} from "../../services/challenges.service.ts";
@@ -25,7 +25,7 @@ import {getChallenges} from "../../services/challenges.service.ts";
 import type {
     Chapter,
     SolvedChallenge
-} from "../../types/gameplay.types";
+} from "../../types/gameplay.types.ts";
 
 export default function GameplayPage() {
 
