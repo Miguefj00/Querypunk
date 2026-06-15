@@ -50,6 +50,9 @@ export default function GroupsManagement() {
     const [csvFile, setCsvFile] =
         useState<File | null>(null);
 
+    const [, setErrorMessage] =
+        useState("");
+
     const [createSuccessMessage, setCreateSuccessMessage] =
         useState("");
 
