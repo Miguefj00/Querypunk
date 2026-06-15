@@ -10,7 +10,7 @@ from app.models.user_group import UserGroup
 from app.services.email_service import EmailService
 from app.services.user_service import UserService
 from app.database.repositories.user_repository import UserRepository
-from app.utils.role_utils import ROLE_TEACHER
+from app.utils.role_utils import ROLE_TEACHER, ROLE_ADMIN
 from app.utils.user_utils import assign_user_to_group, generate_password_from_identifier, generate_username_from_name
 
 
@@ -79,16 +79,16 @@ class GroupService:
             # User already exists
             if user:
 
-                assigned = assign_user_to_group(db, user.id, group_id)
-
-                if assigned:
-                    users_assigned += 1
-
-                    background_tasks.add_task(
-                        EmailService.send_existing_user_added,
-                        user.email,
-                        group.name
+                try:
+                    GroupService.add_user_to_group(
+                        db,
+                        group_id,
+                        user.id,
+                        background_tasks
                     )
+                    users_assigned += 1
+                except HTTPException:
+                    pass
 
             # User doesn't exist
             else:
@@ -125,6 +125,94 @@ class GroupService:
             "created_users": created_users,
             "users_assigned": users_assigned
         }
+
+    @staticmethod
+    def add_user_to_group(
+            db: Session,
+            group_id: int,
+            username: str,
+            background_tasks: BackgroundTasks
+    ):
+        """
+        Assign an existing user to a group manually.
+        Sends email notification if successful.
+        """
+
+        group = db.query(Group).filter(
+            Group.id == group_id
+        ).first()
+
+        if not group:
+            raise HTTPException(
+                status_code=404,
+                detail="Group not found"
+            )
+
+        user = db.query(User).filter(
+            User.username == username
+        ).first()
+
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found"
+            )
+
+        assigned = assign_user_to_group(
+            db,
+            user.id,
+            group.id
+        )
+
+        if not assigned:
+            raise HTTPException(
+                status_code=400,
+                detail="User already assigned to this group"
+            )
+
+        db.commit()
+
+        background_tasks.add_task(
+            EmailService.send_existing_user_added,
+            user.email,
+            group.name
+        )
+
+        return {
+            "group_id": group.id,
+            "users_assigned": 1
+        }
+
+    @staticmethod
+    def get_available_users(
+            db: Session,
+            group_id: int
+    ):
+        """ Returns users who don't belong to the group """
+        group = db.query(Group).filter(
+            Group.id == group_id
+        ).first()
+
+        if not group:
+            raise HTTPException(
+                status_code=404,
+                detail="Group not found"
+            )
+
+        assigned_ids = [
+            user.id for user in group.users
+        ]
+
+        users = db.query(User).filter(
+            User.role_id != ROLE_ADMIN
+        )
+
+        if assigned_ids:
+            users = users.filter(
+                ~User.id.in_(assigned_ids)
+            )
+
+        return users.all()
 
     @staticmethod
     def get_all_groups(db: Session):

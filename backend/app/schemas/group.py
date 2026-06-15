@@ -22,8 +22,13 @@ class GroupListResponse(BaseModel):
     """ Group listing with aggregated student count. """
     id: int
     name: str
-    description: str
+    description: str | None
     student_count: int
 
     class Config:
         from_attributes = True
+
+
+class AssignUserToGroupRequest(BaseModel):
+    """ Assign an existing user to a group manually. """
+    username: str

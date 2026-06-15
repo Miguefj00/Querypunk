@@ -1,12 +1,23 @@
 import {
     useAuth
 } from "../../contexts/AuthContext.tsx";
-import {useState} from "react";
-import {NavLink, useNavigate} from "react-router-dom";
-import {logout} from "../../services/auth.service.ts";
-import "../../styles/sidebar.css"
-import ConfirmationModal from "./ConfirmationModal.tsx";
-import "../../styles/confirmationlogout.css"
+
+import { useState } from "react";
+
+import {
+    NavLink,
+    useNavigate
+} from "react-router-dom";
+
+import {
+    logout
+} from "../../services/auth.service.ts";
+
+import "../../styles/sidebar.css";
+import "../../styles/confirmationlogout.css";
+
+import ConfirmationModal
+    from "./ConfirmationModal.tsx";
 
 export default function Sidebar() {
 
@@ -82,6 +93,35 @@ export default function Sidebar() {
                 >
                     👤 Mi perfil
                 </NavLink>
+
+                {
+                    user.role_id === 2 && (
+
+                        <>
+
+                            <div className="sidebar-section">
+                                <span className="sidebar-section-line"></span>
+                                <span className="sidebar-section-title">
+                                    GESTIÓN DEL SISTEMA
+                                </span>
+                            </div>
+
+                            <NavLink
+                                to="/teacher/system/users"
+                            >
+                                👥 Usuarios
+                            </NavLink>
+
+                            <NavLink
+                                to="/teacher/system/groups"
+                            >
+                                🏫 Grupos
+                            </NavLink>
+
+                        </>
+
+                    )
+                }
 
                 <button
                     className="logout-button"

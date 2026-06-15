@@ -1,0 +1,118 @@
+.crud-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.crud-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.crud-form input,
+.crud-form select {
+    padding: 14px;
+    border: 1px solid rgba(0,255,255,0.25);
+    border-radius: 8px;
+    background: rgba(20,20,20,0.9);
+    color: white;
+    font-size: 0.95rem;
+    transition: 0.2s;
+}
+
+.crud-form input:focus,
+.crud-form select:focus {
+    outline: none;
+    border-color: #00f7ff;
+    box-shadow: 0 0 12px rgba(0,247,255,0.25);
+}
+
+.crud-form button,
+.crud-actions button {
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(
+            135deg,
+            #00f7ff,
+            #8a2be2
+    );
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.crud-form button:hover,
+.crud-actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(0,247,255,0.25);
+}
+
+.crud-actions {
+    margin-bottom: 16px;
+}
+
+.crud-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.crud-item {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 10px;
+    transition: 0.2s;
+}
+
+.crud-item:hover {
+    background: rgba(255,255,255,0.07);
+}
+
+.crud-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #00f7ff;
+    cursor: pointer;
+}
+
+.crud-item p {
+    margin: 4px 0 0;
+    opacity: 0.7;
+    font-size: 0.9rem;
+}
+
+.crud-item button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #ff3b5f;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.crud-error {
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255, 59, 95, 0.15);
+    border: 1px solid rgba(255, 59, 95, 0.4);
+    color: #ff5f7d;
+    font-size: 0.9rem;
+}
+
+.crud-success {
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0, 255, 120, 0.12);
+    border: 1px solid rgba(0, 255, 120, 0.4);
+    color: #6cff9d;
+    font-size: 0.95rem;
+}

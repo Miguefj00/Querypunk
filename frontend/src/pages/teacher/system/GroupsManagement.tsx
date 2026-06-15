@@ -1,0 +1,691 @@
+import { useEffect, useState } from "react";
+
+import DashboardPanel
+    from "../../../components/dashboard/DashboardPanel";
+
+import {
+    getGroups,
+    createGroup,
+    updateGroup,
+    deleteGroup,
+    getGroupUsers,
+    getAvailableUsers,
+    uploadStudentsToGroup,
+    assignUserToGroup
+} from "../../../services/groups.service";
+
+import "../../../styles/groupsmanagement.css";
+import ConfirmationModal from "../../../components/ui/ConfirmationModal.tsx";
+import EditGroupModal from "../../../components/teacher/EditGroupModal.tsx";
+
+interface Group {
+
+    id: number;
+
+    name: string;
+
+    description: string;
+
+    student_count: number;
+}
+
+export default function GroupsManagement() {
+
+    const [groups, setGroups] =
+        useState<Group[]>([]);
+
+    const [selectedGroup, setSelectedGroup] =
+        useState<Group | null>(null);
+
+    const [groupUsers, setGroupUsers] =
+        useState<any[]>([]);
+
+    const [newName, setNewName] =
+        useState("");
+
+    const [newDescription,
+        setNewDescription] =
+        useState("");
+
+    const [csvFile, setCsvFile] =
+        useState<File | null>(null);
+
+    const [createSuccessMessage, setCreateSuccessMessage] =
+        useState("");
+
+    const [managementSuccessMessage, setManagementSuccessMessage] =
+        useState("");
+
+    const [showDeleteModal,
+        setShowDeleteModal] =
+        useState(false);
+
+    const [groupToDelete,
+        setGroupToDelete] =
+        useState<Group | null>(null);
+
+    const [showEditModal,
+        setShowEditModal] =
+        useState(false);
+
+    const [editingGroup,
+        setEditingGroup] =
+        useState<Group | null>(null);
+
+    const [editName, setEditName] =
+        useState("");
+
+    const [editDescription, setEditDescription] =
+        useState("");
+
+    const [availableUsers, setAvailableUsers] =
+        useState<any[]>([]);
+
+    const [selectedUsername, setSelectedUsername] =
+        useState("");
+
+    const [createErrorMessage, setCreateErrorMessage] =
+        useState("");
+
+    const [assignErrorMessage, setAssignErrorMessage] =
+        useState("");
+
+    const loadGroups = async () => {
+
+        try {
+
+            const data =
+                await getGroups();
+
+            setGroups(data);
+
+        } catch (error) {
+
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+
+        loadGroups();
+
+    }, []);
+
+    const handleCreate =
+        async () => {
+
+            setCreateErrorMessage("");
+
+            if (!newName.trim()) {
+
+                setCreateErrorMessage(
+                    "Debes indicar un nombre para el grupo."
+                );
+
+                return;
+            }
+
+            try {
+
+                await createGroup(
+                    newName,
+                    newDescription
+                );
+
+                setCreateSuccessMessage(
+                    `Grupo ${newName} creado correctamente.`
+                );
+                setManagementSuccessMessage("");
+
+                setNewName("");
+                setNewDescription("");
+
+                loadGroups();
+
+            } catch (error) {
+
+                console.error(error);
+
+                setCreateErrorMessage(
+                    "No se pudo crear el grupo."
+                );
+            }
+        };
+
+    const handleAssignUser =
+        async () => {
+
+            setAssignErrorMessage("");
+
+            if (
+                !selectedGroup ||
+                !selectedUsername
+            ) return;
+
+            try {
+
+                await assignUserToGroup(
+                    selectedGroup.id,
+                    selectedUsername
+                );
+
+                const updatedUsers =
+                    await getGroupUsers(
+                        selectedGroup.id
+                    );
+
+                setGroupUsers(updatedUsers);
+
+                const available =
+                    await getAvailableUsers(
+                        selectedGroup.id
+                    );
+
+                setAvailableUsers(available);
+
+                setSelectedUsername(
+                    available.length > 0
+                        ? available[0].username
+                        : ""
+                );
+
+                setManagementSuccessMessage(
+                    "Usuario añadido al grupo correctamente."
+                );
+
+                loadGroups();
+
+            } catch (error) {
+
+                console.error(error);
+
+                setAssignErrorMessage(
+                    "No se pudo asignar el usuario."
+                );
+            }
+        };
+
+    const handleEdit =
+        async () => {
+
+            if (
+                !editingGroup ||
+                !editName.trim()
+            ) {
+
+                setErrorMessage(
+                    "Debes indicar un nombre para el grupo."
+                );
+
+                return;
+            }
+
+            try {
+
+                await updateGroup(
+                    editingGroup.id,
+                    editName,
+                    editDescription
+                );
+
+                setManagementSuccessMessage(
+                    `Grupo ${editName} actualizado correctamente.`
+                );
+
+                if (
+                    selectedGroup?.id === editingGroup.id
+                ) {
+
+                    setSelectedGroup({
+                        ...selectedGroup,
+                        name: editName,
+                        description: editDescription
+                    });
+                }
+
+                setShowEditModal(false);
+                setEditingGroup(null);
+
+                await loadGroups();
+
+            } catch (error) {
+
+                console.error(error);
+
+                setErrorMessage(
+                    "No se pudo actualizar el grupo."
+                );
+            }
+        };
+
+    const handleDelete =
+        async (groupId: number) => {
+
+            try {
+
+                const deletedGroup =
+                    groups.find(
+                        group => group.id === groupId
+                    );
+
+                await deleteGroup(groupId);
+
+                setManagementSuccessMessage(
+                    `Grupo ${deletedGroup?.name} eliminado correctamente.`
+                );
+
+                if (
+                    selectedGroup?.id === groupId
+                ) {
+
+                    setSelectedGroup(null);
+                    setGroupUsers([]);
+                }
+
+                loadGroups();
+
+            } catch (error) {
+
+                console.error(error);
+            }
+        };
+
+    const handleSelectGroup =
+        async (group: Group) => {
+
+            try {
+
+                const users =
+                    await getGroupUsers(group.id);
+
+                const available =
+                    await getAvailableUsers(group.id);
+
+                setSelectedGroup(group);
+                setGroupUsers(users);
+                setAvailableUsers(available);
+
+                if (available.length > 0) {
+                    setSelectedUsername(
+                        available[0].username
+                    );
+                }
+
+            } catch (error) {
+
+                console.error(error);
+            }
+        };
+
+    const handleUploadCSV =
+        async () => {
+
+            if (
+                !csvFile ||
+                !selectedGroup
+            ) return;
+
+            try {
+
+                await uploadStudentsToGroup(
+                    selectedGroup.id,
+                    csvFile
+                );
+
+                const updatedUsers =
+                    await getGroupUsers(
+                        selectedGroup.id
+                    );
+
+                setGroupUsers(
+                    updatedUsers
+                );
+
+                setCsvFile(null);
+
+                loadGroups();
+
+            } catch (error) {
+
+                console.error(error);
+            }
+        };
+
+    return (
+
+        <div className="groups-management-page">
+
+            <DashboardPanel
+                title="CREAR GRUPO"
+            >
+
+                <div className="group-form">
+
+                    <input
+                        type="text"
+                        placeholder="Nombre"
+                        value={newName}
+                        onChange={(e) =>
+                            setNewName(
+                                e.target.value
+                            )
+                        }
+                    />
+
+                    <input
+                        type="text"
+                        placeholder="Descripción"
+                        value={newDescription}
+                        onChange={(e) =>
+                            setNewDescription(
+                                e.target.value
+                            )
+                        }
+                    />
+
+                    {
+                        createErrorMessage && (
+
+                            <div className="group-error">
+                                {createErrorMessage}
+                            </div>
+
+                        )
+                    }
+
+                    {
+                        createSuccessMessage && (
+
+                            <div className="group-success">
+                                {createSuccessMessage}
+                            </div>
+
+                        )
+                    }
+
+                    <button
+                        onClick={handleCreate}
+                    >
+                        Crear grupo
+                    </button>
+
+                </div>
+
+            </DashboardPanel>
+
+            <DashboardPanel
+                title="GESTIÓN DE GRUPOS"
+            >
+
+                <div className="groups-list">
+
+                    {
+                        groups.map(group => (
+
+                            <div
+                                key={group.id}
+                                className="group-item"
+                            >
+
+                                <div
+                                    className="group-clickable"
+                                    onClick={() =>
+                                        handleSelectGroup(group)
+                                    }
+                                >
+
+                                    <strong>
+                                        {group.name}
+                                    </strong>
+
+                                    <div>
+                                        {
+                                            group.student_count
+                                        } alumnos
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    className="group-delete-btn"
+                                    onClick={() => {
+
+                                        setGroupToDelete(group);
+
+                                        setShowDeleteModal(true);
+                                    }}
+                                >
+                                    Eliminar
+                                </button>
+
+                                <button
+                                    className="group-edit-btn"
+                                    onClick={() => {
+
+                                        setEditingGroup(group);
+
+                                        setEditName(group.name);
+
+                                        setEditDescription(
+                                            group.description || ""
+                                        );
+
+                                        setShowEditModal(true);
+
+                                    }}
+                                >
+                                    Editar
+                                </button>
+
+                            </div>
+
+                        ))
+                    }
+
+                    {
+                        managementSuccessMessage && (
+                            <div className="group-success">
+                                {managementSuccessMessage}
+                            </div>
+                        )
+                    }
+
+                </div>
+
+            </DashboardPanel>
+
+            {
+                selectedGroup && (
+
+                    <DashboardPanel
+                        title={`ALUMNOS DE ${selectedGroup.name}`}
+                    >
+                        <div className="selected-group-description">
+
+                            {
+                                selectedGroup.description ||
+                                "Este grupo no tiene descripción."
+                            }
+
+                        </div>
+
+                        <div className="group-users-list">
+
+                            {
+                                groupUsers.map(
+                                    (
+                                        user,
+                                        index
+                                    ) => (
+
+                                        <div
+                                            key={index}
+                                            className="group-user-item"
+                                        >
+
+                                            <strong>
+                                                {
+                                                    user.username
+                                                }
+                                            </strong>
+
+                                            <div>
+                                                {
+                                                    user.email
+                                                }
+                                            </div>
+
+                                        </div>
+
+                                    )
+                                )
+                            }
+
+                        </div>
+
+                        <div className="assign-user-title">
+                            Añadir usuario manualmente
+                        </div>
+
+                        <div className="manual-user-assign">
+
+                            <select
+                                value={selectedUsername}
+                                onChange={(e) =>
+                                    setSelectedUsername(
+                                        e.target.value
+                                    )
+                                }
+                            >
+                                {
+                                    availableUsers.map(user => (
+
+                                        <option
+                                            key={user.id}
+                                            value={user.username}
+                                        >
+                                            {user.username}
+                                        </option>
+
+                                    ))
+                                }
+                            </select>
+
+                            <button
+                                onClick={handleAssignUser}
+                                disabled={!availableUsers.length}
+                            >
+                                Añadir usuario
+                            </button>
+
+                        </div>
+
+                        {
+                            assignErrorMessage && (
+                                <div className="group-error">
+                                    {assignErrorMessage}
+                                </div>
+                            )
+                        }
+
+                        <div className="assign-user-title">
+                            Añadir usuarios automáticamente mediante .csv
+                        </div>
+
+                        <div className="csv-upload">
+
+                            <label className="custom-file-upload">
+
+                                Seleccionar CSV
+
+                                <input
+                                    type="file"
+                                    accept=".csv"
+                                    onChange={(e) =>
+                                        setCsvFile(
+                                            e.target.files?.[0] || null
+                                        )
+                                    }
+                                />
+
+                            </label>
+
+                            {
+                                csvFile && (
+                                    <div className="csv-file-name">
+                                        {csvFile.name}
+                                    </div>
+                                )
+                            }
+
+                            <button
+                                onClick={handleUploadCSV}
+                            >
+                                Importar CSV
+                            </button>
+
+                        </div>
+
+                    </DashboardPanel>
+
+                )
+            }
+
+            {
+                showDeleteModal &&
+                groupToDelete && (
+
+                    <ConfirmationModal
+                        title="ELIMINAR GRUPO"
+                        message={
+                            `¿Deseas eliminar el grupo ${groupToDelete.name}?`
+                        }
+                        confirmText="ELIMINAR"
+                        onCancel={() => {
+
+                            setShowDeleteModal(false);
+                            setGroupToDelete(null);
+
+                        }}
+                        onConfirm={async () => {
+
+                            if ("id" in groupToDelete) {
+                                await handleDelete(
+                                    groupToDelete.id
+                                );
+                            }
+
+                            setShowDeleteModal(false);
+                            setGroupToDelete(null);
+
+                        }}
+                    />
+
+                )
+            }
+
+            {
+                showEditModal &&
+                editingGroup && (
+
+                    <EditGroupModal
+                        title="EDITAR GRUPO"
+                        name={editName}
+                        description={editDescription}
+                        onNameChange={setEditName}
+                        onDescriptionChange={setEditDescription}
+                        onCancel={() => {
+
+                            setShowEditModal(false);
+                            setEditingGroup(null);
+
+                        }}
+                        onConfirm={handleEdit}
+                    />
+
+                )
+            }
+
+        </div>
+    );
+}

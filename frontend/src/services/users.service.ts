@@ -11,42 +11,61 @@ export async function getUsers() {
 export async function getUserById(
     userId: number
 ) {
-    const response = await api.get(
-        `/users/${userId}`
-    );
+
+    const response =
+        await api.get(
+            `/users/${userId}`
+        );
 
     return response.data;
 }
 
-export async function updateUser(
-    userId: number,
+export async function createUser(
     username: string,
-    email: string
+    email: string,
+    password: string,
+    role: string
 ) {
 
-    const response = await api.put(
-        `/users/${userId}`,
-        {
-            username,
-            email
-        }
-    );
+    const response =
+        await api.post(
+            "/users",
+            {
+                username,
+                email,
+                password,
+                role
+            }
+        );
 
     return response.data;
 }
 
-export async function changePassword(
-    currentPassword: string,
-    newPassword: string
+export async function deleteUser(
+    userId: number
 ) {
 
-    const response = await api.put(
-        "/users/change-password",
-        {
-            current_password: currentPassword,
-            new_password: newPassword
-        }
-    );
+    const response =
+        await api.delete(
+            `/users/${userId}`
+        );
+
+    return response.data;
+}
+
+export async function bulkDeleteUsers(
+    userIds: number[]
+) {
+
+    const response =
+        await api.delete(
+            "/users/",
+            {
+                data: {
+                    user_ids: userIds
+                }
+            }
+        );
 
     return response.data;
 }

@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 
 import {
     updateUser,
-    changePassword, getUserById
-} from "../../services/users.service.ts";
+    changePassword
+} from "../../services/profile.service.ts";
+
+import {getUserById} from "../../services/users.service.ts";
 
 import NeonInput from "../../components/ui/NeonInput.tsx";
 

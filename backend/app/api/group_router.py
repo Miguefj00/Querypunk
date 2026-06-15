@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database.current_session import get_db
 from app.schemas.user import UserInGroupResponse
 from app.services.group_service import GroupService
-from app.schemas.group import GroupImportResult, GroupResponse, GroupListResponse
+from app.schemas.group import GroupImportResult, GroupResponse, GroupListResponse, AssignUserToGroupRequest
 from app.utils.role_utils import require_role
 from app.utils.role_utils import ROLE_ADMIN, ROLE_TEACHER
 from app.models.user import User
@@ -32,6 +32,21 @@ def get_group_users(
 ):
     """ List users belonging to a group (ADMIN/TEACHER only). """
     return GroupService.get_group_users(db, group_id)
+
+
+@router.get("/{group_id}/available-users")
+def get_available_users(
+        group_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(
+            require_role([ROLE_ADMIN, ROLE_TEACHER])
+        )
+):
+    """ Lists users that don't belong to a group. """
+    return GroupService.get_available_users(
+        db,
+        group_id
+    )
 
 
 @router.post("", response_model=GroupResponse)
@@ -65,6 +80,25 @@ async def upload_students_to_group(
         db=db,
         group_id=group_id,
         file=file,
+        background_tasks=background_tasks
+    )
+
+
+@router.post("/{group_id}/assign")
+async def assign_user_to_group(
+        group_id: int,
+        payload: AssignUserToGroupRequest,
+        background_tasks: BackgroundTasks,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(
+            require_role([ROLE_ADMIN, ROLE_TEACHER])
+        )
+):
+    """ Assign existing user to group manually (ADMIN/TEACHER only). """
+    return GroupService.add_user_to_group(
+        db=db,
+        group_id=group_id,
+        username=payload.username,
         background_tasks=background_tasks
     )
 
