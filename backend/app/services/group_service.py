@@ -35,6 +35,7 @@ class GroupService:
 
         return group
 
+    @staticmethod
     async def upload_students_to_group(
             db: Session,
             group_id: int,
@@ -83,7 +84,7 @@ class GroupService:
                     GroupService.add_user_to_group(
                         db,
                         group_id,
-                        user.id,
+                        user.username,
                         background_tasks
                     )
                     users_assigned += 1

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import DashboardPanel
     from "../../../components/dashboard/DashboardPanel";
@@ -30,6 +30,8 @@ interface Group {
 }
 
 export default function GroupsManagement() {
+
+    const fileInputRef = useRef<HTMLInputElement>(null!);
 
     const [groups, setGroups] =
         useState<Group[]>([]);
@@ -346,6 +348,10 @@ export default function GroupsManagement() {
 
                 setCsvFile(null);
 
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = "";
+                }
+
                 loadGroups();
 
             } catch (error) {
@@ -602,6 +608,7 @@ export default function GroupsManagement() {
                                 Seleccionar CSV
 
                                 <input
+                                    ref={fileInputRef}
                                     type="file"
                                     accept=".csv"
                                     onChange={(e) =>
