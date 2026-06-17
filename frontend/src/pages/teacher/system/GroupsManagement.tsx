@@ -52,7 +52,7 @@ export default function GroupsManagement() {
     const [csvFile, setCsvFile] =
         useState<File | null>(null);
 
-    const [, setErrorMessage] =
+    const [editErrorMessage, setEditErrorMessage] =
         useState("");
 
     const [createSuccessMessage, setCreateSuccessMessage] =
@@ -218,7 +218,7 @@ export default function GroupsManagement() {
                 !editName.trim()
             ) {
 
-                setErrorMessage(
+                setEditErrorMessage(
                     "Debes indicar un nombre para el grupo."
                 );
 
@@ -257,7 +257,7 @@ export default function GroupsManagement() {
 
                 console.error(error);
 
-                setErrorMessage(
+                setEditErrorMessage(
                     "No se pudo actualizar el grupo."
                 );
             }
@@ -479,6 +479,8 @@ export default function GroupsManagement() {
                                             group.description || ""
                                         );
 
+                                        setEditErrorMessage("");
+
                                         setShowEditModal(true);
 
                                     }}
@@ -684,6 +686,7 @@ export default function GroupsManagement() {
                         description={editDescription}
                         onNameChange={setEditName}
                         onDescriptionChange={setEditDescription}
+                        errorMessage={editErrorMessage}
                         onCancel={() => {
 
                             setShowEditModal(false);

@@ -1,0 +1,125 @@
+.chapters-management-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.chapter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.chapter-form input {
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,255,255,0.25);
+    background: rgba(20,20,20,0.9);
+    color: white;
+}
+
+.chapter-form button {
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(
+            135deg,
+            #00f7ff,
+            #8a2be2
+    );
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.chapter-form button:hover {
+    opacity: 0.9;
+}
+
+.chapters-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.chapter-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    transition: 0.2s;
+    gap: 12px;
+}
+
+.chapter-item:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.chapter-info {
+    flex: 1;
+}
+
+.chapter-info strong {
+    color: #00f7ff;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.chapter-info div {
+    color: #d5d5d5;
+    font-size: 0.95rem;
+}
+
+.chapter-item button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.chapter-delete-btn {
+    background: #ff3b5f;
+}
+
+.chapter-delete-btn:hover {
+    background: #d92b4c;
+}
+
+.chapter-edit-btn {
+    background: #8a2be2;
+}
+
+.chapter-edit-btn:hover {
+    background: #6d1fc1;
+}
+
+.chapter-error {
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255, 50, 50, 0.12);
+    border: 1px solid rgba(255, 50, 50, 0.4);
+    color: #ff8080;
+}
+
+.chapter-success {
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0,255,150,0.12);
+    border: 1px solid rgba(0,255,150,0.4);
+    color: #7dffbe;
+}
+
+.chapter-challenges-btn {
+    background: #00f7ff;
+    color: white;
+}
+
+.chapter-challenges-btn:hover {
+    background: #00d9e0;
+}

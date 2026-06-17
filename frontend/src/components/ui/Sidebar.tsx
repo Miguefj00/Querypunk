@@ -96,9 +96,7 @@ export default function Sidebar() {
 
                 {
                     user.role_id === 2 && (
-
                         <>
-
                             <div className="sidebar-section">
                                 <span className="sidebar-section-line"></span>
                                 <span className="sidebar-section-title">
@@ -106,20 +104,25 @@ export default function Sidebar() {
                                 </span>
                             </div>
 
-                            <NavLink
-                                to="/teacher/system/users"
-                            >
+                            <NavLink to="/teacher/system/users">
                                 👥 Usuarios
                             </NavLink>
 
-                            <NavLink
-                                to="/teacher/system/groups"
-                            >
+                            <NavLink to="/teacher/system/groups">
                                 🏫 Grupos
                             </NavLink>
 
-                        </>
+                            <div className="sidebar-section">
+                                <span className="sidebar-section-line"></span>
+                                <span className="sidebar-section-title">
+                                    GESTIÓN DEL JUEGO
+                                </span>
+                            </div>
 
+                            <NavLink to="/teacher/game/chapters">
+                                📚 Capítulos, retos y pistas
+                            </NavLink>
+                        </>
                     )
                 }
 

@@ -13,6 +13,8 @@ interface Props {
     onConfirm: () => void;
 
     onCancel: () => void;
+
+    errorMessage?: string;
 }
 
 export default function EditGroupModal({
@@ -22,7 +24,8 @@ export default function EditGroupModal({
                                            onNameChange,
                                            onDescriptionChange,
                                            onConfirm,
-                                           onCancel
+                                           onCancel,
+                                           errorMessage
                                        }: Props) {
 
     return (
@@ -54,6 +57,14 @@ export default function EditGroupModal({
                     }
                     placeholder="Descripción"
                 />
+
+                {
+                    errorMessage && (
+                        <div className="group-error">
+                            {errorMessage}
+                        </div>
+                    )
+                }
 
                 <div className="confirmation-actions">
 

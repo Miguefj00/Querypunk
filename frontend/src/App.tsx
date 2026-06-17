@@ -20,6 +20,8 @@ import GroupsManagement
 import Gameplay from "./pages/user/Gameplay";
 import RankingsPage from "./pages/user/RankingsPage";
 import ProfilePage from "./pages/user/ProfilePage";
+import ChaptersManagement from "./pages/teacher/game/ChaptersManagement.tsx";
+import ChallengesManagement from "./pages/teacher/game/ChallengesManagement.tsx";
 
 function App() {
 
@@ -94,6 +96,16 @@ function App() {
                     <Route
                         path="system/groups"
                         element={<GroupsManagement />}
+                    />
+
+                    <Route
+                        path="game/chapters"
+                        element={<ChaptersManagement />}
+                    />
+
+                    <Route
+                        path="/teacher/game/chapters/:chapterId/challenges"
+                        element={<ChallengesManagement />}
                     />
 
                 </Route>

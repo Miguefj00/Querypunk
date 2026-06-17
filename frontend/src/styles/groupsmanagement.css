@@ -129,6 +129,11 @@
     color: #ff8080;
 }
 
+.confirmation-modal .group-error {
+    margin-top: 14px;
+    margin-bottom: 6px;
+}
+
 .group-success {
     padding: 12px;
     border-radius: 8px;
