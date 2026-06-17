@@ -1,0 +1,205 @@
+.hints-management-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.hint-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.hint-form textarea {
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,255,255,0.25);
+    background: rgba(20,20,20,0.9);
+    color: white;
+    resize: vertical;
+    min-height: 140px;
+}
+
+.hint-form button {
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(
+            135deg,
+            #00f7ff,
+            #8a2be2
+    );
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.hint-form button:hover {
+    opacity: 0.9;
+}
+
+.hints-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.hint-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+
+    padding: 14px;
+    border-radius: 10px;
+
+    background: rgba(255,255,255,0.04);
+    transition: 0.2s;
+}
+
+.hint-item:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.hint-content {
+    flex: 1;
+    color: #d5d5d5;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.hint-item button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.hint-edit-btn {
+    background: #8a2be2;
+}
+
+.hint-edit-btn:hover {
+    background: #6d1fc1;
+}
+
+.hint-delete-btn {
+    background: #ff3b5f;
+}
+
+.hint-delete-btn:hover {
+    background: #d92b4c;
+}
+
+.hint-error {
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255, 50, 50, 0.12);
+    border: 1px solid rgba(255, 50, 50, 0.4);
+    color: #ff8080;
+}
+
+.hint-success {
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0,255,150,0.12);
+    border: 1px solid rgba(0,255,150,0.4);
+    color: #7dffbe;
+}
+
+.hint-form input,
+.confirmation-modal textarea {
+    width: 100%;
+    min-height: 160px;
+    box-sizing: border-box;
+
+    padding: 14px;
+    margin-bottom: 14px;
+
+    border-radius: 8px;
+    border: 1px solid rgba(0,255,255,0.25);
+
+    background: rgba(20,20,20,0.9);
+    color: white;
+
+    resize: vertical;
+}
+.hint-content small {
+    display: block;
+    margin-top: 8px;
+    color: #00f7ff;
+    font-size: 0.8rem;
+}
+
+.confirmation-modal .hint-error {
+    margin-top: 14px;
+    margin-bottom: 14px;
+}
+
+.hint-stepper-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.hint-stepper-label {
+    font-size: 0.9rem;
+    color: #d5d5d5;
+}
+
+.hint-stepper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: fit-content;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+.hint-stepper button {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    line-height: 1;
+
+    border: none;
+    border-radius: 8px;
+
+    background: linear-gradient(
+            135deg,
+            #00f7ff,
+            #00bcd4
+    );
+
+    color: black;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.hint-stepper button:hover {
+    filter: brightness(1.12);
+    transform: scale(1.05);
+}
+
+.hint-stepper span {
+    min-width: 24px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+}
