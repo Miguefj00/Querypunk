@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.database.repositories.challenge_repository import ChallengeRepository
+from app.models import User
 from app.models.chapter import Chapter
 from app.utils.difficulty_utils import DIFFICULTY_TO_VALUE, VALUE_TO_DIFFICULTY
 
@@ -9,8 +10,15 @@ class ChapterRepository:
 
     @staticmethod
     def get_all(db: Session):
-        # Returns all chapters
-        return db.query(Chapter).all()
+        # Retrieves all chapters with username's creator
+        return (
+            db.query(
+                Chapter,
+                User.username.label("creator_username")
+            )
+            .join(User, Chapter.user_id == User.id)
+            .all()
+        )
 
     @staticmethod
     def get_by_id(db: Session, chapter_id: int):

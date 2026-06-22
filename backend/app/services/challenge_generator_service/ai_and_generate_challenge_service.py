@@ -11,6 +11,7 @@ from app.services.challenge_generator_service.sql_randomizer import (pick_table,
                                                                      pick_any_column_safe)
 from app.services.challenge_generator_service.validate_challenge_quality import (is_duplicate_query, uses_forbidden_columns,
                                                                                  title_not_immersive, has_type_mismatch)
+from app.services.chapter_service import ChapterService
 from app.utils.ai_utils import clean_llm_json, GAME_WORLD_CONTEXT, COLUMN_TYPE_GUIDE, SCHEMA_SEMANTICS
 from dotenv import load_dotenv
 
@@ -677,7 +678,12 @@ def generate_realistic_condition(table: str, alias: str | None = None):
     return f"{prefix}{col} LIKE '%{value[:3]}%'"
 
 
-def generate_and_store_challenge(chapter: int, difficulty: str):
+def generate_and_store_challenge(
+        db,
+        chapter_id: int,
+        difficulty: str,
+        current_user
+):
     """
     Challenge generation entrypoint.
 
@@ -692,6 +698,12 @@ def generate_and_store_challenge(chapter: int, difficulty: str):
     The pipeline retries AI generation up to 5 times if needed.
     If AI repeatedly fails → challenge is discarded.
     """
+    ChapterService.get_owned_chapter(
+        db,
+        chapter_id,
+        current_user
+    )
+
     valid_difficulties = DIFFICULTY_TO_VALUE
 
     if difficulty not in valid_difficulties:
@@ -755,7 +767,7 @@ def generate_and_store_challenge(chapter: int, difficulty: str):
             print("-", h)
 
         save_challenge_to_db(
-            chapter,
+            chapter_id,
             {
                 "title": challenge["title"],
                 "description": challenge["description"],

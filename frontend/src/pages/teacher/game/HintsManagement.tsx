@@ -72,6 +72,24 @@ export default function HintsManagement() {
         setEditErrorMessage] =
         useState("");
 
+    const [managementErrorMessage, setManagementErrorMessage] =
+        useState("");
+
+    const [createSuccessVisible, setCreateSuccessVisible] =
+        useState(false);
+
+    const [managementSuccessVisible, setManagementSuccessVisible] =
+        useState(false);
+
+    const [createErrorVisible, setCreateErrorVisible] =
+        useState(false);
+
+    const [managementErrorVisible, setManagementErrorVisible] =
+        useState(false);
+
+    const [editErrorVisible, setEditErrorVisible] =
+        useState(false);
+
     const [showDeleteModal,
         setShowDeleteModal] =
         useState(false);
@@ -107,6 +125,58 @@ export default function HintsManagement() {
         loadHints();
 
     }, [chapterId, challengeId]);
+
+    useEffect(() => {
+        if (
+            createSuccessMessage ||
+            managementSuccessMessage ||
+            errorMessage ||
+            managementErrorMessage ||
+            editErrorMessage
+        ) {
+            setCreateSuccessVisible(false);
+            setManagementSuccessVisible(false);
+            setCreateErrorVisible(false);
+            setManagementErrorVisible(false);
+            setEditErrorVisible(false);
+
+            const showTimer = setTimeout(() => {
+                setCreateSuccessVisible(!!createSuccessMessage);
+                setManagementSuccessVisible(!!managementSuccessMessage);
+                setCreateErrorVisible(!!errorMessage);
+                setManagementErrorVisible(!!managementErrorMessage);
+                setEditErrorVisible(!!editErrorMessage);
+            }, 50);
+
+            const fadeTimer = setTimeout(() => {
+                setCreateSuccessVisible(false);
+                setManagementSuccessVisible(false);
+                setCreateErrorVisible(false);
+                setManagementErrorVisible(false);
+                setEditErrorVisible(false);
+            }, 5000);
+
+            const removeTimer = setTimeout(() => {
+                setCreateSuccessMessage("");
+                setManagementSuccessMessage("");
+                setErrorMessage("");
+                setManagementErrorMessage("");
+                setEditErrorMessage("");
+            }, 6000);
+
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(fadeTimer);
+                clearTimeout(removeTimer);
+            };
+        }
+    }, [
+        createSuccessMessage,
+        managementSuccessMessage,
+        errorMessage,
+        managementErrorMessage,
+        editErrorMessage
+    ]);
 
     const handleCreate =
         async () => {
@@ -151,15 +221,20 @@ export default function HintsManagement() {
                 await loadHints();
 
             } catch (error) {
-
                 console.error(
                     "[HINTS] Error creating hint:",
                     error
                 );
 
-                setErrorMessage(
-                    "No se pudo crear la pista."
-                );
+                if ((error as any).response?.status === 403) {
+                    setErrorMessage(
+                        "No tienes permisos para crear pistas en este reto."
+                    );
+                } else {
+                    setErrorMessage(
+                        "No se pudo crear la pista."
+                    );
+                }
             }
         };
 
@@ -204,15 +279,20 @@ export default function HintsManagement() {
                 await loadHints();
 
             } catch (error) {
-
                 console.error(
                     "[HINTS] Error updating hint:",
                     error
                 );
 
-                setEditErrorMessage(
-                    "No se pudo actualizar la pista."
-                );
+                if ((error as any).response?.status === 403) {
+                    setEditErrorMessage(
+                        "No tienes permisos para editar esta pista."
+                    );
+                } else {
+                    setEditErrorMessage(
+                        "No se pudo actualizar la pista."
+                    );
+                }
             }
         };
 
@@ -231,6 +311,8 @@ export default function HintsManagement() {
                     "Pista eliminada correctamente."
                 );
 
+                setManagementErrorMessage("");
+
                 await loadHints();
 
             } catch (error) {
@@ -239,6 +321,16 @@ export default function HintsManagement() {
                     "[HINTS] Error deleting hint:",
                     error
                 );
+
+                if ((error as any).response?.status === 403) {
+                    setManagementErrorMessage(
+                        "No tienes permisos para eliminar esta pista."
+                    );
+                } else {
+                    setManagementErrorMessage(
+                        "No se pudo eliminar la pista."
+                    );
+                }
             }
         };
 
@@ -308,7 +400,9 @@ export default function HintsManagement() {
 
                         {
                             errorMessage && (
-                                <div className="hint-error">
+                                <div className={`hint-error ${
+                                    createErrorVisible ? "log-visible" : "log-hidden"
+                                }`}>
                                     {errorMessage}
                                 </div>
                             )
@@ -316,7 +410,9 @@ export default function HintsManagement() {
 
                         {
                             createSuccessMessage && (
-                                <div className="hint-success">
+                                <div className={`hint-success ${
+                                    createSuccessVisible ? "log-visible" : "log-hidden"
+                                }`}>
                                     {createSuccessMessage}
                                 </div>
                             )
@@ -397,8 +493,20 @@ export default function HintsManagement() {
 
                         {
                             managementSuccessMessage && (
-                                <div className="hint-success">
+                                <div className={`hint-success ${
+                                    managementSuccessVisible ? "log-visible" : "log-hidden"
+                                }`}>
                                     {managementSuccessMessage}
+                                </div>
+                            )
+                        }
+
+                        {
+                            managementErrorMessage && (
+                                <div className={`hint-error ${
+                                    managementErrorVisible ? "log-visible" : "log-hidden"
+                                }`}>
+                                    {managementErrorMessage}
                                 </div>
                             )
                         }
@@ -463,7 +571,9 @@ export default function HintsManagement() {
 
                                 {
                                     editErrorMessage && (
-                                        <div className="hint-error">
+                                        <div className={`hint-error ${
+                                            editErrorVisible ? "log-visible" : "log-hidden"
+                                        }`}>
                                             {editErrorMessage}
                                         </div>
                                     )

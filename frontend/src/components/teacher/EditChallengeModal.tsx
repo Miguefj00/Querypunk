@@ -15,6 +15,9 @@ interface Props {
     onCancel: () => void;
     onConfirm: () => void;
     errorMessage?: string;
+    successMessage?: string;
+    errorVisible?: boolean;
+    successVisible?: boolean;
 }
 
 export default function EditChallengeModal({
@@ -29,7 +32,10 @@ export default function EditChallengeModal({
                                                onToggleRule,
                                                onCancel,
                                                onConfirm,
-                                               errorMessage
+                                               errorMessage,
+                                               successMessage,
+                                               errorVisible,
+                                               successVisible
                                            }: Props) {
     return (
         <div className="modal-overlay">
@@ -103,8 +109,20 @@ export default function EditChallengeModal({
 
                 {
                     errorMessage && (
-                        <div className="challenge-error">
+                        <div className={`challenge-error ${
+                            errorVisible ? "log-visible" : "log-hidden"
+                        }`}>
                             {errorMessage}
+                        </div>
+                    )
+                }
+
+                {
+                    successMessage && (
+                        <div className={`challenge-success ${
+                            successVisible ? "log-visible" : "log-hidden"
+                        }`}>
+                            {successMessage}
                         </div>
                     )
                 }

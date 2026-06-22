@@ -71,15 +71,35 @@ export default function ChallengesManagement() {
     const [generationLogs, setGenerationLogs] =
         useState<string[]>([]);
 
+    const [errorMessage, setErrorMessage] =
+        useState("");
+
     const [createSuccessMessage, setCreateSuccessMessage] =
         useState("");
 
     const [managementSuccessMessage, setManagementSuccessMessage] =
         useState("");
 
-    const [errorMessage,
-        setErrorMessage] =
+    const [createErrorMessage, setCreateErrorMessage] =
         useState("");
+
+    const [managementErrorMessage, setManagementErrorMessage] =
+        useState("");
+
+    const [createSuccessVisible, setCreateSuccessVisible] =
+        useState(false);
+
+    const [managementSuccessVisible, setManagementSuccessVisible] =
+        useState(false);
+
+    const [createErrorVisible, setCreateErrorVisible] =
+        useState(false);
+
+    const [managementErrorVisible, setManagementErrorVisible] =
+        useState(false);
+
+    const [editErrorVisible, setEditErrorVisible] =
+        useState(false);
 
     const [editErrorMessage, setEditErrorMessage] =
         useState("");
@@ -110,6 +130,13 @@ export default function ChallengesManagement() {
         setChallengeToDelete] =
         useState<Challenge | null>(null);
 
+    const [generatorErrorMessage, setGeneratorErrorMessage] =
+        useState("");
+
+    const [generatorErrorVisible, setGeneratorErrorVisible] =
+        useState(false);
+
+
     const loadChallenges =
         async () => {
 
@@ -137,10 +164,101 @@ export default function ChallengesManagement() {
 
     }, [chapterId]);
 
+    useEffect(() => {
+        if (
+            createSuccessMessage ||
+            managementSuccessMessage ||
+            createErrorMessage ||
+            managementErrorMessage ||
+            editErrorMessage
+        ) {
+            setCreateSuccessVisible(false);
+            setManagementSuccessVisible(false);
+            setCreateErrorVisible(false);
+            setManagementErrorVisible(false);
+            setEditErrorVisible(false);
+
+            const showTimer = setTimeout(() => {
+                setCreateSuccessVisible(
+                    !!createSuccessMessage
+                );
+
+                setManagementSuccessVisible(
+                    !!managementSuccessMessage
+                );
+
+                setCreateErrorVisible(
+                    !!createErrorMessage
+                );
+
+                setManagementErrorVisible(
+                    !!managementErrorMessage
+                );
+
+                setEditErrorVisible(
+                    !!editErrorMessage
+                );
+            }, 50);
+
+            const fadeTimer = setTimeout(() => {
+                setCreateSuccessVisible(false);
+                setManagementSuccessVisible(false);
+                setCreateErrorVisible(false);
+                setManagementErrorVisible(false);
+                setEditErrorVisible(false);
+            }, 5000);
+
+            const removeTimer = setTimeout(() => {
+                setCreateSuccessMessage("");
+                setManagementSuccessMessage("");
+                setCreateErrorMessage("");
+                setManagementErrorMessage("");
+                setEditErrorMessage("");
+            }, 6000);
+
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(fadeTimer);
+                clearTimeout(removeTimer);
+            };
+        }
+    }, [
+        createSuccessMessage,
+        managementSuccessMessage,
+        createErrorMessage,
+        managementErrorMessage,
+        editErrorMessage
+    ]);
+
+    useEffect(() => {
+        if (generatorErrorMessage) {
+
+            setGeneratorErrorVisible(false);
+
+            const showTimer = setTimeout(() => {
+                setGeneratorErrorVisible(true);
+            }, 50);
+
+            const fadeTimer = setTimeout(() => {
+                setGeneratorErrorVisible(false);
+            }, 5000);
+
+            const removeTimer = setTimeout(() => {
+                setGeneratorErrorMessage("");
+            }, 6000);
+
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(fadeTimer);
+                clearTimeout(removeTimer);
+            };
+        }
+    }, [generatorErrorMessage]);
+
     const handleCreate =
         async () => {
 
-            setErrorMessage("");
+            setCreateErrorMessage("");
 
             if (
                 !newTitle.trim() ||
@@ -148,7 +266,7 @@ export default function ChallengesManagement() {
                 !newSolution.trim()
             ) {
 
-                setErrorMessage(
+                setCreateErrorMessage(
                     "Todos los campos son obligatorios."
                 );
 
@@ -187,83 +305,96 @@ export default function ChallengesManagement() {
                     error
                 );
 
-                setErrorMessage(
-                    "No se pudo crear el reto."
-                );
+                if (
+                    (error as any).response?.status === 403
+                ) {
+                    setErrorMessage(
+                        "No tienes permisos para crear retos en este capítulo."
+                    );
+                } else {
+                    setErrorMessage(
+                        "No se pudo crear el reto."
+                    );
+                }
             }
         };
 
-    const handleGenerate =
-        async () => {
+    const handleGenerate = async () => {
+        let spinnerTimeout: number | undefined;
 
-            try {
+        try {
+            setManagementErrorMessage("");
+            setManagementSuccessMessage("");
+            setGeneratorErrorMessage("");
 
-                setErrorMessage("");
-                setManagementSuccessMessage("");
+            setGenerationLogs([]);
 
+            spinnerTimeout = window.setTimeout(() => {
                 setIsGenerating(true);
-                setGenerationLogs([]);
 
-                // Paso 1 (instantáneo)
                 setGenerationLogs([
-                    "Estructura SQL generada correctamente."
+                    "Generando estructura del reto..."
                 ]);
+            }, 400);
 
-                await new Promise(resolve =>
-                    setTimeout(resolve, 500)
-                );
+            await generateChallenge(
+                Number(chapterId),
+                difficulty
+            );
 
-                // Backend completo (incluye IA)
-                await generateChallenge(
-                    Number(chapterId),
-                    difficulty
-                );
+            if (spinnerTimeout) clearTimeout(spinnerTimeout);
 
-                // Paso 2
-                setGenerationLogs(prev => [
-                    ...prev,
-                    "Narrativa y pistas generadas correctamente."
-                ]);
+            if (!isGenerating) {
+                setIsGenerating(true);
+            }
 
-                await new Promise(resolve =>
-                    setTimeout(resolve, 700)
-                );
+            setGenerationLogs(prev => [
+                ...prev,
+                "Generando narrativa y pistas..."
+            ]);
 
-                // Paso 3
-                setGenerationLogs(prev => [
-                    ...prev,
-                    "Reto creado y guardado correctamente."
-                ]);
+            await new Promise(resolve =>
+                setTimeout(resolve, 700)
+            );
 
-                setManagementSuccessMessage(
-                    "Reto generado correctamente."
-                );
+            setGenerationLogs(prev => [
+                ...prev,
+                "Reto guardado correctamente."
+            ]);
 
-                await loadChallenges();
+            setManagementSuccessMessage(
+                "Reto generado correctamente."
+            );
 
-                // Mantener logs visibles 6 segundos
-                setTimeout(() => {
+            await loadChallenges();
 
-                    setIsGenerating(false);
-                    setGenerationLogs([]);
-
-                }, 6000);
-
-            } catch (error) {
-
-                console.error(
-                    "[CHALLENGES] Error generating challenge:",
-                    error
-                );
-
-                setErrorMessage(
-                    "No se pudo generar el reto."
-                );
-
+            setTimeout(() => {
                 setIsGenerating(false);
                 setGenerationLogs([]);
+            }, 6000);
+
+        } catch (error) {
+            if (spinnerTimeout) clearTimeout(spinnerTimeout);
+
+            setIsGenerating(false);
+            setGenerationLogs([]);
+
+            console.error(
+                "[GENERATOR] Error generating challenge:",
+                error
+            );
+
+            if ((error as any).response?.status === 403) {
+                setGeneratorErrorMessage(
+                    "No tienes permisos para generar retos en este capítulo."
+                );
+            } else {
+                setGeneratorErrorMessage(
+                    "No se pudo generar el reto."
+                );
             }
-        };
+        }
+    };
 
     const handleEdit =
         async () => {
@@ -314,7 +445,9 @@ export default function ChallengesManagement() {
                 );
 
                 setEditErrorMessage(
-                    "No se pudo actualizar el reto."
+                    error.response?.status === 403
+                        ? "No tienes permisos para editar este reto."
+                        : "No se pudo actualizar el reto."
                 );
             }
         };
@@ -335,11 +468,17 @@ export default function ChallengesManagement() {
 
                 await loadChallenges();
 
-            } catch (error) {
+            } catch (error: any) {
 
                 console.error(
                     "[CHALLENGES] Error deleting challenge:",
                     error
+                );
+
+                setManagementErrorMessage(
+                    error.response?.status === 403
+                        ? "No tienes permisos para eliminar este reto."
+                        : "No se pudo eliminar el reto."
                 );
             }
         };
@@ -439,16 +578,20 @@ export default function ChallengesManagement() {
                         </div>
 
                         {
-                            errorMessage && (
-                                <div className="challenge-error">
-                                    {errorMessage}
+                            createErrorMessage && (
+                                <div className={`challenge-error ${
+                                    createErrorVisible ? "log-visible" : "log-hidden"
+                                }`}>
+                                    {createErrorMessage}
                                 </div>
                             )
                         }
 
                         {
                             createSuccessMessage && (
-                                <div className="challenge-success">
+                                <div className={`challenge-success ${
+                                    createSuccessVisible ? "log-visible" : "log-hidden"
+                                }`}>
                                     {createSuccessMessage}
                                 </div>
                             )
@@ -499,38 +642,32 @@ export default function ChallengesManagement() {
 
                     </div>
 
-                    {
-                        isGenerating && (
+                    {isGenerating && (
+                        <div className="generator-status">
+                            <div className="generator-spinner" />
 
-                            <div className="generator-status">
-
-                                <div className="generator-header">
-
-                                    <div className="generator-spinner"></div>
-
-                                    <span>
-                                        Generando reto...
-                                    </span>
-
-                                </div>
-
-                                {
-                                    generationLogs.map((log, index) => (
-
-                                        <div
-                                            key={index}
-                                            className="generator-log"
-                                        >
-                                            ✓ {log}
-                                        </div>
-
-                                    ))
-                                }
-
+                            <div className="generator-logs">
+                                {generationLogs.map((log, index) => (
+                                    <div
+                                        key={index}
+                                        className="generator-log"
+                                    >
+                                        {log}
+                                    </div>
+                                ))}
                             </div>
+                        </div>
+                    )}
 
-                        )
-                    }
+                    {generatorErrorMessage && (
+                        <div className={`challenge-error generator-error ${
+                            generatorErrorVisible
+                                ? "log-visible"
+                                : "log-hidden"
+                        }`}>
+                            {generatorErrorMessage}
+                        </div>
+                    )}
 
                 </DashboardPanel>
 
@@ -621,8 +758,20 @@ export default function ChallengesManagement() {
 
                         {
                             managementSuccessMessage && (
-                                <div className="challenge-success">
+                                <div className={`challenge-success ${
+                                    managementSuccessVisible ? "log-visible" : "log-hidden"
+                                }`}>
                                     {managementSuccessMessage}
+                                </div>
+                            )
+                        }
+
+                        {
+                            managementErrorMessage && (
+                                <div className={`challenge-error ${
+                                    managementErrorVisible ? "log-visible" : "log-hidden"
+                                }`}>
+                                    {managementErrorMessage}
                                 </div>
                             )
                         }
@@ -671,6 +820,9 @@ export default function ChallengesManagement() {
                             solution={editSolution}
                             validationRules={editValidationRules}
                             errorMessage={editErrorMessage}
+                            successMessage={managementSuccessMessage}
+                            successVisible={managementSuccessVisible}
+                            errorVisible={editErrorVisible}
                             onTitleChange={setEditTitle}
                             onDescriptionChange={setEditDescription}
                             onSolutionChange={setEditSolution}

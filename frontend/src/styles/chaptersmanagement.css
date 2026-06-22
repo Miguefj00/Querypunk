@@ -83,6 +83,33 @@
     transition: 0.2s;
 }
 
+.chapter-description {
+    color: #d5d5d5;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    margin-bottom: 12px;
+}
+
+.chapter-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    margin-top: 6px;
+    padding-top: 10px;
+
+    border-top: 1px solid rgba(255,255,255,0.06);
+
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.3px;
+}
+
+.chapter-meta span {
+    color: #00f7ff;
+    font-weight: 600;
+}
+
 .chapter-delete-btn {
     background: #ff3b5f;
 }
@@ -122,4 +149,19 @@
 
 .chapter-challenges-btn:hover {
     background: #00d9e0;
+}
+.log-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+            opacity 1s ease,
+            transform 1s ease;
+}
+
+.log-hidden {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+            opacity 1s ease,
+            transform 1s ease;
 }

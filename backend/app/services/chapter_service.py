@@ -50,8 +50,20 @@ class ChapterService:
 
     @staticmethod
     def get_all(db: Session, current_user):
-        """ Returns all chapters. """
-        return ChapterRepository.get_all(db)
+        """ Return all chapters with owner's username. """
+        chapters = ChapterRepository.get_all(db)
+
+        return [
+            {
+                "id": chapter.id,
+                "title": chapter.title,
+                "description": chapter.description,
+                "user_id": chapter.user_id,
+                "difficulty": chapter.difficulty,
+                "creator_username": creator_username
+            }
+            for chapter, creator_username in chapters
+    ]
 
     @staticmethod
     def get_by_id(db: Session, chapter_id: int):

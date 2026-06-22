@@ -203,3 +203,22 @@
     font-weight: bold;
     color: white;
 }
+
+.hint-error,
+.hint-success {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+            opacity 0.4s ease,
+            transform 0.4s ease;
+}
+
+.log-hidden {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+.log-visible {
+    opacity: 1;
+    transform: translateY(0);
+}

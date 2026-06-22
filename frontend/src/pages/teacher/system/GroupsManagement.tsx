@@ -95,6 +95,27 @@ export default function GroupsManagement() {
     const [assignErrorMessage, setAssignErrorMessage] =
         useState("");
 
+    const [createSuccessVisible, setCreateSuccessVisible] =
+        useState(false);
+
+    const [managementSuccessVisible, setManagementSuccessVisible] =
+        useState(false);
+
+    const [createErrorVisible, setCreateErrorVisible] =
+        useState(false);
+
+    const [assignErrorVisible, setAssignErrorVisible] =
+        useState(false);
+
+    const [editErrorVisible, setEditErrorVisible] =
+        useState(false);
+
+    const [managementErrorMessage, setManagementErrorMessage] =
+        useState("");
+
+    const [managementErrorVisible, setManagementErrorVisible] =
+        useState(false);
+
     const loadGroups = async () => {
 
         try {
@@ -115,6 +136,81 @@ export default function GroupsManagement() {
         loadGroups();
 
     }, []);
+
+    useEffect(() => {
+        if (
+            createSuccessMessage ||
+            managementSuccessMessage ||
+            managementErrorMessage ||
+            createErrorMessage ||
+            assignErrorMessage ||
+            editErrorMessage
+        ) {
+            setCreateSuccessVisible(false);
+            setManagementSuccessVisible(false);
+            setManagementErrorVisible(false);
+            setCreateErrorVisible(false);
+            setAssignErrorVisible(false);
+            setEditErrorVisible(false);
+
+            const showTimer = setTimeout(() => {
+                setCreateSuccessVisible(
+                    !!createSuccessMessage
+                );
+
+                setManagementSuccessVisible(
+                    !!managementSuccessMessage
+                );
+
+                setManagementErrorVisible(
+                    !!managementErrorMessage
+                );
+
+                setCreateErrorVisible(
+                    !!createErrorMessage
+                );
+
+                setAssignErrorVisible(
+                    !!assignErrorMessage
+                );
+
+                setEditErrorVisible(
+                    !!editErrorMessage
+                );
+            }, 50);
+
+            const fadeTimer = setTimeout(() => {
+                setCreateSuccessVisible(false);
+                setManagementSuccessVisible(false);
+                setManagementErrorVisible(false);
+                setCreateErrorVisible(false);
+                setAssignErrorVisible(false);
+                setEditErrorVisible(false);
+            }, 5000);
+
+            const removeTimer = setTimeout(() => {
+                setCreateSuccessMessage("");
+                setManagementSuccessMessage("");
+                setManagementErrorMessage("");
+                setCreateErrorMessage("");
+                setAssignErrorMessage("");
+                setEditErrorMessage("");
+            }, 6000);
+
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(fadeTimer);
+                clearTimeout(removeTimer);
+            };
+        }
+    }, [
+        createSuccessMessage,
+        managementSuccessMessage,
+        managementErrorMessage,
+        createErrorMessage,
+        assignErrorMessage,
+        editErrorMessage
+    ]);
 
     const handleCreate =
         async () => {
@@ -137,10 +233,11 @@ export default function GroupsManagement() {
                     newDescription
                 );
 
+                setCreateSuccessMessage("");
+
                 setCreateSuccessMessage(
                     `Grupo ${newName} creado correctamente.`
                 );
-                setManagementSuccessMessage("");
 
                 setNewName("");
                 setNewDescription("");
@@ -253,13 +350,24 @@ export default function GroupsManagement() {
 
                 await loadGroups();
 
-            } catch (error) {
+            } catch (error: any) {
 
                 console.error(error);
 
-                setEditErrorMessage(
-                    "No se pudo actualizar el grupo."
-                );
+                if (error.response?.status === 403) {
+
+                    setManagementSuccessMessage("");
+
+                    setEditErrorMessage(
+                        "No tienes permisos para editar este grupo."
+                    );
+
+                } else {
+
+                    setEditErrorMessage(
+                        "No se pudo actualizar el grupo."
+                    );
+                }
             }
         };
 
@@ -275,6 +383,8 @@ export default function GroupsManagement() {
 
                 await deleteGroup(groupId);
 
+                setManagementSuccessMessage("");
+
                 setManagementSuccessMessage(
                     `Grupo ${deletedGroup?.name} eliminado correctamente.`
                 );
@@ -289,9 +399,26 @@ export default function GroupsManagement() {
 
                 loadGroups();
 
-            } catch (error) {
+            } catch (error: any) {
 
                 console.error(error);
+
+                if (error.response?.status === 403) {
+
+                    setManagementSuccessMessage("");
+                    setEditErrorMessage("");
+                    setAssignErrorMessage("");
+
+                    setManagementErrorMessage(
+                        "No tienes permisos para eliminar este grupo."
+                    );
+
+                } else {
+
+                    setManagementErrorMessage(
+                        "No se pudo eliminar el grupo."
+                    );
+                }
             }
         };
 
@@ -395,7 +522,9 @@ export default function GroupsManagement() {
                     {
                         createErrorMessage && (
 
-                            <div className="group-error">
+                            <div className={`group-error ${
+                                createErrorVisible ? "log-visible" : "log-hidden"
+                            }`}>
                                 {createErrorMessage}
                             </div>
 
@@ -405,7 +534,9 @@ export default function GroupsManagement() {
                     {
                         createSuccessMessage && (
 
-                            <div className="group-success">
+                            <div className={`group-success ${
+                                createSuccessVisible ? "log-visible" : "log-hidden"
+                            }`}>
                                 {createSuccessMessage}
                             </div>
 
@@ -495,8 +626,20 @@ export default function GroupsManagement() {
 
                     {
                         managementSuccessMessage && (
-                            <div className="group-success">
+                            <div className={`group-success ${
+                                managementSuccessVisible ? "log-visible" : "log-hidden"
+                            }`}>
                                 {managementSuccessMessage}
+                            </div>
+                        )
+                    }
+
+                    {
+                        managementErrorMessage && (
+                            <div className={`group-error ${
+                                managementErrorVisible ? "log-visible" : "log-hidden"
+                            }`}>
+                                {managementErrorMessage}
                             </div>
                         )
                     }
@@ -593,7 +736,9 @@ export default function GroupsManagement() {
 
                         {
                             assignErrorMessage && (
-                                <div className="group-error">
+                                <div className={`group-error ${
+                                    assignErrorVisible ? "log-visible" : "log-hidden"
+                                }`}>
                                     {assignErrorMessage}
                                 </div>
                             )
@@ -687,6 +832,9 @@ export default function GroupsManagement() {
                         onNameChange={setEditName}
                         onDescriptionChange={setEditDescription}
                         errorMessage={editErrorMessage}
+                        errorVisible={editErrorVisible}
+                        successMessage={managementSuccessMessage}
+                        successVisible={managementSuccessVisible}
                         onCancel={() => {
 
                             setShowEditModal(false);

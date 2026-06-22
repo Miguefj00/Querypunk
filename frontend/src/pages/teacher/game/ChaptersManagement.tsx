@@ -23,6 +23,8 @@ interface Chapter {
     id: number;
     title: string;
     description: string;
+    user_id: number;
+    creator_username: string;
 }
 
 export default function ChaptersManagement() {
@@ -78,6 +80,24 @@ export default function ChaptersManagement() {
     const [editErrorMessage, setEditErrorMessage] =
         useState("");
 
+    const [managementErrorMessage, setManagementErrorMessage] =
+        useState("");
+
+    const [createSuccessVisible, setCreateSuccessVisible] =
+        useState(false);
+
+    const [managementSuccessVisible, setManagementSuccessVisible] =
+        useState(false);
+
+    const [createErrorVisible, setCreateErrorVisible] =
+        useState(false);
+
+    const [managementErrorVisible, setManagementErrorVisible] =
+        useState(false);
+
+    const [editErrorVisible, setEditErrorVisible] =
+        useState(false);
+
     const loadChapters = async () => {
 
         try {
@@ -102,10 +122,63 @@ export default function ChaptersManagement() {
 
     }, []);
 
+    useEffect(() => {
+        if (
+            createSuccessMessage ||
+            managementSuccessMessage ||
+            createErrorMessage ||
+            managementErrorMessage ||
+            editErrorMessage
+        ) {
+            setCreateSuccessVisible(false);
+            setManagementSuccessVisible(false);
+            setCreateErrorVisible(false);
+            setManagementErrorVisible(false);
+            setEditErrorVisible(false);
+
+            const showTimer = setTimeout(() => {
+                setCreateSuccessVisible(!!createSuccessMessage);
+                setManagementSuccessVisible(!!managementSuccessMessage);
+                setCreateErrorVisible(!!createErrorMessage);
+                setManagementErrorVisible(!!managementErrorMessage);
+                setEditErrorVisible(!!editErrorMessage);
+            }, 50);
+
+            const fadeTimer = setTimeout(() => {
+                setCreateSuccessVisible(false);
+                setManagementSuccessVisible(false);
+                setCreateErrorVisible(false);
+                setManagementErrorVisible(false);
+                setEditErrorVisible(false);
+            }, 5000);
+
+            const removeTimer = setTimeout(() => {
+                setCreateSuccessMessage("");
+                setManagementSuccessMessage("");
+                setCreateErrorMessage("");
+                setManagementErrorMessage("");
+                setEditErrorMessage("");
+            }, 6000);
+
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(fadeTimer);
+                clearTimeout(removeTimer);
+            };
+        }
+    }, [
+        createSuccessMessage,
+        managementSuccessMessage,
+        createErrorMessage,
+        managementErrorMessage,
+        editErrorMessage
+    ]);
+
     const handleCreate =
         async () => {
 
             setCreateErrorMessage("");
+            setCreateSuccessMessage("");
 
             if (!newTitle.trim()) {
 
@@ -122,6 +195,8 @@ export default function ChaptersManagement() {
                     newTitle,
                     newDescription
                 );
+
+                setCreateSuccessMessage("");
 
                 setCreateSuccessMessage(
                     `Capítulo ${newTitle} creado correctamente.`
@@ -151,6 +226,7 @@ export default function ChaptersManagement() {
         async () => {
 
             setEditErrorMessage("");
+            setManagementSuccessMessage("");
 
             if (
                 !editingChapter ||
@@ -172,6 +248,8 @@ export default function ChaptersManagement() {
                     editDescription
                 );
 
+                setManagementSuccessMessage("");
+
                 setManagementSuccessMessage(
                     `Capítulo ${editTitle} actualizado correctamente.`
                 );
@@ -189,9 +267,17 @@ export default function ChaptersManagement() {
                     error
                 );
 
-                setEditErrorMessage(
-                    "No se pudo actualizar el capítulo."
-                );
+                if (
+                    (error as any).response?.status === 403
+                ) {
+                    setEditErrorMessage(
+                        "No tienes permisos para editar este capítulo."
+                    );
+                } else {
+                    setEditErrorMessage(
+                        "No se pudo actualizar el capítulo."
+                    );
+                }
             }
         };
 
@@ -209,6 +295,8 @@ export default function ChaptersManagement() {
                     chapterId
                 );
 
+                setManagementSuccessMessage("");
+
                 setManagementSuccessMessage(
                     `Capítulo ${deletedChapter?.title} eliminado correctamente.`
                 );
@@ -221,6 +309,18 @@ export default function ChaptersManagement() {
                     "[CHAPTERS] Error deleting chapter:",
                     error
                 );
+
+                if (
+                    (error as any).response?.status === 403
+                ) {
+                    setManagementErrorMessage(
+                        "No tienes permisos para eliminar este capítulo."
+                    );
+                } else {
+                    setManagementErrorMessage(
+                        "No se pudo eliminar el capítulo."
+                    );
+                }
             }
         };
 
@@ -258,7 +358,9 @@ export default function ChaptersManagement() {
 
                     {
                         createErrorMessage && (
-                            <div className="chapter-error">
+                            <div className={`chapter-error ${
+                                createErrorVisible ? "log-visible" : "log-hidden"
+                            }`}>
                                 {createErrorMessage}
                             </div>
                         )
@@ -266,7 +368,9 @@ export default function ChaptersManagement() {
 
                     {
                         createSuccessMessage && (
-                            <div className="chapter-success">
+                            <div className={`chapter-success ${
+                                createSuccessVisible ? "log-visible" : "log-hidden"
+                            }`}>
                                 {createSuccessMessage}
                             </div>
                         )
@@ -302,8 +406,13 @@ export default function ChaptersManagement() {
                                         {chapter.title}
                                     </strong>
 
-                                    <div>
+                                    <div className="chapter-description">
                                         {chapter.description}
+                                    </div>
+
+                                    <div className="chapter-meta">
+                                        Creado por:
+                                        <span>{chapter.creator_username}</span>
                                     </div>
 
                                 </div>
@@ -362,8 +471,20 @@ export default function ChaptersManagement() {
 
                     {
                         managementSuccessMessage && (
-                            <div className="chapter-success">
+                            <div className={`chapter-success ${
+                                managementSuccessVisible ? "log-visible" : "log-hidden"
+                            }`}>
                                 {managementSuccessMessage}
+                            </div>
+                        )
+                    }
+
+                    {
+                        managementErrorMessage && (
+                            <div className={`chapter-error ${
+                                managementErrorVisible ? "log-visible" : "log-hidden"
+                            }`}>
+                                {managementErrorMessage}
                             </div>
                         )
                     }
@@ -412,6 +533,9 @@ export default function ChaptersManagement() {
                         name={editTitle}
                         description={editDescription}
                         errorMessage={editErrorMessage}
+                        errorVisible={editErrorVisible}
+                        successMessage={managementSuccessMessage}
+                        successVisible={managementSuccessVisible}
                         onNameChange={setEditTitle}
                         onDescriptionChange={setEditDescription}
                         onCancel={() => {

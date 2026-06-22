@@ -15,6 +15,12 @@ interface Props {
     onCancel: () => void;
 
     errorMessage?: string;
+
+    successMessage?: string;
+
+    errorVisible?: boolean;
+
+    successVisible?: boolean;
 }
 
 export default function EditGroupModal({
@@ -25,7 +31,10 @@ export default function EditGroupModal({
                                            onDescriptionChange,
                                            onConfirm,
                                            onCancel,
-                                           errorMessage
+                                           errorMessage,
+                                           successMessage,
+                                           errorVisible,
+                                           successVisible
                                        }: Props) {
 
     return (
@@ -60,8 +69,20 @@ export default function EditGroupModal({
 
                 {
                     errorMessage && (
-                        <div className="group-error">
+                        <div className={`group-error ${
+                            errorVisible ? "log-visible" : "log-hidden"
+                        }`}>
                             {errorMessage}
+                        </div>
+                    )
+                }
+
+                {
+                    successMessage && (
+                        <div className={`group-success ${
+                            successVisible ? "log-visible" : "log-hidden"
+                        }`}>
+                            {successMessage}
                         </div>
                     )
                 }

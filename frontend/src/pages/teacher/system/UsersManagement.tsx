@@ -44,8 +44,17 @@ export default function UsersManagement() {
     const [role, setRole] =
         useState("student");
 
-    const [errorMessage, setErrorMessage] =
+    const [createErrorMessage, setCreateErrorMessage] =
         useState("");
+
+    const [managementErrorMessage, setManagementErrorMessage] =
+        useState("");
+
+    const [createErrorVisible, setCreateErrorVisible] =
+        useState(false);
+
+    const [managementErrorVisible, setManagementErrorVisible] =
+        useState(false);
 
     const [createSuccessMessage, setCreateSuccessMessage] =
         useState("");
@@ -63,6 +72,12 @@ export default function UsersManagement() {
 
     const [showBulkDeleteModal,
         setShowBulkDeleteModal] =
+        useState(false);
+
+    const [createSuccessVisible, setCreateSuccessVisible] =
+        useState(false);
+
+    const [managementSuccessVisible, setManagementSuccessVisible] =
         useState(false);
 
     const loadUsers = async () => {
@@ -86,16 +101,73 @@ export default function UsersManagement() {
 
     }, []);
 
+    useEffect(() => {
+        if (
+            createSuccessMessage ||
+            managementSuccessMessage ||
+            createErrorMessage ||
+            managementErrorMessage
+        ) {
+            setCreateSuccessVisible(false);
+            setManagementSuccessVisible(false);
+            setCreateErrorVisible(false);
+            setManagementErrorVisible(false);
+
+            const showTimer = setTimeout(() => {
+                setCreateSuccessVisible(
+                    !!createSuccessMessage
+                );
+
+                setManagementSuccessVisible(
+                    !!managementSuccessMessage
+                );
+
+                setCreateErrorVisible(
+                    !!createErrorMessage
+                );
+
+                setManagementErrorVisible(
+                    !!managementErrorMessage
+                );
+            }, 50);
+
+            const fadeTimer = setTimeout(() => {
+                setCreateSuccessVisible(false);
+                setManagementSuccessVisible(false);
+                setCreateErrorVisible(false);
+                setManagementErrorVisible(false);
+            }, 5000);
+
+            const removeTimer = setTimeout(() => {
+                setCreateSuccessMessage("");
+                setManagementSuccessMessage("");
+                setCreateErrorMessage("");
+                setManagementErrorMessage("");
+            }, 6000);
+
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(fadeTimer);
+                clearTimeout(removeTimer);
+            };
+        }
+    }, [
+        createSuccessMessage,
+        managementSuccessMessage,
+        createErrorMessage,
+        managementErrorMessage
+    ]);
+
     const handleCreateUser =
         async () => {
 
-            setErrorMessage("");
+            setCreateErrorMessage("");
             setCreateSuccessMessage("");
 
 
             if (!username.trim()) {
 
-                setErrorMessage(
+                setCreateErrorMessage(
                     "Debes indicar un nombre de usuario."
                 );
 
@@ -104,7 +176,7 @@ export default function UsersManagement() {
 
             if (!email.trim()) {
 
-                setErrorMessage(
+                setCreateErrorMessage(
                     "Debes indicar un correo electrónico."
                 );
 
@@ -116,7 +188,7 @@ export default function UsersManagement() {
 
             if (!emailRegex.test(email)) {
 
-                setErrorMessage(
+                setCreateErrorMessage(
                     "El correo electrónico no es válido."
                 );
 
@@ -125,7 +197,7 @@ export default function UsersManagement() {
 
             if (!password.trim()) {
 
-                setErrorMessage(
+                setCreateErrorMessage(
                     "Debes indicar una contraseña."
                 );
 
@@ -157,7 +229,7 @@ export default function UsersManagement() {
 
                 console.error(error);
 
-                setErrorMessage(
+                setCreateErrorMessage(
                     error.response?.data?.detail ||
                     "No se pudo crear el usuario."
                 );
@@ -183,9 +255,29 @@ export default function UsersManagement() {
 
             await loadUsers();
 
-        } catch (error) {
+        } catch (error: any) {
 
             console.error(error);
+
+            const apiMessage =
+                error.response?.data?.detail;
+
+            if (
+                apiMessage ===
+                "You don't have permission to delete this user"
+            ) {
+
+                setManagementErrorMessage(
+                    "No tienes permisos para eliminar a este usuario"
+                );
+
+            } else {
+
+                setManagementErrorMessage(
+                    apiMessage ||
+                    "No se pudo eliminar el usuario."
+                );
+            }
         }
     };
 
@@ -208,9 +300,29 @@ export default function UsersManagement() {
 
             await loadUsers();
 
-        } catch (error) {
+        } catch (error: any) {
 
             console.error(error);
+
+            const apiMessage =
+                error.response?.data?.detail;
+
+            if (
+                apiMessage ===
+                "You don't have permission to delete this user"
+            ) {
+
+                setManagementErrorMessage(
+                    "No tienes permisos para eliminar a este usuario"
+                );
+
+            } else {
+
+                setManagementErrorMessage(
+                    apiMessage ||
+                    "No se pudieron eliminar los usuarios."
+                );
+            }
         }
     };
 
@@ -288,10 +400,12 @@ export default function UsersManagement() {
                     </select>
 
                     {
-                        errorMessage && (
+                        createErrorMessage && (
 
-                            <div className="crud-error">
-                                {errorMessage}
+                            <div className={`crud-error ${
+                                createErrorVisible ? "log-visible" : "log-hidden"
+                            }`}>
+                                {createErrorMessage}
                             </div>
 
                         )
@@ -299,9 +413,13 @@ export default function UsersManagement() {
 
                     {
                         createSuccessMessage && (
-                            <div className="crud-success">
+
+                            <div className={`crud-success ${
+                                createSuccessVisible ? "log-visible" : "log-hidden"
+                            }`}>
                                 {createSuccessMessage}
                             </div>
+
                         )
                     }
 
@@ -386,9 +504,25 @@ export default function UsersManagement() {
 
                     {
                         managementSuccessMessage && (
-                            <div className="crud-success">
+
+                            <div className={`crud-success ${
+                                managementSuccessVisible ? "log-visible" : "log-hidden"
+                            }`}>
                                 {managementSuccessMessage}
                             </div>
+
+                        )
+                    }
+
+                    {
+                        managementErrorMessage && (
+
+                            <div className={`crud-error ${
+                                managementErrorVisible ? "log-visible" : "log-hidden"
+                            }`}>
+                                {managementErrorMessage}
+                            </div>
+
                         )
                     }
                 </div>

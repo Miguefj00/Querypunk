@@ -23,6 +23,8 @@ class ChapterResponse(ChapterBase):
     """ Chapter data returned by the API. """
     id: int
     user_id: int
+    difficulty: Optional[str] = None
+    creator_username: str
 
     class Config:
         from_attributes = True
