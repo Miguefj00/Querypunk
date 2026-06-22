@@ -50,6 +50,18 @@ export default function ProfilePage() {
     const [passwordError, setPasswordError] =
         useState("");
 
+    const [profileMessageVisible, setProfileMessageVisible] =
+        useState(false);
+
+    const [profileErrorVisible, setProfileErrorVisible] =
+        useState(false);
+
+    const [passwordMessageVisible, setPasswordMessageVisible] =
+        useState(false);
+
+    const [passwordErrorVisible, setPasswordErrorVisible] =
+        useState(false);
+
     useEffect(() => {
 
         const loadUser = async () => {
@@ -81,6 +93,52 @@ export default function ProfilePage() {
 
     }, []);
 
+    useEffect(() => {
+        if (
+            profileMessage ||
+            profileError ||
+            passwordMessage ||
+            passwordError
+        ) {
+            setProfileMessageVisible(false);
+            setProfileErrorVisible(false);
+            setPasswordMessageVisible(false);
+            setPasswordErrorVisible(false);
+
+            const showTimer = setTimeout(() => {
+                setProfileMessageVisible(!!profileMessage);
+                setProfileErrorVisible(!!profileError);
+                setPasswordMessageVisible(!!passwordMessage);
+                setPasswordErrorVisible(!!passwordError);
+            }, 50);
+
+            const fadeTimer = setTimeout(() => {
+                setProfileMessageVisible(false);
+                setProfileErrorVisible(false);
+                setPasswordMessageVisible(false);
+                setPasswordErrorVisible(false);
+            }, 5000);
+
+            const removeTimer = setTimeout(() => {
+                setProfileMessage("");
+                setProfileError("");
+                setPasswordMessage("");
+                setPasswordError("");
+            }, 6000);
+
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(fadeTimer);
+                clearTimeout(removeTimer);
+            };
+        }
+    }, [
+        profileMessage,
+        profileError,
+        passwordMessage,
+        passwordError
+    ]);
+
     const hasProfileChanges =
 
         currentUser && (
@@ -90,16 +148,6 @@ export default function ProfilePage() {
             email !== currentUser.email
 
         );
-
-    const canChangePassword =
-
-        currentPassword.trim() !== "" &&
-
-        newPassword.trim() !== "" &&
-
-        confirmPassword.trim() !== "" &&
-
-        newPassword === confirmPassword;
 
     const handleUpdateProfile =
         async () => {
@@ -228,6 +276,27 @@ export default function ProfilePage() {
             setPasswordMessage("");
             setPasswordError("");
 
+            if (!currentPassword.trim()) {
+                setPasswordError(
+                    "Debes introducir tu contraseña actual."
+                );
+                return;
+            }
+
+            if (!newPassword.trim()) {
+                setPasswordError(
+                    "Debes introducir una nueva contraseña."
+                );
+                return;
+            }
+
+            if (!confirmPassword.trim()) {
+                setPasswordError(
+                    "Debes confirmar la nueva contraseña."
+                );
+                return;
+            }
+
             if (
                 newPassword !==
                 confirmPassword
@@ -340,7 +409,11 @@ export default function ProfilePage() {
 
                         {
                             profileError && (
-                                <span className="profile-error">
+                                <span className={`profile-error ${
+                                    profileErrorVisible
+                                        ? "log-visible"
+                                        : "log-hidden"
+                                }`}>
                                     {profileError}
                                 </span>
                             )
@@ -348,7 +421,11 @@ export default function ProfilePage() {
 
                         {
                             profileMessage && (
-                                <span className="profile-success">
+                                <span className={`profile-success ${
+                                    profileMessageVisible
+                                        ? "log-visible"
+                                        : "log-hidden"
+                                }`}>
                                     {profileMessage}
                                 </span>
                             )
@@ -406,19 +483,6 @@ export default function ProfilePage() {
                             }
                         />
 
-                        {
-                            confirmPassword &&
-                            newPassword !== confirmPassword && (
-
-                                <span
-                                    className="profile-error"
-                                >
-                                    Las contraseñas no coinciden
-                                </span>
-
-                            )
-                        }
-
                         <label>
                             Confirmar contraseña
                         </label>
@@ -434,31 +498,41 @@ export default function ProfilePage() {
                         />
 
                         {
+                            confirmPassword &&
+                            newPassword !== confirmPassword && (
+                                <span className="profile-error log-visible">
+                                    Las contraseñas no coinciden
+                                </span>
+                            )
+                        }
+
+                        {
                             passwordError && (
-                                <span className="profile-error">
+                                <span className={`profile-error ${
+                                    passwordErrorVisible
+                                        ? "log-visible"
+                                        : "log-hidden"
+                                }`}>
                                     {passwordError}
                                 </span>
-
                             )
                         }
 
                         {
                             passwordMessage && (
-                                <span className="profile-success">
+                                <span className={`profile-success ${
+                                    passwordMessageVisible
+                                        ? "log-visible"
+                                        : "log-hidden"
+                                }`}>
                                     {passwordMessage}
                                 </span>
-
                             )
                         }
 
                         <button
                             className="dashboard-button"
-                            disabled={
-                                !canChangePassword
-                            }
-                            onClick={
-                                handleChangePassword
-                            }
+                            onClick={handleChangePassword}
                         >
                             Guardar cambios
                         </button>

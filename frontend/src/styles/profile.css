@@ -141,3 +141,19 @@
             0 0 5px #00ff9f,
             0 0 10px #00ff9f;
 }
+
+.log-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+            opacity 1s ease,
+            transform 1s ease;
+}
+
+.log-hidden {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+            opacity 1s ease,
+            transform 1s ease;
+}
