@@ -14,7 +14,8 @@ import {
 } from "../../services/chapters.service";
 
 import {
-    getGameSettings
+    getGameSettings,
+    updateGameSettings
 } from "../../services/settings.service";
 
 import {
@@ -233,6 +234,26 @@ export default function TeacherDashboard() {
             user => user.role_id === 2
         );
 
+    const handleToggleSetting = async (
+        key: keyof Settings
+    ) => {
+        if (!settings) return;
+
+        const updatedSettings = {
+            ...settings,
+            [key]: !settings[key]
+        };
+
+        try {
+            await updateGameSettings(updatedSettings);
+
+            setSettings(updatedSettings);
+
+        } catch (error) {
+            console.error("Error updating settings:", error);
+        }
+    };
+
     const hardestChallenges =
         [...challengeAnalytics]
             .filter(
@@ -349,60 +370,79 @@ export default function TeacherDashboard() {
 
                 </DashboardPanel>
 
-                <DashboardPanel
-                    title="CONFIGURACIÓN DEL SISTEMA"
-                >
+                <DashboardPanel title="CONFIGURACIÓN DEL SISTEMA">
 
                     {settings && (
 
                         <div className="system-status-grid">
 
                             <div className="system-status-item">
+                                <span>Ranking Global</span>
 
-                                <span>
-                                    Ranking Global
-                                </span>
-
-                                <strong>
+                                <button
+                                    className={`toggle-btn ${
+                                        settings.show_global_leaderboard
+                                            ? "toggle-active"
+                                            : "toggle-inactive"
+                                    }`}
+                                    onClick={() =>
+                                        handleToggleSetting(
+                                            "show_global_leaderboard"
+                                        )
+                                    }
+                                >
                                     {
                                         settings.show_global_leaderboard
                                             ? "ACTIVO"
                                             : "OCULTO"
                                     }
-                                </strong>
-
+                                </button>
                             </div>
 
                             <div className="system-status-item">
+                                <span>Ranking Capítulos</span>
 
-                                <span>
-                                    Ranking Capítulos
-                                </span>
-
-                                <strong>
+                                <button
+                                    className={`toggle-btn ${
+                                        settings.show_chapter_leaderboard
+                                            ? "toggle-active"
+                                            : "toggle-inactive"
+                                    }`}
+                                    onClick={() =>
+                                        handleToggleSetting(
+                                            "show_chapter_leaderboard"
+                                        )
+                                    }
+                                >
                                     {
                                         settings.show_chapter_leaderboard
                                             ? "ACTIVO"
                                             : "OCULTO"
                                     }
-                                </strong>
-
+                                </button>
                             </div>
 
                             <div className="system-status-item">
+                                <span>Ranking Retos</span>
 
-                                <span>
-                                    Ranking Retos
-                                </span>
-
-                                <strong>
+                                <button
+                                    className={`toggle-btn ${
+                                        settings.show_challenge_leaderboard
+                                            ? "toggle-active"
+                                            : "toggle-inactive"
+                                    }`}
+                                    onClick={() =>
+                                        handleToggleSetting(
+                                            "show_challenge_leaderboard"
+                                        )
+                                    }
+                                >
                                     {
                                         settings.show_challenge_leaderboard
                                             ? "ACTIVO"
                                             : "OCULTO"
                                     }
-                                </strong>
-
+                                </button>
                             </div>
 
                         </div>

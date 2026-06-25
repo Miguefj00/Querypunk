@@ -111,12 +111,10 @@
 .system-status-item {
 
     display: flex;
-
+    align-items: center;
     justify-content: space-between;
-
-    padding: 10px 14px;
-
-    border-radius: 10px;
+    min-height: 70px;
+    padding: 0 1rem;
 
     background:
             rgba(255,255,255,.03);
@@ -384,4 +382,30 @@
     flex-direction: column;
 
     gap: 15px;
+}
+
+.toggle-btn {
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    min-width: 100px;
+}
+
+.toggle-active {
+    background: rgba(0, 255, 159, 0.15);
+    color: #00ff9f;
+    border: 1px solid rgba(0, 255, 159, 0.3);
+}
+
+.toggle-inactive {
+    background: rgba(255, 77, 109, 0.15);
+    color: #ff4d6d;
+    border: 1px solid rgba(255, 77, 109, 0.3);
+}
+
+.toggle-btn:hover {
+    transform: scale(1.03);
 }

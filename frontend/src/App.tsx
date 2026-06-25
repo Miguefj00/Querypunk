@@ -23,6 +23,8 @@ import ProfilePage from "./pages/user/ProfilePage";
 import ChaptersManagement from "./pages/teacher/game/ChaptersManagement.tsx";
 import ChallengesManagement from "./pages/teacher/game/ChallengesManagement.tsx";
 import HintsManagement from "./pages/teacher/game/HintsManagement.tsx";
+import AnalyticsPage from "./pages/teacher/system/Analytics.tsx";
+import UserAnalyticsPage from "./pages/teacher/system/UserAnalytics.tsx";
 
 function App() {
 
@@ -112,6 +114,16 @@ function App() {
                     <Route
                         path="/teacher/game/chapters/:chapterId/challenges/:challengeId/hints"
                         element={<HintsManagement />}
+                    />
+
+                    <Route
+                        path="/teacher/system/analytics"
+                        element={<AnalyticsPage />}
+                    />
+
+                    <Route
+                        path="/teacher/system/analytics/:userId"
+                        element={<UserAnalyticsPage />}
                     />
 
                 </Route>

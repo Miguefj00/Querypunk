@@ -40,10 +40,10 @@
 }
 
 .sidebar-section {
-    margin: 22px 0 10px;
+    margin: 28px 0 12px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .sidebar-section-line {
@@ -57,12 +57,12 @@
 }
 
 .sidebar-section-title {
-    font-size: 0.72rem;
-    letter-spacing: 2px;
-    font-weight: 700;
+    font-size: 0.70rem;
+    letter-spacing: 2.5px;
+    font-weight: 800;
     color: #00f7ff;
     text-transform: uppercase;
-    opacity: 0.85;
+    opacity: 0.9;
 }
 
 .sidebar a {

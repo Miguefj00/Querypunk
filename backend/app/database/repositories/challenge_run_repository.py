@@ -64,12 +64,16 @@ class ChallengeRunRepository:
         return run
 
     @staticmethod
-    def complete_run(db: Session, run_id: int):
-        # Marks a run as completed
-        run = db.query(ChallengeRun).filter(ChallengeRun.id == run_id).first()
+    def complete_run(db: Session, run_id: int, score: int):
+        # Mark a run as completed
+        run = db.query(ChallengeRun).filter(
+            ChallengeRun.id == run_id
+        ).first()
+
         if run:
             run.finished_at = datetime.utcnow()
             run.is_successful = True
+            run.score = score
             db.commit()
 
     @staticmethod

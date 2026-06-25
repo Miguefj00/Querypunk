@@ -122,6 +122,17 @@ export default function Sidebar() {
                             <NavLink to="/teacher/game/chapters">
                                 📚 Capítulos, retos y pistas
                             </NavLink>
+
+                            <div className="sidebar-section">
+                                <span className="sidebar-section-line"></span>
+                                <span className="sidebar-section-title">
+                                    MONITORIZACIÓN
+                                </span>
+                            </div>
+
+                            <NavLink to="/teacher/system/analytics">
+                                📊 Analíticas
+                            </NavLink>
                         </>
                     )
                 }

@@ -73,52 +73,72 @@ class AnalyticsService:
         """
         Returns aggregated analytics per challenge:
         finished runs, successes, cancellations, avg attempts and avg time.
+        Includes challenge title for frontend visualization.
         """
-        challenges = db.query(Challenge.id).all()
+
+        challenges = db.query(
+            Challenge.id,
+            Challenge.title
+        ).all()
+
         results = []
 
-        for (challenge_id,) in challenges:
+        for challenge_id, challenge_title in challenges:
 
-            finished_runs = db.query(func.count(ChallengeRun.id)).filter(
+            finished_runs = db.query(
+                func.count(ChallengeRun.id)
+            ).filter(
                 ChallengeRun.challenge_id == challenge_id,
                 ChallengeRun.finished_at.isnot(None)
             ).scalar()
 
-            successful_runs = db.query(func.count(ChallengeRun.id)).filter(
+            successful_runs = db.query(
+                func.count(ChallengeRun.id)
+            ).filter(
                 ChallengeRun.challenge_id == challenge_id,
                 ChallengeRun.is_successful.is_(True)
             ).scalar()
 
-            cancelled_or_reset_runs = db.query(func.count(ChallengeRun.id)).filter(
+            cancelled_or_reset_runs = db.query(
+                func.count(ChallengeRun.id)
+            ).filter(
                 ChallengeRun.challenge_id == challenge_id,
                 ChallengeRun.is_successful.is_(False)
             ).scalar()
 
             run_success_rate = (
-                successful_runs / finished_runs * 100 if finished_runs else 0
+                successful_runs / finished_runs * 100
+                if finished_runs else 0
             )
 
-            total_attempts = db.query(func.count(Attempt.id)).filter(
+            total_attempts = db.query(
+                func.count(Attempt.id)
+            ).filter(
                 Attempt.challenge_id == challenge_id
             ).scalar()
 
-            avg_resolution_time = db.query(func.avg(Attempt.resolution_time)).filter(
+            avg_resolution_time = db.query(
+                func.avg(Attempt.resolution_time)
+            ).filter(
                 Attempt.challenge_id == challenge_id,
                 Attempt.is_correct.is_(True)
             ).scalar()
 
             avg_attempts_per_run = (
-                total_attempts / finished_runs if finished_runs else 0
+                total_attempts / finished_runs
+                if finished_runs else 0
             )
 
             results.append({
                 "challenge_id": challenge_id,
+                "challenge_title": challenge_title,
                 "total_runs": finished_runs,
                 "successful_runs": successful_runs,
                 "cancelled_or_reset_runs": cancelled_or_reset_runs,
                 "run_success_rate": round(run_success_rate, 2),
                 "avg_attempts_per_run": round(avg_attempts_per_run, 2),
                 "avg_resolution_time_seconds": round(avg_resolution_time or 0, 2),
+                "total_attempts": total_attempts
             })
 
         return results
@@ -291,8 +311,11 @@ class AnalyticsService:
             db.query(
                 Challenge.id.label("challenge_id"),
                 Challenge.title.label("challenge_title"),
+                Challenge.description.label("challenge_description"),
+                Challenge.solution.label("challenge_solution"),
                 ChallengeRun.id.label("run_id"),
                 ChallengeRun.started_at,
+                ChallengeRun.score.label("run_score"),
                 Attempt.id.label("attempt_id"),
                 Attempt.submitted_query,
                 Attempt.is_correct
@@ -314,6 +337,8 @@ class AnalyticsService:
                 challenges_map[ch_id] = {
                     "challenge_id": ch_id,
                     "challenge_title": row.challenge_title,
+                    "description": row.challenge_description,
+                    "solution": row.challenge_solution,
                     "runs": {}
                 }
 
@@ -321,6 +346,7 @@ class AnalyticsService:
                 challenges_map[ch_id]["runs"][run_id] = {
                     "run_id": run_id,
                     "started_at": row.started_at,
+                    "score": row.run_score,
                     "attempts": []
                 }
 

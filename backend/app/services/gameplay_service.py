@@ -132,7 +132,11 @@ class GameplayService:
             )
 
             best_score = entry.score
-            ChallengeRunRepository.complete_run(db, challenge_run.id)
+            ChallengeRunRepository.complete_run(
+                db,
+                challenge_run.id,
+                run_score
+            )
 
         hints = []
 
