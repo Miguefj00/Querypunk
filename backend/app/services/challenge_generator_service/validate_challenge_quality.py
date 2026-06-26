@@ -3,6 +3,7 @@ import sqlite3
 
 from app.services.challenge_generator_service.game_db_executor import SYSTEM_SQLITE_PATH
 from app.services.challenge_generator_service.schema_structured_service import get_structured_schema
+from app.utils.query_analizer import QueryAnalyzer
 
 """
 Challenge Quality Validators
@@ -78,5 +79,17 @@ def has_type_mismatch(sql: str) -> bool:
 
                 if not is_numeric:
                     return True  # mismatch real
+
+    return False
+
+
+def uses_forbidden_constructs(sql):
+    parsed = QueryAnalyzer.parse(sql)
+
+    if QueryAnalyzer.has_limit(parsed):
+        return True
+
+    if QueryAnalyzer.has_union(parsed):
+        return True
 
     return False

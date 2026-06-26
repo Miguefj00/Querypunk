@@ -9,8 +9,10 @@ from app.services.challenge_generator_service.schema_structured_service import f
 from app.services.challenge_generator_service.sql_randomizer import (pick_table, pick_join,
                                                                      pick_numeric_column_safe, pick_text_column_safe,
                                                                      pick_any_column_safe)
-from app.services.challenge_generator_service.validate_challenge_quality import (is_duplicate_query, uses_forbidden_columns,
-                                                                                 title_not_immersive, has_type_mismatch)
+from app.services.challenge_generator_service.validate_challenge_quality import (is_duplicate_query,
+                                                                                 uses_forbidden_columns,
+                                                                                 title_not_immersive, has_type_mismatch,
+                                                                                 uses_forbidden_constructs)
 from app.services.chapter_service import ChapterService
 from app.utils.ai_utils import clean_llm_json, GAME_WORLD_CONTEXT, COLUMN_TYPE_GUIDE, SCHEMA_SEMANTICS
 from dotenv import load_dotenv
@@ -312,8 +314,8 @@ def generate_hard_sql():
     if random.random() < 0.7:
         query += "\nORDER BY 2 DESC"
 
-    if random.random() < 0.5:
-        query += "\nLIMIT 5"
+    # LIMIT disabled because gameplay validator forbids it
+    pass
 
     return query
 
@@ -408,8 +410,8 @@ def generate_expert_sql():
     if random.random() < 0.6:
         query += f"\nORDER BY 1"
 
-    if random.random() < 0.5:
-        query += "\nLIMIT 5"
+    # LIMIT disabled because gameplay validator forbids it
+    pass
 
     return query
 
@@ -614,6 +616,10 @@ def generate_valid_sql_with_rows(difficulty: str, max_tries: int = 15):
 
         if uses_forbidden_columns(sql):
             print("❌ Uses forbidden columns")
+            continue
+
+        if uses_forbidden_constructs(sql):
+            print("❌ Uses forbidden constructs")
             continue
 
         result = execute_query_and_get_expected(sql)

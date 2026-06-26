@@ -1,4 +1,4 @@
-import {useState} from "react";
+import { useState, useRef, useEffect } from "react";
 
 import {
     submitQuery,
@@ -52,6 +52,9 @@ export default function ChallengeModal({
     const [errorMessage, setErrorMessage] =
         useState("");
 
+    const autoCloseTimeout =
+        useRef<number | undefined>(undefined);
+
     const handleExecute = async () => {
 
         try {
@@ -80,11 +83,10 @@ export default function ChallengeModal({
 
                 await onChallengeSolved();
 
-                setTimeout(() => {
-
-                    onClose();
-
-                }, 9000);
+                autoCloseTimeout.current =
+                    window.setTimeout(() => {
+                        onClose();
+                    }, 9000);
             }
 
         } catch (error: any) {
@@ -99,6 +101,16 @@ export default function ChallengeModal({
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        return () => {
+            const timeout = autoCloseTimeout.current;
+
+            if (timeout !== undefined) {
+                clearTimeout(timeout);
+            }
+        };
+    }, []);
 
     const handleResetRun =
         async () => {
