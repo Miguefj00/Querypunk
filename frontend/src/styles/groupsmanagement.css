@@ -58,8 +58,15 @@
     cursor: pointer;
 }
 
+.group-clickable div {
+    color: #d5d5d5;
+    font-size: 0.95rem;
+}
+
 .group-clickable strong {
     color: #00f7ff;
+    display: block;
+    margin-bottom: 6px;
 }
 
 .group-item button {
@@ -246,4 +253,31 @@
     transition:
             opacity 1s ease,
             transform 1s ease;
+}
+
+.group-description {
+    color: #d5d5d5;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    margin-bottom: 12px;
+}
+
+.group-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    margin-top: 6px;
+    padding-top: 10px;
+
+    border-top: 1px solid rgba(255,255,255,0.06);
+
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.3px;
+}
+
+.group-meta span {
+    color: #00f7ff;
+    font-weight: 600;
 }

@@ -83,6 +83,12 @@
     width: fit-content;
 }
 
+.challenge-description {
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 18px;
+    line-height: 1.6;
+}
+
 .challenge-solved {
 
     color: #2ecc71;
@@ -91,4 +97,161 @@
 .challenge-pending {
 
     color: #e74c3c;
+}
+
+.challenge-main {
+    width: 100%;
+    min-width: 0;
+}
+
+.database-intel {
+    width: 420px;
+    height: 78vh;
+
+    background: rgba(5,8,17,0.96);
+    border: 1px solid rgba(0,229,255,0.25);
+    border-radius: 18px;
+
+    padding: 20px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    box-shadow:
+            0 0 20px rgba(0,229,255,0.12),
+            inset 0 0 20px rgba(0,229,255,0.04);
+
+    animation: intelPulse 4s infinite ease-in-out;
+}
+
+.database-intel summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #00ffff;
+    padding: 12px;
+    list-style: none;
+    position: relative;
+}
+
+.database-intel summary::before {
+    content: "▸";
+    margin-right: 8px;
+    color: var(--neon-pink);
+}
+
+.database-intel details[open] summary::before {
+    content: "▾";
+}
+
+.database-intel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.database-intel::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+}
+
+.database-intel::-webkit-scrollbar-thumb {
+    background: rgba(0,229,255,0.35);
+    border-radius: 8px;
+}
+
+.database-intel::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,229,255,0.6);
+}
+
+.database-intel h3 {
+    margin-bottom: 18px;
+    color: var(--neon-blue);
+    font-family: Orbitron, sans-serif;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(0,229,255,.5);
+}
+
+.database-intel details {
+    margin-bottom: 10px;
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.015);
+    transition: .2s;
+}
+
+.database-intel details:hover {
+    border-color: rgba(0,229,255,0.2);
+    box-shadow: 0 0 12px rgba(0,229,255,0.08);
+}
+
+.database-intel summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #00ffff;
+}
+
+.database-intel ul {
+    padding: 0 18px 14px 30px;
+}
+
+.database-intel li {
+    padding: 6px 0;
+    color: rgba(255,255,255,0.82);
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    font-size: 14px;
+}
+
+@keyframes intelPulse {
+    0%, 100% {
+        box-shadow:
+                0 0 20px rgba(0,229,255,0.10),
+                inset 0 0 20px rgba(0,229,255,0.03);
+    }
+
+    50% {
+        box-shadow:
+                0 0 28px rgba(0,229,255,0.18),
+                inset 0 0 24px rgba(0,229,255,0.05);
+    }
+}
+
+.column-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.column-name {
+    color: white;
+    font-weight: 500;
+}
+
+.column-type {
+    color: rgba(0,229,255,0.75);
+    font-size: 12px;
+    font-family: Consolas, monospace;
+}
+
+.column-key {
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.column-key.pk {
+    background: rgba(255,193,7,0.15);
+    color: #ffc107;
+}
+
+.column-key.fk {
+    background: rgba(255,0,120,0.15);
+    color: #ff4fa3;
+}
+
+.column-ref {
+    margin-top: 4px;
+    margin-left: 4px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    font-style: italic;
 }

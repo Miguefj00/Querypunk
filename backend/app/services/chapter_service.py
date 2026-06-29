@@ -82,12 +82,21 @@ class ChapterService:
 
         if data.title is not None:
             chapter.title = data.title
+
         if data.description is not None:
             chapter.description = data.description
 
         db.commit()
         db.refresh(chapter)
-        return chapter
+
+        return {
+            "id": chapter.id,
+            "title": chapter.title,
+            "description": chapter.description,
+            "user_id": chapter.user_id,
+            "difficulty": chapter.difficulty,
+            "creator_username": chapter.owner.username
+        }
 
     @staticmethod
     def delete(db: Session, chapter_id: int, current_user):

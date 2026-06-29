@@ -223,10 +223,15 @@ class GroupService:
                 Group.id,
                 Group.name,
                 Group.description,
+                User.username.label("creator_username"),
                 func.count(UserGroup.user_id).label("student_count")
             )
+            .join(User, Group.created_by == User.id)
             .outerjoin(UserGroup, Group.id == UserGroup.group_id)
-            .group_by(Group.id)
+            .group_by(
+                Group.id,
+                User.username
+            )
             .all()
         )
 
@@ -235,7 +240,8 @@ class GroupService:
                 "id": r.id,
                 "name": r.name,
                 "description": r.description,
-                "student_count": r.student_count
+                "student_count": r.student_count,
+                "creator_username": r.creator_username
             }
             for r in results
         ]

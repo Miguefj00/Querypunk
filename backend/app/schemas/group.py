@@ -24,6 +24,7 @@ class GroupListResponse(BaseModel):
     name: str
     description: str | None
     student_count: int
+    creator_username: str
 
     class Config:
         from_attributes = True

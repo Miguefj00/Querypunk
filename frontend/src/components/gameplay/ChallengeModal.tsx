@@ -12,6 +12,10 @@ import SQLTerminal
 import QueryResults
     from "./QueryResults";
 
+import DatabaseIntel, {
+    GAME_SCHEMA
+} from "./DatabaseIntel.tsx";
+
 interface Props {
 
     challenge: any;
@@ -154,30 +158,17 @@ export default function ChallengeModal({
         };
 
     return (
-
         <div className="modal-overlay">
 
-            <div className="challenge-modal">
+            <div className="challenge-wrapper">
 
-                <div className="challenge-header">
-
-                    <div>
-
-                        <div className="challenge-tag">
-                            MISIÓN
-                        </div>
-
-                        <h2>
-                            {challenge.title}
-                        </h2>
-
-                    </div>
+                <div className="challenge-modal">
 
                     {
-                        !runStarted && (
+                        !runStarted && !results && (
 
                             <button
-                                className="modal-close"
+                                className="modal-close global-close"
                                 onClick={onClose}
                             >
                                 ✕
@@ -186,173 +177,138 @@ export default function ChallengeModal({
                         )
                     }
 
-                </div>
+                    <div className="challenge-shell">
 
-                <div className="challenge-description">
+                        <div className="challenge-main">
 
-                    {challenge.description}
+                            <div className="challenge-header">
 
-                </div>
+                                <div>
 
-                <SQLTerminal
-                    query={query}
-                    setQuery={setQuery}
-                />
+                                    <div className="challenge-tag">
+                                        MISIÓN
+                                    </div>
 
-                <div className="challenge-actions">
-
-                    {
-                        !completed && (
-
-                            <button
-                                className="action-button execute"
-                                onClick={handleExecute}
-                                disabled={loading}
-                            >
-                                {
-                                    loading
-                                        ? "EJECUTANDO..."
-                                        : "▶ EJECUTAR"
-                                }
-                            </button>
-
-                        )
-                    }
-
-                    {
-                        runStarted && (
-
-                            <>
-
-                                <button
-                                    className="action-button reset"
-                                    onClick={handleResetRun}
-                                >
-                                    ↺ RESET RUN
-                                </button>
-
-                                <button
-                                    className="action-button cancel"
-                                    onClick={handleCancelRun}
-                                >
-                                    ✕ CANCELAR RUN
-                                </button>
-
-                            </>
-
-                        )
-                    }
-
-                </div>
-
-                {
-                    errorMessage && (
-
-                        <div className="terminal-error">
-
-                            {errorMessage}
-
-                        </div>
-
-                    )
-                }
-
-                {
-                    results?.hints?.length > 0 && (
-
-                        <div className="hint-panel">
-
-                            <h3>
-                                PISTAS DESBLOQUEADAS
-                            </h3>
-
-                            {
-                                results.hints.map(
-                                    (hint: string, index: number) => (
-
-                                        <div
-                                            key={index}
-                                            className="hint-item"
-                                        >
-                                            {index + 1}. {hint}
-                                        </div>
-
-                                    )
-                                )
-                            }
-
-                        </div>
-
-                    )
-                }
-
-                {
-                    results && (
-
-                        <>
-
-                            <QueryResults
-                                columns={results.columns}
-                                rows={results.rows}
-                            />
-
-                            <>
-                                {
-                                    results.correct && (
-
-                                        <div className="mission-completed">
-
-                                            ✔ MISIÓN COMPLETADA
-
-                                        </div>
-
-                                    )
-                                }
-
-                                <div className="score-panel">
-
-                                    {
-                                        results.run_score !== undefined && (
-
-                                            <div>
-
-                                                <strong>RUN SCORE</strong>
-
-                                                <br />
-
-                                                {results.run_score}
-
-                                            </div>
-
-                                        )
-                                    }
-
-                                    {
-                                        results.best_score !== undefined && (
-
-                                            <div>
-
-                                                <strong>BEST SCORE</strong>
-
-                                                <br />
-
-                                                {results.best_score}
-
-                                            </div>
-
-                                        )
-                                    }
+                                    <h2>
+                                        {challenge.title}
+                                    </h2>
 
                                 </div>
-                            </>
 
-                        </>
+                            </div>
 
-                    )
-                }
+                            <div className="challenge-description">
+                                {challenge.description}
+                            </div>
+
+                            <SQLTerminal
+                                query={query}
+                                setQuery={setQuery}
+                            />
+
+                            <div className="challenge-actions">
+
+                                {!completed && (
+                                    <button
+                                        className="action-button execute"
+                                        onClick={handleExecute}
+                                        disabled={loading}
+                                    >
+                                        {loading
+                                            ? "EJECUTANDO..."
+                                            : "▶ EJECUTAR"}
+                                    </button>
+                                )}
+
+                                {runStarted && (
+                                    <>
+                                        <button
+                                            className="action-button reset"
+                                            onClick={handleResetRun}
+                                        >
+                                            ↺ RESET RUN
+                                        </button>
+
+                                        <button
+                                            className="action-button cancel"
+                                            onClick={handleCancelRun}
+                                        >
+                                            ✕ CANCELAR RUN
+                                        </button>
+                                    </>
+                                )}
+
+                            </div>
+
+                            {errorMessage && (
+                                <div className="terminal-error">
+                                    {errorMessage}
+                                </div>
+                            )}
+
+                            {results?.hints?.length > 0 && (
+                                <div className="hint-panel">
+
+                                    <h3>PISTAS DESBLOQUEADAS</h3>
+
+                                    {results.hints.map(
+                                        (hint: string, index: number) => (
+                                            <div
+                                                key={index}
+                                                className="hint-item"
+                                            >
+                                                {index + 1}. {hint}
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            )}
+
+                            {results && (
+                                <>
+                                    <div className="query-results-wrapper">
+                                        <QueryResults
+                                            columns={results.columns}
+                                            rows={results.rows}
+                                        />
+                                    </div>
+
+                                    {results.correct && (
+                                        <div className="mission-completed">
+                                            ✔ MISIÓN COMPLETADA
+                                        </div>
+                                    )}
+
+                                    <div className="score-panel">
+
+                                        {results.run_score !== undefined && (
+                                            <div>
+                                                <strong>RUN SCORE</strong>
+                                                <br />
+                                                {results.run_score}
+                                            </div>
+                                        )}
+
+                                        {results.best_score !== undefined && (
+                                            <div>
+                                                <strong>BEST SCORE</strong>
+                                                <br />
+                                                {results.best_score}
+                                            </div>
+                                        )}
+
+                                    </div>
+                                </>
+                            )}
+
+                        </div>
+                    </div>
+                </div>
+
+                {/* PANEL SEPARADO */}
+                <DatabaseIntel schema={GAME_SCHEMA} />
 
             </div>
-
         </div>
     );
 }

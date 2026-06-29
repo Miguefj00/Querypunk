@@ -242,9 +242,18 @@
 }
 
 .challenge-modal {
-    width: 700px;
-    max-width: 95%;
+    width: 1180px;
+    max-width: 1180px;
+
+    max-height: 92vh;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    position: relative;
+    flex-shrink: 0;
 }
+
 .challenge-modal .challenge-error {
     margin-top: 14px;
 }

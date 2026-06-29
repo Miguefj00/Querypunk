@@ -141,39 +141,32 @@
 }
 
 .modal-overlay {
-
     position: fixed;
-
     inset: 0;
 
     background: rgba(0,0,0,0.7);
 
     display: flex;
-
     justify-content: center;
-
     align-items: center;
 
     z-index: 999;
+
+    padding: 30px;
 }
 
 .challenge-modal {
+    width: 920px;
+    max-width: 920px;
 
-    width: min(900px, 90vw);
-
-    max-height: 90vh;
+    height: 78vh;
+    max-height: 78vh;
 
     overflow-y: auto;
-
-    background: rgba(8,12,25,0.98);
-
-    border: 1px solid rgba(0,229,255,0.2);
-
-    border-radius: 20px;
-
-    padding: 30px;
+    overflow-x: visible;
 
     position: relative;
+    flex-shrink: 0;
 }
 
 .challenge-modal h2 {
@@ -340,12 +333,10 @@
 }
 
 .query-results {
-
-    width: 100%;
-
+    width: max-content;
+    min-width: 100%;
     border-collapse: collapse;
-
-    margin-top: 25px;
+    margin-top: 0;
 }
 
 .query-results th {
@@ -370,6 +361,24 @@
                     255,
                     .08
             );
+}
+
+.query-results-wrapper {
+    width: 100%;
+    max-width: 100%;
+
+    margin-top: 25px;
+    margin-bottom: 25px;
+
+    overflow-x: auto;
+    overflow-y: auto;
+
+    max-height: 320px;
+
+    border: 1px solid rgba(0,229,255,.15);
+    border-radius: 14px;
+
+    background: rgba(255,255,255,.02);
 }
 
 .mission-completed {
@@ -490,4 +499,40 @@
 .hint-item:first-of-type {
 
     border-top: none;
+}
+
+.challenge-shell {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(8,12,25,0.98);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 22px;
+
+    padding: 60px 35px 35px 35px;
+
+    box-shadow:
+            0 0 30px rgba(0,229,255,0.08),
+            inset 0 0 20px rgba(0,229,255,0.02);
+
+    overflow-x: hidden;
+}
+
+.global-close {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    z-index: 50;
+}
+
+.challenge-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 24px;
+
+    width: fit-content;
+    max-width: 1500px;
 }

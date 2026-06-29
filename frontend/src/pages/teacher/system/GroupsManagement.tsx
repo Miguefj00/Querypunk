@@ -27,6 +27,8 @@ interface Group {
     description: string;
 
     student_count: number;
+
+    creator_username: string;
 }
 
 export default function GroupsManagement() {
@@ -449,43 +451,49 @@ export default function GroupsManagement() {
             }
         };
 
-    const handleUploadCSV =
-        async () => {
+    const handleUploadCSV = async () => {
+        if (!csvFile || !selectedGroup) return;
 
-            if (
-                !csvFile ||
-                !selectedGroup
-            ) return;
+        try {
+            await uploadStudentsToGroup(
+                selectedGroup.id,
+                csvFile
+            );
 
-            try {
-
-                await uploadStudentsToGroup(
-                    selectedGroup.id,
-                    csvFile
+            const updatedUsers =
+                await getGroupUsers(
+                    selectedGroup.id
                 );
 
-                const updatedUsers =
-                    await getGroupUsers(
-                        selectedGroup.id
-                    );
+            setGroupUsers(updatedUsers);
 
-                setGroupUsers(
-                    updatedUsers
+            const available =
+                await getAvailableUsers(
+                    selectedGroup.id
                 );
 
-                setCsvFile(null);
+            setAvailableUsers(available);
 
-                if (fileInputRef.current) {
-                    fileInputRef.current.value = "";
-                }
+            setManagementSuccessMessage(
+                `Usuarios importados correctamente al grupo ${selectedGroup.name}.`
+            );
 
-                loadGroups();
+            setCsvFile(null);
 
-            } catch (error) {
-
-                console.error(error);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
             }
-        };
+
+            loadGroups();
+
+        } catch (error) {
+            console.error(error);
+
+            setManagementErrorMessage(
+                "No se pudieron importar los usuarios desde el CSV."
+            );
+        }
+    };
 
     return (
 
@@ -578,10 +586,20 @@ export default function GroupsManagement() {
                                         {group.name}
                                     </strong>
 
-                                    <div>
+                                    <div className="group-description">
                                         {
-                                            group.student_count
-                                        } alumnos
+                                            group.description ||
+                                            "Este grupo no tiene descripción."
+                                        }
+                                    </div>
+
+                                    <div>
+                                        {group.student_count} alumnos
+                                    </div>
+
+                                    <div className="group-meta">
+                                        Creado por:
+                                        <span>{group.creator_username}</span>
                                     </div>
 
                                 </div>
