@@ -41,6 +41,22 @@ export async function createUser(
     return response.data;
 }
 
+export async function updateUser(
+    userId: number,
+    data: {
+        username: string;
+        email: string;
+    }
+) {
+    const response =
+        await api.put(
+            `/users/${userId}`,
+            data
+        );
+
+    return response.data;
+}
+
 export async function deleteUser(
     userId: number
 ) {

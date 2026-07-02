@@ -158,28 +158,30 @@ class UserService:
     @staticmethod
     def delete(db: Session, user_id: int, current_user: User):
         """
-        Deletes a user with strict role rules:
+        Deletes a user with role rules:
         - Users can delete themselves (except admin)
-        - Admin/Teacher can delete students only.
+        - Teachers can delete students only
+        - Admin can delete anyone except itself
         """
         target_user = UserRepository.get_by_id(db, user_id)
 
         if not target_user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        # Self deletion allowed (except admin)
+        # Self deletion forbidden for everyone
         if current_user.id == target_user.id:
-            if current_user.role_id == ROLE_ADMIN:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Admin cannot delete itself"
-                )
+            raise HTTPException(
+                status_code=400,
+                detail="You cannot delete your own account"
+            )
 
+        # Admin can delete anyone except itself
+        if current_user.role_id == ROLE_ADMIN:
             UserRepository.delete(db, target_user)
             return {"detail": "User deleted successfully"}
 
-        # Admin/Teacher can delete STUDENTS only
-        if current_user.role_id in [ROLE_ADMIN, ROLE_TEACHER]:
+        # Teacher can delete students only
+        if current_user.role_id == ROLE_TEACHER:
             if target_user.role_id == ROLE_STUDENT:
                 UserRepository.delete(db, target_user)
                 return {"detail": "User deleted successfully"}
@@ -192,22 +194,33 @@ class UserService:
 
     @staticmethod
     def delete_bulk(db: Session, user_ids: list[int], current_user: User):
-        """ Bulk deletion of students based on permissions. """
+        """ Bulk deletion based on permissions. """
         users = UserRepository.get_by_ids(db, user_ids)
 
         if not users:
-            raise HTTPException(status_code=404, detail="Users not found")
+            raise HTTPException(
+                status_code=404,
+                detail="Users not found"
+            )
 
         deletable_ids = []
 
         for user in users:
 
-            # Admin cannot delete itself in bulk
+            # Self delete forbidden
             if user.id == current_user.id:
                 continue
 
-            # Admin/Teacher can delete students
-            if current_user.role_id in [ROLE_ADMIN, ROLE_TEACHER] and user.role_id == ROLE_STUDENT:
+            # Admin can delete everybody excepts himself
+            if current_user.role_id == ROLE_ADMIN:
+                deletable_ids.append(user.id)
+                continue
+
+            # Teacher or student
+            if (
+                    current_user.role_id == ROLE_TEACHER
+                    and user.role_id == ROLE_STUDENT
+            ):
                 deletable_ids.append(user.id)
 
         if not deletable_ids:
@@ -216,6 +229,12 @@ class UserService:
                 detail="No users can be deleted with your permissions"
             )
 
-        deleted = UserRepository.delete_many(db, deletable_ids)
+        deleted = UserRepository.delete_many(
+            db,
+            deletable_ids
+        )
 
-        return {"detail": f"{deleted} users deleted successfully"}
+        return {
+            "detail": f"{deleted} users deleted successfully",
+            "deleted_count": deleted
+        }

@@ -1,0 +1,223 @@
+.crud-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.crud-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.crud-form input,
+.crud-form select {
+    padding: 14px;
+    border: 1px solid rgba(0,255,255,0.25);
+    border-radius: 8px;
+    background: rgba(20,20,20,0.9);
+    color: white;
+    font-size: 0.95rem;
+    transition: 0.2s;
+}
+
+.crud-form input:focus,
+.crud-form select:focus {
+    outline: none;
+    border-color: #00f7ff;
+    box-shadow: 0 0 12px rgba(0,247,255,0.25);
+}
+
+.crud-form button,
+.crud-actions button {
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(
+            135deg,
+            #00f7ff,
+            #8a2be2
+    );
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.crud-form button:hover,
+.crud-actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(0,247,255,0.25);
+}
+
+.crud-actions {
+    margin-bottom: 16px;
+}
+
+.crud-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: visible;
+}
+
+.crud-item {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 10px;
+    transition: 0.2s;
+    overflow: visible;
+}
+
+.crud-item > div:nth-child(2) {
+    flex: 1;
+}
+
+.crud-item-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.crud-item-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.crud-item:hover {
+    background: rgba(255,255,255,0.07);
+}
+
+.crud-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #00f7ff;
+    cursor: pointer;
+}
+
+.crud-item p {
+    margin: 4px 0 0;
+    opacity: 0.7;
+    font-size: 0.9rem;
+}
+
+.crud-item button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    min-width: 90px;
+}
+
+.crud-delete-btn {
+    background: #ff3b5f !important;
+}
+
+.crud-delete-btn:hover {
+    background: #d92b4c !important;
+}
+
+.crud-edit-btn {
+    background: #8a2be2 !important;
+}
+
+.crud-edit-btn:hover {
+    background: #6d1fc1 !important;
+}
+
+.crud-error {
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255, 59, 95, 0.15);
+    border: 1px solid rgba(255, 59, 95, 0.4);
+    color: #ff5f7d;
+    font-size: 0.9rem;
+}
+
+.crud-success {
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0, 255, 120, 0.12);
+    border: 1px solid rgba(0, 255, 120, 0.4);
+    color: #6cff9d;
+    font-size: 0.95rem;
+}
+
+.log-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+            opacity 1s ease,
+            transform 1s ease;
+}
+
+.log-hidden {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+            opacity 1s ease,
+            transform 1s ease;
+}
+
+/* Error dentro de modal */
+.confirmation-modal .crud-error {
+    margin-top: 14px;
+    margin-bottom: 6px;
+}
+
+/* Success dentro de modal */
+.confirmation-modal .crud-success {
+    margin-top: 14px;
+    margin-bottom: 6px;
+}
+
+/* Título auxiliar dentro del modal (si lo usas) */
+.crud-modal-subtitle {
+    font-size: 0.9rem;
+    color: #00f7ff;
+    margin-bottom: 12px;
+    font-weight: bold;
+}
+
+/* Contenido del modal */
+.crud-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Labels opcionales */
+.crud-modal-content label {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 4px;
+}
+
+/* Orden consistente con otros CRUDs: Eliminar izquierda, Editar derecha */
+.crud-item-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.crud-item-actions .crud-delete-btn {
+    order: 1;
+}
+
+.crud-item-actions .crud-edit-btn {
+    order: 2;
+}
+
+

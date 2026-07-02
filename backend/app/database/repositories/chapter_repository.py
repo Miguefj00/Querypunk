@@ -26,7 +26,7 @@ class ChapterRepository:
         return db.query(Chapter).filter(Chapter.id == chapter_id).first()
 
     @staticmethod
-    def update_difficulty(db: Session, chapter_id: int, difficulty: str):
+    def update_difficulty(db: Session, chapter_id: int, difficulty: str | None):
         # Updates computed chapter difficulty
         chapter = db.query(Chapter).filter(Chapter.id == chapter_id).first()
         if chapter:
@@ -62,7 +62,7 @@ class ChapterRepository:
         difficulties = ChallengeRepository.get_difficulties_by_chapter(db, chapter_id)
 
         if not difficulties:
-            ChapterRepository.update_difficulty(db, chapter_id, "")
+            ChapterRepository.update_difficulty(db, chapter_id, None)
             return
 
         numeric_values = [

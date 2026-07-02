@@ -35,10 +35,15 @@ export default function Sidebar() {
         localStorage.getItem("user") || "{}"
     );
 
+    const isTeacherOrAdmin =
+        user.role_id === 2 || user.role_id === 3;
+
     const basePath =
-        user.role_id === 2
-            ? "/teacher"
-            : "/student";
+        user.role_id === 3
+            ? "/admin"
+            : user.role_id === 2
+                ? "/teacher"
+                : "/student";
 
     const handleLogout =
         async () => {
@@ -95,7 +100,7 @@ export default function Sidebar() {
                 </NavLink>
 
                 {
-                    user.role_id === 2 && (
+                    isTeacherOrAdmin && (
                         <>
                             <div className="sidebar-section">
                                 <span className="sidebar-section-line"></span>
@@ -104,11 +109,15 @@ export default function Sidebar() {
                                 </span>
                             </div>
 
-                            <NavLink to="/teacher/system/users">
+                            <NavLink
+                                to={`${basePath}/system/users`}
+                            >
                                 👥 Usuarios
                             </NavLink>
 
-                            <NavLink to="/teacher/system/groups">
+                            <NavLink
+                                to={`${basePath}/system/groups`}
+                            >
                                 🏫 Grupos
                             </NavLink>
 
@@ -119,7 +128,9 @@ export default function Sidebar() {
                                 </span>
                             </div>
 
-                            <NavLink to="/teacher/game/chapters">
+                            <NavLink
+                                to={`${basePath}/game/chapters`}
+                            >
                                 📚 Capítulos, retos y pistas
                             </NavLink>
 
@@ -130,7 +141,9 @@ export default function Sidebar() {
                                 </span>
                             </div>
 
-                            <NavLink to="/teacher/system/analytics">
+                            <NavLink
+                                to={`${basePath}/system/analytics`}
+                            >
                                 📊 Analíticas
                             </NavLink>
                         </>

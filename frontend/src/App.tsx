@@ -26,6 +26,10 @@ import HintsManagement from "./pages/teacher/game/HintsManagement.tsx";
 import AnalyticsPage from "./pages/teacher/system/Analytics.tsx";
 import UserAnalyticsPage from "./pages/teacher/system/UserAnalytics.tsx";
 
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import UsersManagementAdmin
+    from "./pages/admin/system/UsersManagementAdmin.tsx";
+
 function App() {
 
     return (
@@ -126,6 +130,66 @@ function App() {
                         element={<UserAnalyticsPage />}
                     />
 
+                </Route>
+
+                <Route
+                    path="/admin"
+                    element={<UserLayout />}
+                >
+                    <Route
+                        index
+                        element={<AdminDashboard />}
+                    />
+
+                    <Route
+                        path="chapters"
+                        element={<Gameplay />}
+                    />
+
+                    <Route
+                        path="rankings"
+                        element={<RankingsPage />}
+                    />
+
+                    <Route
+                        path="profile"
+                        element={<ProfilePage />}
+                    />
+
+                    <Route
+                        path="system/users"
+                        element={<UsersManagementAdmin />}
+                    />
+
+                    <Route
+                        path="system/groups"
+                        element={<GroupsManagement />}
+                    />
+
+                    <Route
+                        path="game/chapters"
+                        element={<ChaptersManagement />}
+                    />
+
+                    <Route
+                        path="game/chapters/:chapterId/challenges"
+                        element={<ChallengesManagement />}
+                    />
+
+                    <Route
+                        path="game/chapters/:chapterId/challenges/:challengeId/hints"
+                        element={<HintsManagement />}
+                    />
+
+                    <Route
+                        path="system/analytics"
+                        element={<AnalyticsPage />}
+                    />
+
+                    <Route
+                        path="system/analytics/:userId"
+                        element={<UserAnalyticsPage />}
+                    />
                 </Route>
 
             </Routes>

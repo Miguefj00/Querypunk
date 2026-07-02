@@ -7,10 +7,14 @@ import {
     getUsers,
     createUser,
     deleteUser,
-    bulkDeleteUsers
+    bulkDeleteUsers,
+    updateUser
 } from "../../../services/users.service.ts";
 
-import "../../../styles/crud.css";
+import EditUserModal
+    from "../../../components/admin/EditUserModal.tsx";
+
+import "../../../styles/crudAdmin.css";
 import ConfirmationModal from "../../../components/ui/ConfirmationModal.tsx";
 
 interface User {
@@ -24,7 +28,7 @@ interface User {
     role_id: number;
 }
 
-export default function UsersManagement() {
+export default function UsersManagementAdmin() {
 
     const [users, setUsers] =
         useState<User[]>([]);
@@ -80,6 +84,30 @@ export default function UsersManagement() {
     const [managementSuccessVisible, setManagementSuccessVisible] =
         useState(false);
 
+    const [showEditModal,
+        setShowEditModal] =
+        useState(false);
+
+    const [editingUser,
+        setEditingUser] =
+        useState<User | null>(null);
+
+    const [editUsername,
+        setEditUsername] =
+        useState("");
+
+    const [editEmail,
+        setEditEmail] =
+        useState("");
+
+    const [editErrorMessage,
+        setEditErrorMessage] =
+        useState("");
+
+    const [editErrorVisible,
+        setEditErrorVisible] =
+        useState(false);
+
     const loadUsers = async () => {
 
         try {
@@ -106,12 +134,14 @@ export default function UsersManagement() {
             createSuccessMessage ||
             managementSuccessMessage ||
             createErrorMessage ||
-            managementErrorMessage
+            managementErrorMessage ||
+            editErrorMessage
         ) {
             setCreateSuccessVisible(false);
             setManagementSuccessVisible(false);
             setCreateErrorVisible(false);
             setManagementErrorVisible(false);
+            setEditErrorVisible(false);
 
             const showTimer = setTimeout(() => {
                 setCreateSuccessVisible(
@@ -129,6 +159,10 @@ export default function UsersManagement() {
                 setManagementErrorVisible(
                     !!managementErrorMessage
                 );
+
+                setEditErrorVisible(
+                    !!editErrorMessage
+                );
             }, 50);
 
             const fadeTimer = setTimeout(() => {
@@ -136,6 +170,7 @@ export default function UsersManagement() {
                 setManagementSuccessVisible(false);
                 setCreateErrorVisible(false);
                 setManagementErrorVisible(false);
+                setEditErrorVisible(false);
             }, 5000);
 
             const removeTimer = setTimeout(() => {
@@ -143,6 +178,7 @@ export default function UsersManagement() {
                 setManagementSuccessMessage("");
                 setCreateErrorMessage("");
                 setManagementErrorMessage("");
+                setEditErrorMessage("");
             }, 6000);
 
             return () => {
@@ -155,7 +191,8 @@ export default function UsersManagement() {
         createSuccessMessage,
         managementSuccessMessage,
         createErrorMessage,
-        managementErrorMessage
+        managementErrorMessage,
+        editErrorMessage
     ]);
 
     const handleCreateUser =
@@ -232,6 +269,74 @@ export default function UsersManagement() {
                 setCreateErrorMessage(
                     error.response?.data?.detail ||
                     "No se pudo crear el usuario."
+                );
+            }
+        };
+
+    const handleEditUser =
+        async () => {
+
+            setEditErrorMessage("");
+            setManagementSuccessMessage("");
+
+            if (!editingUser) return;
+
+            if (!editUsername.trim()) {
+
+                setEditErrorMessage(
+                    "Debes indicar un nombre de usuario."
+                );
+
+                return;
+            }
+
+            if (!editEmail.trim()) {
+
+                setEditErrorMessage(
+                    "Debes indicar un correo electrónico."
+                );
+
+                return;
+            }
+
+            const emailRegex =
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!emailRegex.test(editEmail)) {
+
+                setEditErrorMessage(
+                    "El correo electrónico no es válido."
+                );
+
+                return;
+            }
+
+            try {
+
+                await updateUser(
+                    editingUser.id,
+                    {
+                        username: editUsername,
+                        email: editEmail
+                    }
+                );
+
+                setManagementSuccessMessage(
+                    `Usuario ${editUsername} actualizado correctamente.`
+                );
+
+                setShowEditModal(false);
+                setEditingUser(null);
+
+                await loadUsers();
+
+            } catch (error: any) {
+
+                console.error(error);
+
+                setEditErrorMessage(
+                    error.response?.data?.detail ||
+                    "No se pudo actualizar el usuario."
                 );
             }
         };
@@ -494,16 +599,31 @@ export default function UsersManagement() {
 
                             </div>
 
-                            <button
-                                onClick={() => {
+                            <div className="crud-item-actions">
 
-                                    setUserToDelete(user);
+                                <button
+                                    className="crud-delete-btn"
+                                    onClick={() => {
+                                        setUserToDelete(user);
+                                        setShowDeleteModal(true);
+                                    }}
+                                >
+                                    Eliminar
+                                </button>
 
-                                    setShowDeleteModal(true);
-                                }}
-                            >
-                                Eliminar
-                            </button>
+                                <button
+                                    className="crud-edit-btn"
+                                    onClick={() => {
+                                        setEditingUser(user);
+                                        setEditUsername(user.username);
+                                        setEditEmail(user.email);
+                                        setShowEditModal(true);
+                                    }}
+                                >
+                                    Editar
+                                </button>
+
+                            </div>
 
                         </div>
 
@@ -536,6 +656,28 @@ export default function UsersManagement() {
 
             </DashboardPanel>
 
+            {
+                showEditModal &&
+                editingUser && (
+
+                    <EditUserModal
+                        title="EDITAR USUARIO"
+                        username={editUsername}
+                        email={editEmail}
+                        errorMessage={editErrorMessage}
+                        errorVisible={editErrorVisible}
+                        onUsernameChange={setEditUsername}
+                        onEmailChange={setEditEmail}
+                        onCancel={() => {
+                            setShowEditModal(false);
+                            setEditingUser(null);
+                            setEditErrorMessage("");
+                        }}
+                        onConfirm={handleEditUser}
+                    />
+
+                )
+            }
 
             {
                 showDeleteModal &&

@@ -46,7 +46,17 @@ class ChapterService:
             description=data.description,
             user_id=current_user.id
         )
-        return ChapterRepository.create(db, chapter)
+
+        chapter = ChapterRepository.create(db, chapter)
+
+        return {
+            "id": chapter.id,
+            "title": chapter.title,
+            "description": chapter.description,
+            "user_id": chapter.user_id,
+            "difficulty": chapter.difficulty,
+            "creator_username": current_user.username
+        }
 
     @staticmethod
     def get_all(db: Session, current_user):
