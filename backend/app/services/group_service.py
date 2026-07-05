@@ -17,6 +17,36 @@ from app.utils.user_utils import assign_user_to_group, generate_password_from_id
 class GroupService:
 
     @staticmethod
+    def get_owned_group(
+            db: Session,
+            group_id: int,
+            current_user: User
+    ):
+        """
+        Returns a group ensuring ownership or admin permissions.
+        """
+        group = db.query(Group).filter(
+            Group.id == group_id
+        ).first()
+
+        if not group:
+            raise HTTPException(
+                status_code=404,
+                detail="Group not found"
+            )
+
+        if (
+                current_user.role_id == ROLE_TEACHER
+                and group.created_by != current_user.id
+        ):
+            raise HTTPException(
+                status_code=403,
+                detail="Not authorized to modify this group"
+            )
+
+        return group
+
+    @staticmethod
     def create_group(db: Session, name: str, description: str, created_by: int):
         """ Creates a new student group ensuring unique name. """
         existing = db.query(Group).filter(Group.name == name).first()
@@ -40,14 +70,19 @@ class GroupService:
             db: Session,
             group_id: int,
             file: UploadFile,
-            background_tasks: BackgroundTasks
+            background_tasks: BackgroundTasks,
+            current_user: User
     ):
         """
         Bulk import students from CSV file.
         Existing users are assigned to the group,
         new users are automatically created and emailed.
         """
-        group = db.query(Group).filter(Group.id == group_id).first()
+        group = GroupService.get_owned_group(
+            db,
+            group_id,
+            current_user
+        )
 
         if not group:
             raise HTTPException(status_code=404, detail="Group not found")
@@ -85,7 +120,8 @@ class GroupService:
                         db,
                         group_id,
                         user.username,
-                        background_tasks
+                        background_tasks,
+                        current_user
                     )
                     users_assigned += 1
                 except HTTPException:
@@ -132,16 +168,19 @@ class GroupService:
             db: Session,
             group_id: int,
             username: str,
-            background_tasks: BackgroundTasks
+            background_tasks: BackgroundTasks,
+            current_user: User
     ):
         """
         Assign an existing user to a group manually.
         Sends email notification if successful.
         """
 
-        group = db.query(Group).filter(
-            Group.id == group_id
-        ).first()
+        group = GroupService.get_owned_group(
+            db,
+            group_id,
+            current_user
+        )
 
         if not group:
             raise HTTPException(
@@ -309,4 +348,3 @@ class GroupService:
         db.commit()
 
         return {"detail": "Group deleted successfully"}
-

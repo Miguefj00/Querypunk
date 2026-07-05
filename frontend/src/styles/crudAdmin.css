@@ -63,7 +63,7 @@
 
 .crud-item {
     display: grid;
-    grid-template-columns: 40px 1fr auto;
+    grid-template-columns: 40px minmax(0, 1fr) max-content;
     align-items: center;
     gap: 16px;
     padding: 14px;
@@ -79,11 +79,10 @@
 }
 
 .crud-item-actions {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
+    display: inline-flex;
+    gap: 12px;
+    width: fit-content;
+    justify-self: end;
     flex-shrink: 0;
 }
 
@@ -113,12 +112,14 @@
 .crud-item button {
     padding: 10px 14px;
     border: none;
+    width: fit-content;
+    white-space: nowrap;
     border-radius: 8px;
     color: white;
     font-weight: bold;
     cursor: pointer;
     transition: 0.2s;
-    min-width: 90px;
+    min-width: unset;
 }
 
 .crud-delete-btn {
@@ -171,19 +172,16 @@
             transform 1s ease;
 }
 
-/* Error dentro de modal */
 .confirmation-modal .crud-error {
     margin-top: 14px;
     margin-bottom: 6px;
 }
 
-/* Success dentro de modal */
 .confirmation-modal .crud-success {
     margin-top: 14px;
     margin-bottom: 6px;
 }
 
-/* Título auxiliar dentro del modal (si lo usas) */
 .crud-modal-subtitle {
     font-size: 0.9rem;
     color: #00f7ff;
@@ -191,33 +189,15 @@
     font-weight: bold;
 }
 
-/* Contenido del modal */
 .crud-modal-content {
     display: flex;
     flex-direction: column;
     gap: 14px;
 }
 
-/* Labels opcionales */
 .crud-modal-content label {
     font-size: 0.85rem;
     color: rgba(255,255,255,0.75);
     margin-bottom: 4px;
 }
-
-/* Orden consistente con otros CRUDs: Eliminar izquierda, Editar derecha */
-.crud-item-actions {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-}
-
-.crud-item-actions .crud-delete-btn {
-    order: 1;
-}
-
-.crud-item-actions .crud-edit-btn {
-    order: 2;
-}
-
 

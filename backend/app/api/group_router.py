@@ -80,7 +80,8 @@ async def upload_students_to_group(
         db=db,
         group_id=group_id,
         file=file,
-        background_tasks=background_tasks
+        background_tasks=background_tasks,
+        current_user=current_user
     )
 
 
@@ -99,7 +100,8 @@ async def assign_user_to_group(
         db=db,
         group_id=group_id,
         username=payload.username,
-        background_tasks=background_tasks
+        background_tasks=background_tasks,
+        current_user=current_user
     )
 
 

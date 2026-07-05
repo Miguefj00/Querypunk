@@ -30,7 +30,7 @@
 
 .crud-form button,
 .crud-actions button {
-    padding: 14px;
+    padding: 14px 16px;
     border: none;
     border-radius: 8px;
     background: linear-gradient(
@@ -90,7 +90,11 @@
 }
 
 .crud-item button {
-    padding: 8px 14px;
+    padding: 10px 14px;
+    min-width: auto;
+    width: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
     border: none;
     border-radius: 6px;
     background: #ff3b5f;

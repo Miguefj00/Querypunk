@@ -109,6 +109,12 @@ export default function GroupsManagement() {
     const [assignErrorVisible, setAssignErrorVisible] =
         useState(false);
 
+    const [assignSuccessMessage, setAssignSuccessMessage] =
+        useState("");
+
+    const [assignSuccessVisible, setAssignSuccessVisible] =
+        useState(false);
+
     const [editErrorVisible, setEditErrorVisible] =
         useState(false);
 
@@ -143,6 +149,7 @@ export default function GroupsManagement() {
         if (
             createSuccessMessage ||
             managementSuccessMessage ||
+            assignSuccessMessage ||
             managementErrorMessage ||
             createErrorMessage ||
             assignErrorMessage ||
@@ -154,6 +161,7 @@ export default function GroupsManagement() {
             setCreateErrorVisible(false);
             setAssignErrorVisible(false);
             setEditErrorVisible(false);
+            setAssignSuccessVisible(false);
 
             const showTimer = setTimeout(() => {
                 setCreateSuccessVisible(
@@ -176,6 +184,10 @@ export default function GroupsManagement() {
                     !!assignErrorMessage
                 );
 
+                setAssignSuccessVisible(
+                    !!assignSuccessMessage
+                );
+
                 setEditErrorVisible(
                     !!editErrorMessage
                 );
@@ -187,6 +199,7 @@ export default function GroupsManagement() {
                 setManagementErrorVisible(false);
                 setCreateErrorVisible(false);
                 setAssignErrorVisible(false);
+                setAssignSuccessVisible(false);
                 setEditErrorVisible(false);
             }, 5000);
 
@@ -196,6 +209,7 @@ export default function GroupsManagement() {
                 setManagementErrorMessage("");
                 setCreateErrorMessage("");
                 setAssignErrorMessage("");
+                setAssignSuccessMessage("");
                 setEditErrorMessage("");
             }, 6000);
 
@@ -211,6 +225,7 @@ export default function GroupsManagement() {
         managementErrorMessage,
         createErrorMessage,
         assignErrorMessage,
+        assignSuccessMessage,
         editErrorMessage
     ]);
 
@@ -293,19 +308,31 @@ export default function GroupsManagement() {
                         : ""
                 );
 
-                setManagementSuccessMessage(
+                setAssignSuccessMessage(
                     "Usuario añadido al grupo correctamente."
                 );
 
                 loadGroups();
 
-            } catch (error) {
-
+            } catch (error: any) {
                 console.error(error);
 
-                setAssignErrorMessage(
-                    "No se pudo asignar el usuario."
-                );
+                const apiMessage =
+                    error.response?.data?.detail;
+
+                if (
+                    apiMessage ===
+                    "Not authorized to modify this group"
+                ) {
+                    setAssignErrorMessage(
+                        "No tienes permisos para añadir usuarios a este grupo."
+                    );
+                } else {
+                    setAssignErrorMessage(
+                        apiMessage ||
+                        "No se pudo asignar el usuario."
+                    );
+                }
             }
         };
 
@@ -474,7 +501,7 @@ export default function GroupsManagement() {
 
             setAvailableUsers(available);
 
-            setManagementSuccessMessage(
+            setAssignSuccessMessage(
                 `Usuarios importados correctamente al grupo ${selectedGroup.name}.`
             );
 
@@ -486,12 +513,25 @@ export default function GroupsManagement() {
 
             loadGroups();
 
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
 
-            setManagementErrorMessage(
-                "No se pudieron importar los usuarios desde el CSV."
-            );
+            const apiMessage =
+                error.response?.data?.detail;
+
+            if (
+                apiMessage ===
+                "Not authorized to modify this group"
+            ) {
+                setAssignErrorMessage(
+                    "No tienes permisos para importar usuarios a este grupo."
+                );
+            } else {
+                setAssignErrorMessage(
+                    apiMessage ||
+                    "No se pudieron importar los usuarios desde el CSV."
+                );
+            }
         }
     };
 
@@ -758,6 +798,16 @@ export default function GroupsManagement() {
                                     assignErrorVisible ? "log-visible" : "log-hidden"
                                 }`}>
                                     {assignErrorMessage}
+                                </div>
+                            )
+                        }
+
+                        {
+                            assignSuccessMessage && (
+                                <div className={`group-success ${
+                                    assignSuccessVisible ? "log-visible" : "log-hidden"
+                                }`}>
+                                    {assignSuccessMessage}
                                 </div>
                             )
                         }
