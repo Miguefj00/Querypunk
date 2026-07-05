@@ -96,6 +96,12 @@ interface ChallengeAnalytics {
     avg_resolution_time_seconds: number;
 }
 
+const ROLE_LABELS: Record<number, string> = {
+    1: "Estudiante",
+    2: "Profesor",
+    3: "Administrador",
+};
+
 export default function TeacherDashboard() {
 
     const [users, setUsers] =
@@ -340,15 +346,7 @@ export default function TeacherDashboard() {
 
                                         </div>
 
-                                        <span>
-
-                                            {
-                                                user.role_id === 1
-                                                    ? "Estudiante"
-                                                    : "Profesor"
-                                            }
-
-                                        </span>
+                                        <span>{ROLE_LABELS[user.role_id] ?? "Desconocido"}</span>
 
                                     </div>
 
