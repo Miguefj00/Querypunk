@@ -9,8 +9,9 @@ backend/venv/
 # Environment variables
 backend/.env
 
-# Databases
-backend/*.db
+backend/*.db-journal
+backend/*.db-wal
+backend/*.db-shm
 
 # IDE
 .idea/
