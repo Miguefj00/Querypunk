@@ -1,5 +1,6 @@
 # Node
 frontend/node_modules/
+frontend/.env.development
 
 # Python
 backend/__pycache__/
