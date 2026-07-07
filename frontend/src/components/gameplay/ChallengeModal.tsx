@@ -7,7 +7,7 @@ import {
 } from "../../services/gameplay.service";
 
 import SQLTerminal
-    from "./SQLTerminal";
+    from "./SqlTerminal";
 
 import QueryResults
     from "./QueryResults";
