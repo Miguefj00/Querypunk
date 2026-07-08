@@ -3,6 +3,13 @@ Querypunk es un videojuego narrativo por niveles centrado en la enseñanza y apr
 
 ## Estructura
 - frontend/: cliente React + TypeScript
-- backend/: servidor FastAPI
-- databases/: bases de datos del sistema y del juego
+- backend/: servidor FastAPI + databases
 - docs/: documentación del TFG
+
+## Requisitos
+
+- Docker Desktop
+
+Clonar el repositorio
+
+docker compose up --build
