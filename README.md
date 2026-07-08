@@ -10,6 +10,10 @@ Querypunk es un videojuego narrativo por niveles centrado en la enseñanza y apr
 
 - Docker Desktop
 
-Clonar el repositorio
+##  Comandos a utilizar
 
-docker compose up --build
+1. git clone https://github.com/Miguefj00/Querypunk.git
+
+2. cd Querypunk
+
+3. docker compose up --build
