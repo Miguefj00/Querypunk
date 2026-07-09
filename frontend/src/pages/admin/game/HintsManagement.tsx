@@ -343,7 +343,7 @@ export default function HintsManagement() {
                     navigate(-1)
                 }
             >
-                ← Volver
+                ← Volver a retos
             </button>
 
             <div className="hints-management-page">
