@@ -93,3 +93,63 @@ def uses_forbidden_constructs(sql):
         return True
 
     return False
+
+
+def is_bad_grouping(sql):
+
+    sql_lower = sql.lower()
+
+    if "group by" not in sql_lower:
+        return False
+
+    schema = get_structured_schema()
+
+    bad_columns = [
+        "id"
+    ]
+
+    for table_data in schema.values():
+
+        for col, col_type in table_data["columns"].items():
+
+            col_lower = col.lower()
+
+            if (
+                    col_lower.endswith("_id")
+                    or col_lower == "id"
+            ):
+                bad_columns.append(col_lower)
+
+            numeric_types = [
+                "INT",
+                "INTEGER",
+                "REAL",
+                "NUMERIC",
+                "FLOAT",
+                "DOUBLE"
+            ]
+
+            if any(t in col_type.upper() for t in numeric_types):
+
+                if (
+                        "main" in col_lower
+                        or "legality" in col_lower
+                ):
+                    continue
+
+                bad_columns.append(col_lower)
+
+    return any(
+        f"group by {c}" in sql_lower
+        for c in bad_columns
+    )
+
+
+def has_fake_subquery(sql):
+
+    sql_lower = sql.lower()
+
+    if "count(*)" in sql_lower and ">= 1" in sql_lower:
+        return True
+
+    return False

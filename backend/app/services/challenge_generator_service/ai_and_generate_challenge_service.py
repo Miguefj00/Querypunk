@@ -1,18 +1,22 @@
 import ollama
 import json
+import time
 
 import random
 
 from app.services.challenge_generator_service.ai_hint_service import generate_hints
 from app.services.challenge_generator_service.generation_helpers import build_select_list
-from app.services.challenge_generator_service.schema_structured_service import format_schema_for_llm
+from app.services.challenge_generator_service.schema_structured_service import format_schema_for_llm, \
+    get_structured_schema
 from app.services.challenge_generator_service.sql_randomizer import (pick_table, pick_join,
                                                                      pick_numeric_column_safe, pick_text_column_safe,
-                                                                     pick_any_column_safe)
+                                                                     pick_any_column_safe, is_parent_child_join,
+                                                                     pick_avg_column_safe)
 from app.services.challenge_generator_service.validate_challenge_quality import (is_duplicate_query,
                                                                                  uses_forbidden_columns,
                                                                                  title_not_immersive, has_type_mismatch,
-                                                                                 uses_forbidden_constructs)
+                                                                                 uses_forbidden_constructs,
+                                                                                 is_bad_grouping, has_fake_subquery)
 from app.services.chapter_service import ChapterService
 from app.utils.ai_utils import clean_llm_json, GAME_WORLD_CONTEXT, COLUMN_TYPE_GUIDE, SCHEMA_SEMANTICS
 from dotenv import load_dotenv
@@ -266,6 +270,30 @@ def generate_hard_sql():
     if agg != "COUNT" and not num_col:
         return None
 
+    schema = get_structured_schema()
+
+    if agg != "COUNT":
+        col_type = schema[t1]["columns"].get(num_col, "").upper()
+
+        boolean_keywords = [
+            "BOOLEAN",
+            "BOOL"
+        ]
+
+        suspicious_names = [
+            "main",
+            "legality",
+            "active",
+            "enabled",
+            "is_"
+        ]
+
+        if (
+                any(x in col_type for x in boolean_keywords)
+                or any(x in num_col.lower() for x in suspicious_names)
+        ):
+            return None
+
     agg_expr = "COUNT(*)" if agg == "COUNT" else f"{agg}({a1}.{num_col})"
 
     total_cols = random.choice([1, 2])
@@ -285,12 +313,16 @@ def generate_hard_sql():
 
         return query
 
-    dimension_table = random.choice([t1, t2])
+    dimension_table = random.choices(
+        [t1, t2],
+        weights=[20, 80]
+    )[0]
+
     dim_alias = a1 if dimension_table == t1 else a2
 
-    dim_col = pick_any_column_safe(dimension_table)
+    dim_col = pick_text_column_safe(dimension_table)
     if not dim_col:
-        return None
+        dim_col = pick_any_column_safe(dimension_table)
 
     query = f"""
     SELECT {dim_alias}.{dim_col}, {agg_expr}
@@ -306,10 +338,41 @@ def generate_hard_sql():
     query += f"\nGROUP BY {dim_alias}.{dim_col}"
 
     if random.random() < 0.6:
+
         if agg == "COUNT":
-            query += "\nHAVING COUNT(*) >= 1"
-        else:
-            query += f"\nHAVING {agg_expr} IS NOT NULL"
+            threshold = random.randint(1, 3)
+
+            query += f"""
+            HAVING COUNT(*) >= {threshold}
+            """
+
+        elif agg == "AVG":
+
+            query += f"""
+            HAVING AVG({a1}.{num_col}) >
+            (
+                SELECT AVG({num_col})
+                FROM {t1}
+            )
+            """
+
+        elif agg == "SUM":
+
+            query += f"""
+            HAVING SUM({a1}.{num_col}) > 0
+            """
+
+        elif agg == "MAX":
+
+            query += f"""
+            HAVING MAX({a1}.{num_col}) IS NOT NULL
+            """
+
+        elif agg == "MIN":
+
+            query += f"""
+            HAVING MIN({a1}.{num_col}) IS NOT NULL
+            """
 
     if random.random() < 0.7:
         query += "\nORDER BY 2 DESC"
@@ -322,98 +385,262 @@ def generate_hard_sql():
 
 def generate_expert_sql():
     """
-   Generates advanced SQL using subqueries.
+    Generates advanced SQL challenges.
 
-   Skills introduced:
-       - EXISTS / NOT EXISTS
-       - Correlated subqueries
-       - Comparisons against averages
-       - Nested logic
+    Skills:
+        - EXISTS / NOT EXISTS
+        - Correlated subqueries
+        - Aggregate subqueries
+        - Scalar subqueries
+        - Nested comparisons
+        - Subqueries in ORDER BY
+    """
 
-   This is the highest difficulty level.
-   """
     join = pick_join()
     if not join:
         return None
 
     t1, t2, col1, col2 = join
-    a1, a2 = alias(t1), alias(t2)
 
-    col_t1 = pick_any_column_safe(t1)
-    if not col_t1:
-        return None
+    a1 = alias(t1)
+    a2 = alias(t2)
 
-    num_col_t2 = pick_numeric_column_safe(t2)
+    allow_corr = is_parent_child_join(join)
 
-    pattern = random.choice(["EXISTS", "NOT_EXISTS", "COUNT_COMPARE", "ABOVE_AVG"])
+    patterns = [
+        "EXISTS_FILTERED",
+        "NOT_EXISTS_FILTERED",
+        "ABOVE_GLOBAL_AVG",
+        "MAX_VALUE",
+        "ORDER_BY_SUBQUERY"
+    ]
 
-    total_cols = random.choice([1, 2])
+    weights = [
+        25,
+        20,
+        20,
+        15,
+        10
+    ]
 
-    select_cols = [f"{a1}.{col_t1}"]
+    if allow_corr:
+        patterns += [
+            "CORRELATED_COUNT",
+            "GROUP_AGG_COMPARE",
+            "SCALAR_SUBQUERY"
+        ]
 
-    if total_cols == 2:
-        second_col = pick_any_column_safe(t2)
-        if second_col:
-            select_cols.append(f"{a2}.{second_col}")
+        weights += [
+            20,
+            20,
+            15
+        ]
 
-    use_join = random.random() < 0.8
+    pattern = random.choices(
+        patterns,
+        weights=weights
+    )[0]
 
-    from_clause = f"FROM {t1} {a1}"
-    if use_join:
-        from_clause += f"\nJOIN {t2} {a2} ON {a1}.{col1} = {a2}.{col2}"
+    ###################################################
+    # EXISTS
+    ###################################################
 
-    query = f"SELECT {', '.join(select_cols)}\n{from_clause}\nWHERE "
+    if pattern == "EXISTS_FILTERED":
 
-    if pattern == "EXISTS":
-        query += f"""
-        EXISTS (
-            SELECT 1
-            FROM {t2} sub
-            WHERE sub.{col2} = {a1}.{col1}
+        col = pick_any_column_safe(t2)
+
+        sub_cond = generate_realistic_condition(
+            t1,
+            "sub"
         )
-        """
 
-    elif pattern == "NOT_EXISTS":
-        query += f"""
-        NOT EXISTS (
-            SELECT 1
-            FROM {t2} sub
-            WHERE sub.{col2} = {a1}.{col1}
+        query = f"""
+SELECT {a2}.{col}
+FROM {t2} {a2}
+WHERE EXISTS
+(
+    SELECT 1
+    FROM {t1} sub
+    WHERE sub.{col1} = {a2}.{col2}
+"""
+
+        if sub_cond:
+            query += f"\n    AND {sub_cond}"
+
+        query += "\n)"
+
+        return query
+
+    ###################################################
+    # NOT EXISTS
+    ###################################################
+
+    if pattern == "NOT_EXISTS_FILTERED":
+
+        col = pick_any_column_safe(t2)
+
+        sub_cond = generate_realistic_condition(
+            t1,
+            "sub"
         )
-        """
 
-    elif pattern == "COUNT_COMPARE":
-        query += f"""
-        (
-            SELECT COUNT(*)
-            FROM {t2} sub
-            WHERE sub.{col2} = {a1}.{col1}
-        ) >= 1
-        """
+        query = f"""
+SELECT {a2}.{col}
+FROM {t2} {a2}
+WHERE NOT EXISTS
+(
+    SELECT 1
+    FROM {t1} sub
+    WHERE sub.{col1} = {a2}.{col2}
+"""
 
-    elif pattern == "ABOVE_AVG" and num_col_t2:
-        query += f"""
-        {a2}.{num_col_t2} > (
-            SELECT AVG(sub.{num_col_t2})
-            FROM {t2} sub
-            WHERE sub.{col2} = {a1}.{col1}
-        )
-        """
-    else:
-        return None
+        if sub_cond:
+            query += f"\n    AND {sub_cond}"
 
-    if random.random() < 0.4:
-        cond = generate_realistic_condition(t1, a1)
-        if cond:
-            query += f"\nAND {cond}"
+        query += "\n)"
 
-    if random.random() < 0.6:
-        query += f"\nORDER BY 1"
+        return query
 
-    # LIMIT disabled because gameplay validator forbids it
-    pass
+    ###################################################
+    # GLOBAL AVG
+    ###################################################
 
-    return query
+    if pattern == "ABOVE_GLOBAL_AVG":
+
+        num_col = pick_avg_column_safe(t1)
+
+        if not num_col:
+            return None
+
+        select_col = pick_any_column_safe(t1)
+
+        return f"""
+SELECT {a1}.{select_col}
+FROM {t1} {a1}
+WHERE {a1}.{num_col}
+>
+(
+    SELECT AVG(sub.{num_col})
+    FROM {t1} sub
+)
+"""
+
+    ###################################################
+    # MAX VALUE
+    ###################################################
+
+    if pattern == "MAX_VALUE":
+
+        num_col = pick_avg_column_safe(t1)
+
+        if not num_col:
+            return None
+
+        select_col = pick_any_column_safe(t1)
+
+        agg = random.choice([
+            "MAX",
+            "MIN"
+        ])
+
+        return f"""
+SELECT {a1}.{select_col}
+FROM {t1} {a1}
+WHERE {a1}.{num_col}
+=
+(
+    SELECT {agg}(sub.{num_col})
+    FROM {t1} sub
+)
+"""
+
+    ###################################################
+    # CORRELATED COUNT
+    ###################################################
+
+    if pattern == "CORRELATED_COUNT":
+
+        select_col = pick_any_column_safe(t1)
+
+        op = random.choice([
+            ">=",
+            ">",
+            "="
+        ])
+
+        threshold = random.choice([
+            2,
+            3,
+            4
+        ])
+
+        return f"""
+SELECT {a1}.{select_col}
+FROM {t1} {a1}
+WHERE
+(
+    SELECT COUNT(*)
+    FROM {t2} sub
+    WHERE sub.{col2} = {a1}.{col1}
+)
+{op}
+{threshold}
+"""
+
+    ###################################################
+    # GROUP VS GLOBAL AGGREGATE
+    ###################################################
+
+    if pattern == "GROUP_AGG_COMPARE":
+
+        num_col = pick_avg_column_safe(t2)
+
+        if not num_col:
+            return None
+
+        select_col = pick_any_column_safe(t1)
+
+        agg = random.choice([
+            "AVG",
+            "MAX"
+        ])
+
+        return f"""
+SELECT {a1}.{select_col}
+FROM {t1} {a1}
+WHERE
+(
+    SELECT {agg}(sub.{num_col})
+    FROM {t2} sub
+    WHERE sub.{col2} = {a1}.{col1}
+)
+>
+(
+    SELECT {agg}({num_col})
+    FROM {t2}
+)
+"""
+
+    ###################################################
+    # SCALAR SUBQUERY IN SELECT
+    ###################################################
+
+    if pattern == "SCALAR_SUBQUERY":
+
+        select_col = pick_any_column_safe(t1)
+
+        return f"""
+SELECT
+    {a1}.{select_col},
+    (
+        SELECT COUNT(*)
+        FROM {t2} sub
+        WHERE sub.{col2} = {a1}.{col1}
+    ) AS RelatedCount
+FROM {t1} {a1}
+"""
+
+    return None
 
 
 def generate_ai_backstory_challenge(sql_query, previous_attempt=None, feedback=None):
@@ -622,6 +849,13 @@ def generate_valid_sql_with_rows(difficulty: str, max_tries: int = 15):
             print("❌ Uses forbidden constructs")
             continue
 
+        if is_bad_grouping(sql):
+            continue
+
+        if has_fake_subquery(sql):
+            print("❌ Fake subquery")
+            continue
+
         result = execute_query_and_get_expected(sql)
 
         if result is None:
@@ -704,6 +938,8 @@ def generate_and_store_challenge(
     The pipeline retries AI generation up to 5 times if needed.
     If AI repeatedly fails → challenge is discarded.
     """
+    start_time = time.perf_counter()
+
     ChapterService.get_owned_chapter(
         db,
         chapter_id,
@@ -785,10 +1021,18 @@ def generate_and_store_challenge(
         )
 
         print("RETO GUARDADO EN BD")
+        total_time = time.perf_counter() - start_time
+
+        print(f"\n⏱ Tiempo total de generación del reto: "
+              f"{total_time:.2f} segundos\n")
         return {"status": "challenge created"}
 
     # ─────────────────────────────────────────────
     # IA fails after 5 attempts
     # ─────────────────────────────────────────────
     print("\nLa IA falló tras 5 intentos")
+    total_time = time.perf_counter() - start_time
+
+    print(f"\n⏱ Tiempo total hasta fallo: "
+          f"{total_time:.2f} segundos\n")
     return {"error": "AI failed after 5 attempts"}

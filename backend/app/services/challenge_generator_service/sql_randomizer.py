@@ -26,14 +26,53 @@ FORBIDDEN_COLUMNS = {
 
 # Column names that usually represent booleans.
 BOOLEAN_KEYWORDS = [
-    "Main",
-    "Legality"
+    "main",
+    "legality"
 ]
 
 # Tables excluded from generation.
 FORBIDDEN_TABLES = {
     "Corporation_sector",
     "Personnel_implant",
+}
+
+# For AVG/MAX/MIN
+AGGREGABLE_COLUMNS = {
+    "Corporation": [
+        "Net_worth",
+        "Influence_lvl"
+    ],
+
+    "Data_leak": [
+        "Files_number",
+        "Confidentiality_lvl"
+    ],
+
+    "District": [
+        "Population",
+        "Danger_lvl"
+    ],
+
+    "Headquarter": [
+        "Employees",
+        "Security_lvl"
+    ],
+
+    "Implant": [
+        "Power_consumption"
+    ],
+
+    "Security_incident": [
+        "Severity"
+    ],
+
+    "Personnel": [
+        "Salary"
+    ],
+
+    "Sector": [
+        "Budget"
+    ]
 }
 
 
@@ -115,6 +154,80 @@ def pick_numeric_column_safe(table, tries=15):
     return None
 
 
+def get_numeric_columns(table):
+    """
+    Returns all numeric columns of a table,
+    excluding ids and boolean-like columns.
+    """
+
+    schema = get_structured_schema()
+
+    columns = schema[table]["columns"]
+
+    numeric_types = [
+        "INT",
+        "INTEGER",
+        "REAL",
+        "NUMERIC",
+        "FLOAT",
+        "DOUBLE",
+        "DECIMAL"
+    ]
+
+    valid = []
+
+    for col, col_type in columns.items():
+
+        col_lower = col.lower()
+
+        if (
+                col_lower in FORBIDDEN_COLUMNS
+                or col_lower.endswith("_id")
+        ):
+            continue
+
+        if is_boolean_like(col):
+            continue
+
+        if any(t in col_type.upper() for t in numeric_types):
+            valid.append(col)
+
+    return valid
+
+
+def pick_avg_column_safe(table):
+
+    allowed = AGGREGABLE_COLUMNS.get(table)
+
+    if not allowed:
+        return None
+
+    cols = get_numeric_columns(table)
+
+    allowed_lower = {
+        c.lower()
+        for c in allowed
+    }
+
+    valid = [
+        c
+        for c in cols
+        if c.lower() in allowed_lower
+    ]
+
+    if not valid:
+        return None
+
+    return random.choice(valid)
+
+
+def is_boolean_like(col):
+
+    name = col.lower()
+
+    return any(x in name for x in BOOLEAN_KEYWORDS)
+
+
 def pick_text_column_safe(table, tries=15):
     """ Retries text column selection multiple times for robustness. """
     for _ in range(tries):
@@ -178,3 +291,17 @@ def pick_join():
         return None
 
     return random.choice(valid_joins)
+
+
+def is_parent_child_join(join):
+    """
+    Returns True if join:
+
+    parent.id -> child.parent_id
+    """
+    t1, t2, col1, col2 = join
+
+    return (
+            col1.lower() == "id"
+            and col2.lower().endswith("_id")
+    )
