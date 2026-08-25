@@ -71,9 +71,6 @@ export default function ChallengesManagement() {
     const [generationLogs, setGenerationLogs] =
         useState<string[]>([]);
 
-    const [errorMessage, setErrorMessage] =
-        useState("");
-
     const [createSuccessMessage, setCreateSuccessMessage] =
         useState("");
 
@@ -305,14 +302,12 @@ export default function ChallengesManagement() {
                     error
                 );
 
-                if (
-                    (error as any).response?.status === 403
-                ) {
-                    setErrorMessage(
+                if ((error as any).response?.status === 403) {
+                    setCreateErrorMessage(
                         "No tienes permisos para crear retos en este capítulo."
                     );
                 } else {
-                    setErrorMessage(
+                    setCreateErrorMessage(
                         "No se pudo crear el reto."
                     );
                 }
@@ -445,7 +440,7 @@ export default function ChallengesManagement() {
                 );
 
                 setEditErrorMessage(
-                    error.response?.status === 403
+                    (error as any).response?.status === 403
                         ? "No tienes permisos para editar este reto."
                         : "No se pudo actualizar el reto."
                 );
