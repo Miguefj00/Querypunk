@@ -264,7 +264,7 @@ export default function ChallengesManagement() {
             ) {
 
                 setCreateErrorMessage(
-                    "Todos los campos son obligatorios."
+                    "Todos los campos son obligatorios excepto las reglas de validación."
                 );
 
                 return;
