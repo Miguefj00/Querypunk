@@ -83,8 +83,6 @@ export default function ChallengeModal({
 
                 setRunStarted(false);
 
-                setQuery(DEFAULT_QUERY);
-
                 await onChallengeSolved();
 
                 autoCloseTimeout.current =
@@ -266,13 +264,6 @@ export default function ChallengeModal({
 
                             {results && (
                                 <>
-                                    <div className="query-results-wrapper">
-                                        <QueryResults
-                                            columns={results.columns}
-                                            rows={results.rows}
-                                        />
-                                    </div>
-
                                     {results.correct && (
                                         <div className="mission-completed">
                                             ✔ MISIÓN COMPLETADA
@@ -298,6 +289,14 @@ export default function ChallengeModal({
                                         )}
 
                                     </div>
+
+                                    <div className="query-results-wrapper">
+                                        <QueryResults
+                                            columns={results.columns}
+                                            rows={results.rows}
+                                        />
+                                    </div>
+
                                 </>
                             )}
 
