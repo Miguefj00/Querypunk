@@ -722,9 +722,10 @@ export default function ChallengesManagement() {
                                                 challenge.solution
                                             );
 
-                                            setEditValidationRules(
-                                                challenge.validation_rules || defaultRules
-                                            );
+                                            setEditValidationRules({
+                                                ...defaultRules,
+                                                ...(challenge.validation_rules || {})
+                                            });
 
                                             setShowEditModal(true);
                                         }}
